@@ -1,0 +1,19 @@
+{
+	"extension": {
+		"version": "0.7.2025041600",
+		"json": 2
+	},
+	"project": {
+		"name": "hyperbot_V2",
+		"description": "",
+		"creationDate": "11/4/2025, 3:32:57 PM",
+		"platform": "IQ2",
+		"language": "cpp",
+		"slot": 8,
+		"sdkVersion": "IQ2_20250520_15_00_00",
+		"cpp": {
+			"includePath": [],
+			"printf_float": false
+		}
+	}
+}
