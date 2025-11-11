@@ -96,6 +96,10 @@ void myblockfunction_Grab_then_up() {
 // User defined function
 void myblockfunction_Flip_Pin_Over() {
     GrabPin();
+// set beam arm free to move a little bit
+    mg_beam.setStopping(coast);
+    mg_beam.stop();
+// move pin over
     pneuVGuide.retract(cylinder1);
     mg_beam.spin(forward);
     wait(0.2, seconds);
