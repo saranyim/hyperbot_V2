@@ -9,7 +9,9 @@ uint16_t driveSpeed = 70;
 double distanceToGo;
 void Setup();
 void Step1(); // 1st 3colors stack
-void Step2();
+void Step2_1();
+void Step2_2();
+void Step2_3();
 void Step3();
 void Step4();
 void pushStackAway();
@@ -29,7 +31,9 @@ int TaskAutonomous() {
     }
   
     Step1();
-    Step2();
+    Step2_1();
+    Step2_2();
+    Step2_3();
     Step3();
     Step4();
     while (true) {
@@ -159,7 +163,7 @@ void Step1(){ // grab blue and turn left to yellow
     
 }
 
-void Step2(){
+void Step2_1(){
     // move backward
     printf("Step2 Start\n");
     mot_dtRight.setVelocity(driveSpeed, percent);
@@ -208,6 +212,11 @@ void Step2(){
     mot_dtRight.stop();
     // grab red
     myblockfunction_Grab_then_up();
+   
+
+}
+
+void Step2_2(){
     printf("Serching for Blue\n");
     // dis lef 185, righ 240
     // turn right to blue
@@ -245,6 +254,10 @@ void Step2(){
     // grab blue
     myblockfunction_Drop_Down_Grab_Up();
 
+    
+}
+
+void Step2_3(){
     // left > 800 right 219
     // turn left < 220 right > 800
     printf("turning to Yellow\n");
@@ -278,7 +291,6 @@ void Step2(){
     pushStackAway();
 
     printf("Step2 End\n");
-
 }
 
 void Step3(){
