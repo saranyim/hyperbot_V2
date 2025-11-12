@@ -21,8 +21,8 @@ void myblockfunction_Grab_Beam_up() {
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
     mg_beam.spin(reverse);
-    wait(0.6, seconds);
-        
+    wait(1, seconds);
+    pneuVGuide.extend(cylinder2);
     while(mg_beam.velocity(percent) < 0) { // reverse direction velocity is negative
         // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) * 10));
         wait(20, msec);
@@ -30,7 +30,7 @@ void myblockfunction_Grab_Beam_up() {
     // printf("Stop beam\n");
         
     mg_beam.stop();
-    pneuVGuide.extend(cylinder2);
+    
     beamPos = top;
     beamGraber = grab;
 }
@@ -62,6 +62,17 @@ void myblockfunction_Place_beam() {
     mot_dtRight.stop();
     OverRideDriveTrain = false;
     // put beam arm down 
+    mg_beam.setVelocity(100, percent);
+    mg_beam.setStopping(coast);
+    ReverseDir = true;
+    mg_beam.spin(forward);
+    wait(0.2, seconds);
+
+    while(mg_beam.velocity(percent) > 0) {
+        wait(20, msec);
+    }
+    mg_beam.stop();
+    // get arm to proprer down position
     mg_beam.setVelocity(beamArmDownTorque, percent);
     mg_beam.setStopping(hold);
     ReverseDir = true;
@@ -81,6 +92,17 @@ void myblockfunction_Place_beam() {
 void myblockfunction_Drop_down_beam() {
     pneuVGuide.retract(cylinder2);
    // put beam arm down 
+    mg_beam.setVelocity(100, percent);
+    mg_beam.setStopping(coast);
+    ReverseDir = true;
+    mg_beam.spin(forward);
+    wait(0.2, seconds);
+
+    while(mg_beam.velocity(percent) > 0) {
+        wait(20, msec);
+    }
+    mg_beam.stop();
+    // get arm to proprer down position
     mg_beam.setVelocity(beamArmDownTorque, percent);
     mg_beam.setStopping(hold);
     ReverseDir = true;
@@ -116,9 +138,9 @@ void Grab_Beam() {
         mot_dtRight.setVelocity(60.0, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
-        wait(0.3, seconds);
+        wait(0.1, seconds);
         pneuVGrabber.extend(pneuCBeamGrab);
-        wait(0.2, seconds);
+        wait(0.1, seconds);
         mg_beam.stop();
         mot_dtLeft.stop();
         mot_dtRight.stop();

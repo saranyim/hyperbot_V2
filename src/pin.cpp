@@ -159,7 +159,7 @@ int TaskPin() {
     mg_pin.setStopping(hold);
 
     mg_pin.stop();
-
+    ReleasePin();
     mg_pin.spinFor(reverse, 10.0, degrees, true);
     pneuVGuide.retract(cylinder1);
     myblockfunction_Drop_down();
@@ -192,7 +192,12 @@ int TaskPin() {
             fBtnEdownPressed = false;
         }
         if(fBtnFupPressed) {
-            Grab_Release_Pin();
+            if(pinPos == top) {
+                pneuVGuide.retract(pneuCPinGuide);
+            }
+            else{
+                 Grab_Release_Pin();
+            }
             fBtnFupPressed = false;
         }
         wait(5, msec);
