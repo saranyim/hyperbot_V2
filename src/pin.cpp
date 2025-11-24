@@ -55,9 +55,10 @@ void myblockfunction_Drop_down() {
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(40.0, percent);
     mg_pin.spin(forward);
-    wait(0.3, seconds);
     pneuVGuide.retract(cylinder1);
-    while(mg_pin.velocity(percent) > 30.0) {
+    
+    wait(0.3, seconds);
+   while(mg_pin.velocity(percent) > 30.0) {
         wait(20, msec);
     }
     mg_pin.stop();
@@ -86,9 +87,11 @@ void myblockfunction_Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
+    mg_pin.spinFor(reverse, pinArmDegree, degrees, false);
+    wait(0.2, seconds);
     pneuVGuide.extend(cylinder1);
-    mg_pin.spinFor(reverse, pinArmDegree, degrees, true);
-    mg_pin.stop();
+   
+    // mg_pin.stop();
    
     printf("end myblockfunction_Grab_then_up\n");
 }
@@ -146,6 +149,9 @@ void Grab_Release_Pin() {
             GrabPin();
         }
     }
+    else if(mid == pinPos) {
+        ReleasePin();
+    }
     else {
         GrabPin();
     }
@@ -193,7 +199,10 @@ int TaskPin() {
         }
         if(fBtnFupPressed) {
             if(pinPos == top) {
+
                 pneuVGuide.retract(pneuCPinGuide);
+                pinPos = mid;
+                mg_pin.spinFor(forward, pinArmDegree/2, degrees, false);
             }
             else{
                  Grab_Release_Pin();

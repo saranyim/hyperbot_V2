@@ -43,18 +43,36 @@ void myblockfunction_Place_beam() {
     mot_dtRight.stop();
     wait(0.1, seconds);
     // move beam down
-    mg_beam.setMaxTorque(100.0, percent);
+    printf("beam down\n");
+    mg_beam.setMaxTorque(1.0, percent);
+    mg_beam.setVelocity(50, percent);
+    mg_beam.setStopping(coast);
+    ReverseDir = true;
+    mg_beam.stop();
+    mg_beam.spin(forward);
+    wait(0.5, seconds);
+
+    while(mg_beam.velocity(percent) > 15) {
+        wait(20, msec);
+        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) * 10));
+    }
     mg_beam.setStopping(hold);
-    mg_beam.spinFor(forward, 80.0, degrees, true);
-    // release beam
+    mg_beam.stop();
+    printf("stop\n");
     pneuVGrabber.retract(cylinder1);
+    printf("beam relase and move away\n");
+    // wait(5,seconds);
+    // mg_beam.spinFor(forward, 80.0, degrees, true);
+    // release beam
+    
     // move robot away
     mg_beam.spinFor(reverse, 30.0, degrees, true);
     mot_dtLeft.setVelocity(50.0, percent);
     mot_dtRight.setVelocity(50.0, percent);
     mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
+    mot_dtRight.spin(forward)
     wait(0.8, seconds);
+    printf("stop moving\n");
     // close pneu guide
     pneuVGuide.retract(cylinder2);
     beamGraber = grab;
@@ -62,6 +80,7 @@ void myblockfunction_Place_beam() {
     mot_dtRight.stop();
     OverRideDriveTrain = false;
     // put beam arm down 
+    printf("beam down\n");
     mg_beam.setVelocity(100, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
@@ -72,6 +91,7 @@ void myblockfunction_Place_beam() {
         wait(20, msec);
     }
     mg_beam.stop();
+   
     // get arm to proprer down position
     mg_beam.setVelocity(beamArmDownTorque, percent);
     mg_beam.setStopping(hold);
@@ -189,7 +209,7 @@ int TaskBeam() {
             }
             fBtnLupPressed = false;
         }
-        if (fBtnLdownPressed ) {
+        else if (fBtnLdownPressed ) {
             if(beamPos == top){
                 printf("L Down");
                 printf("\n");
@@ -200,10 +220,35 @@ int TaskBeam() {
             }
             fBtnLdownPressed = false;
         }
+        if(Controller.AxisD.position() > 80){
+            mg_beam.setMaxTorque(100.0, percent);
+            mg_beam.setVelocity(100.0, percent);
+            mg_beam.setStopping(hold);
+            mg_beam.spin(reverse);
+            
+        }
+        else if(Controller.AxisD.position() < -80){
+            mg_beam.setMaxTorque(10.0, percent);
+            mg_beam.setVelocity(10.0, percent);
+            mg_beam.setStopping(hold);
+            mg_beam.spin(forward);
+           
+        }
+        else{
+            mg_beam.stop();
+        }
         if(fBtnFdownPressed) {
             // printf("F Down\n");
             // printf("\n");
-            Grab_Beam();
+            // Grab_Beam();
+            if (grab == beamGraber) {
+                beamGraber = release;
+                pneuVGrabber.retract(pneuCBeamGrab);
+            }
+            else {
+                beamGraber = grab;
+                pneuVGrabber.extend(pneuCBeamGrab);
+            }
             fBtnFdownPressed = false;
         }
     wait(20, msec);

@@ -112,10 +112,10 @@ int main() {
     wait(15, msec);
     vex::task ws1(TaskPin);
     vex::task ws2(TaskBeam);
-    vex::task wsDebug(TaskDebug);
+    // vex::task wsDebug(TaskDebug);
     vex::task ws3(TaskControl);
-    // TaskDriveTrain();
-    TaskAutonomous();
+    TaskDriveTrain();
+    // TaskAutonomous();
 }
 
 void PrintDistance(){
@@ -126,9 +126,9 @@ void PrintDistance(){
 int TaskDebug() {
     while(1){
         printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-        printf(" Dis Right: %u ", (uint16_t)dis_right.objectDistance(mm));
-        printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
-        printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
+        printf(" Dis Right: %u\n", (uint16_t)dis_right.objectDistance(mm));
+        // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
+        // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
         
         wait(500, msec);
     }

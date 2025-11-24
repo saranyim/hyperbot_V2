@@ -15,6 +15,14 @@ void Step2_3();
 void Step3();
 void Step4();
 void pushStackAway();
+
+int TaskAutoCnt(){
+    wait(60,sec);
+    Brain.programStop();
+     return 0;
+}
+
+
 // 1 wheel rotation = 8 inches
 int TaskAutonomous() {
    
@@ -29,7 +37,8 @@ int TaskAutonomous() {
     while(TouchLED12.pressing() == false){
         wait(20, msec);
     }
-  
+     vex::task wsAuto(TaskAutoCnt);
+    // TaskDriveTrain();
     Step1();
     Step2_1();
     Step2_2();
@@ -101,14 +110,14 @@ void pushStackAway(){
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(150), degrees, false);
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(150), degrees, true);
     // move forward
-    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(100), degrees, false);
-    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(100), degrees, true);
-    // release stack
-    // fBtnEupPressed = true;
-    // wait(1, sec);
-    //move backward to prevuious position
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(100), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(100), degrees, true);
+    // mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(100), degrees, false);
+    // mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(100), degrees, true);
+    // // release stack
+    // // fBtnEupPressed = true;
+    // // wait(1, sec);
+    // //move backward to prevuious position
+    // mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(100), degrees, false);
+    // mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(100), degrees, true);
    
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -297,6 +306,9 @@ void Step3(){
     // move backward
     // distance left 225, right >500
     // grab red on left craw
+    // while(TouchLED12.pressing() == false){
+    //     wait(20, msec);
+    // }
     printf("Step3 Start\n");
     printf("turning left to Red\n");
     myblockfunction_Grab_then_up();
@@ -306,10 +318,10 @@ void Step3(){
     // }
     mot_dtLeft.spin(reverse,15, percent);
     mot_dtRight.spin(forward,15, percent);
-    wait(2, sec);
+    wait(1.5, sec);
     while(1){       
          if(IS_IN_RANGE((uint16_t)dis_left.objectDistance(mm),240,330) 
-            && IS_IN_RANGE((uint16_t)dis_right.objectDistance(mm),500,700) 
+            && IS_IN_RANGE((uint16_t)dis_right.objectDistance(mm),500,1500) 
         ){
             break;
         }
@@ -319,6 +331,9 @@ void Step3(){
 
     mot_dtLeft.stop();
     mot_dtRight.stop();
+    //     while(TouchLED12.pressing() == false){
+    //     wait(20, msec);
+    // }
     printf("red 3 found ");
     PrintDistance();
     distanceToGo = dis_left.objectDistance(mm) + 40;
@@ -369,10 +384,10 @@ void Step3(){
     printf("turning left to yellow\n");
     mot_dtLeft.spin(reverse,15, percent);
     mot_dtRight.spin(forward,15, percent);
-    wait(2, sec);
+    wait(1.5, sec);
     while(1){       
-         if(IS_IN_RANGE((uint16_t)dis_left.objectDistance(mm),90,200) 
-            && IS_IN_RANGE((uint16_t)dis_right.objectDistance(mm),450,1000) 
+         if(IS_IN_RANGE((uint16_t)dis_left.objectDistance(mm),90,220) 
+            && IS_IN_RANGE((uint16_t)dis_right.objectDistance(mm),450,2000) 
         ){
             break;
         }
@@ -409,6 +424,14 @@ void Step4(){
     // while(TouchLED12.pressing() == false){
     //     wait(20, msec);
     // }
+
+    mot_dtRight.setVelocity(driveSpeed, percent);
+    mot_dtLeft.setVelocity(driveSpeed, percent); 
+    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(30), degrees, false);
+    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(30), degrees, true);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+
     mot_dtLeft.spin(reverse,15, percent);
     mot_dtRight.spin(forward,15, percent);
     wait(2, sec);
@@ -428,7 +451,7 @@ void Step4(){
     // while(TouchLED12.pressing() == false){
     //     wait(20, msec);
     // }
-    distanceToGo = dis_left.objectDistance(mm) + 40;
+    distanceToGo = dis_left.objectDistance(mm) + 60;
     
     //  while(TouchLED12.pressing() == false){
     //     wait(20, msec);

@@ -5,7 +5,8 @@ using namespace vex;
 
 typedef enum {
   top = 1,
-  bottom = 2
+  bottom = 2,
+  mid = 3
 } position_t;
 
 
