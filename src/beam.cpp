@@ -4,6 +4,8 @@ using namespace vex;
 
 #define beamArmDownTorque 10
 
+#define spinBeamUp reverse
+#define spinBeamDown forward
 // User defined function
 void myblockfunction_Grab_Beam_up() {
     // printf("beam up");
@@ -20,7 +22,7 @@ void myblockfunction_Grab_Beam_up() {
    
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
-    mg_beam.spin(reverse);
+    mg_beam.spin(spinBeamUp);
     wait(1, seconds);
     pneuVGuide.extend(cylinder2);
     while(mg_beam.velocity(percent) < 0) { // reverse direction velocity is negative
@@ -49,10 +51,10 @@ void myblockfunction_Place_beam() {
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.5, seconds);
 
-    while(mg_beam.velocity(percent) > 15) {
+    while(mg_beam.velocity(percent) > 20) {
         wait(20, msec);
         printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) * 10));
     }
@@ -61,17 +63,14 @@ void myblockfunction_Place_beam() {
     printf("stop\n");
     pneuVGrabber.retract(cylinder1);
     printf("beam relase and move away\n");
-    // wait(5,seconds);
-    // mg_beam.spinFor(forward, 80.0, degrees, true);
-    // release beam
-    
+
     // move robot away
     mg_beam.spinFor(reverse, 30.0, degrees, true);
     mot_dtLeft.setVelocity(50.0, percent);
     mot_dtRight.setVelocity(50.0, percent);
     mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward)
-    wait(0.8, seconds);
+    mot_dtRight.spin(forward);
+    wait(1, seconds);
     printf("stop moving\n");
     // close pneu guide
     pneuVGuide.retract(cylinder2);
@@ -84,7 +83,7 @@ void myblockfunction_Place_beam() {
     mg_beam.setVelocity(100, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -115,7 +114,7 @@ void myblockfunction_Drop_down_beam() {
     mg_beam.setVelocity(100, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -126,7 +125,7 @@ void myblockfunction_Drop_down_beam() {
     mg_beam.setVelocity(beamArmDownTorque, percent);
     mg_beam.setStopping(hold);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -189,6 +188,8 @@ int TaskBeam() {
         wait(20, msec);
     }
     mg_beam.stop();
+    // beam up to starting position to grab pre-load pin
+    mg_beam.spinFor(spinBeamUp,540,degrees,true);
 
     printf("Task Beam Start");
     printf("\n");
@@ -229,7 +230,7 @@ int TaskBeam() {
         }
         else if(Controller.AxisD.position() < -80){
             mg_beam.setMaxTorque(10.0, percent);
-            mg_beam.setVelocity(10.0, percent);
+            mg_beam.setVelocity(30.0, percent);
             mg_beam.setStopping(hold);
             mg_beam.spin(forward);
            
