@@ -54,9 +54,9 @@ void myblockfunction_Place_beam() {
     mg_beam.spin(spinBeamDown);
     wait(0.5, seconds);
 
-    while(mg_beam.velocity(percent) > 20) {
+    while(mg_beam.velocity(percent) > 15) {
         wait(20, msec);
-        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) * 10));
+        // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) * 10));
     }
     mg_beam.setStopping(hold);
     mg_beam.stop();
@@ -65,12 +65,18 @@ void myblockfunction_Place_beam() {
     printf("beam relase and move away\n");
 
     // move robot away
-    mg_beam.spinFor(reverse, 30.0, degrees, true);
+    OverRideDriveTrain = true;
+    mg_beam.setMaxTorque(100.0, percent);
+    mg_beam.spin(spinBeamUp);
+    wait(0.2, seconds);
+    mg_beam.stop();
+    printf("set velocity\n");
     mot_dtLeft.setVelocity(50.0, percent);
     mot_dtRight.setVelocity(50.0, percent);
+    printf("spin\n");
     mot_dtLeft.spin(forward);
     mot_dtRight.spin(forward);
-    wait(1, seconds);
+    wait(0.8, seconds);
     printf("stop moving\n");
     // close pneu guide
     pneuVGuide.retract(cylinder2);
@@ -86,7 +92,7 @@ void myblockfunction_Place_beam() {
     mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
-    while(mg_beam.velocity(percent) > 0) {
+    while(mg_beam.velocity(percent) > 10) {
         wait(20, msec);
     }
     mg_beam.stop();
@@ -95,7 +101,8 @@ void myblockfunction_Place_beam() {
     mg_beam.setVelocity(beamArmDownTorque, percent);
     mg_beam.setStopping(hold);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.setMaxTorque(1.0, percent);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -127,7 +134,7 @@ void myblockfunction_Drop_down_beam() {
     ReverseDir = true;
     mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
-
+    mg_beam.setMaxTorque(1.0, percent);
     while(mg_beam.velocity(percent) > 0) {
         wait(20, msec);
     }
@@ -150,20 +157,20 @@ void Grab_Beam() {
     else {
         if (release == beamGraber) {
         beamGraber = grab;
-        mg_beam.spin(forward);
-        OverRideDriveTrain = true;
-        wait(0.1, seconds);
-        mot_dtLeft.setVelocity(60.0, percent);
-        mot_dtRight.setVelocity(60.0, percent);
-        mot_dtLeft.spin(reverse);
-        mot_dtRight.spin(reverse);
+        mg_beam.spin(spinBeamDown);
+        // OverRideDriveTrain = true;
+        // wait(0.1, seconds);
+        // mot_dtLeft.setVelocity(60.0, percent);
+        // mot_dtRight.setVelocity(60.0, percent);
+        // mot_dtLeft.spin(reverse);
+        // mot_dtRight.spin(reverse);
         wait(0.1, seconds);
         pneuVGrabber.extend(pneuCBeamGrab);
-        wait(0.1, seconds);
-        mg_beam.stop();
-        mot_dtLeft.stop();
-        mot_dtRight.stop();
-        OverRideDriveTrain = false;
+        // wait(0.1, seconds);
+        // mg_beam.stop();
+        // mot_dtLeft.stop();
+        // mot_dtRight.stop();
+        // OverRideDriveTrain = false;
         }
     }
 }
