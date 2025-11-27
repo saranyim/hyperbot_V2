@@ -5,6 +5,8 @@ using namespace vex;
 #define pinGrapSpeed 50
 #define pinArmDegree 155    
 
+#define spinArmUp reverse
+#define spinArmDown forward
 void myblockfunction_Drop_down();
 void myblockfunction_Grab_then_up() ;
 void ReleasePin() {
@@ -87,7 +89,7 @@ void myblockfunction_Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, pinArmDegree, degrees, false);
+    mg_pin.spinFor(spinArmUp, pinArmDegree, degrees, false);
     wait(0.2, seconds);
     pneuVGuide.extend(cylinder1);
    
@@ -111,7 +113,7 @@ void myblockfunction_Flip_Pin_Over() {
     mg_beam.setTimeout(1.0, seconds);
     mg_pin.setVelocity(100.0, percent);
     mg_pin.setMaxTorque(100.0, percent);
-    mg_pin.spin(reverse);
+    mg_pin.spin(spinArmUp);
     wait(1.5, seconds);
 
     while(mg_pin.velocity(percent) > 0) {
@@ -124,7 +126,7 @@ void myblockfunction_Flip_Pin_Over() {
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(100.0, percent);
-    mg_pin.spin(forward);
+    mg_pin.spin(spinArmDown);
     wait(0.4, seconds);
 
     while(mg_pin.velocity(percent) > 30.0) {
@@ -176,6 +178,11 @@ int TaskPin() {
                 myblockfunction_Grab_then_up();
                 pinPos = top;
             }
+            else if (mid == pinPos){
+                mg_pin.setMaxTorque(100.0, percent);
+                mg_pin.spinFor(spinArmUp, pinArmDegree/2, degrees, false);
+                pinPos = top;
+            }
             else {
                 myblockfunction_Drop_Down_Grab_Up();
                 pinPos = top;
@@ -184,7 +191,7 @@ int TaskPin() {
         }
         if (fBtnRdownPressed) {
             Brain.Timer.reset();
-            if (top == pinPos) {
+            if ((top == pinPos)  ||(mid == pinPos)) {
                 myblockfunction_Drop_down();
                 pinPos = bottom;
             }
@@ -199,10 +206,11 @@ int TaskPin() {
         }
         if(fBtnFupPressed) {
             if(pinPos == top) {
-
                 pneuVGuide.retract(pneuCPinGuide);
                 pinPos = mid;
-                mg_pin.spinFor(forward, pinArmDegree/2, degrees, false);
+                mg_pin.setVelocity(30.0, percent);
+                mg_pin.setMaxTorque(100.0, percent);
+                mg_pin.spinFor(spinArmDown, pinArmDegree/2, degrees, false);
             }
             else{
                  Grab_Release_Pin();
