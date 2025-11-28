@@ -185,16 +185,22 @@ int TaskBeam() {
     pinPos = bottom;
     pinGraber = release;
 
-    pneuVGuide.retract(cylinder2);
+    pneuVGuide.retract(pneuCBeamGuide);
+    pneuVGrabber.retract(pneuCBeamGrab);
 // move arm down
     mg_beam.setMaxTorque(20.0, percent);
     mg_beam.setStopping(hold);
     mg_beam.spin(forward);
     wait(0.2, seconds);
+    
     while(mg_beam.velocity(percent) > 0) {
         wait(20, msec);
     }
     mg_beam.stop();
+    
+    mg_beam.setMaxTorque(100.0, percent);
+    mg_beam.setStopping(hold);
+
     // beam up to starting position to grab pre-load pin
     mg_beam.spinFor(spinBeamUp,540,degrees,true);
 
