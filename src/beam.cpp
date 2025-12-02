@@ -24,8 +24,8 @@ void myblockfunction_Grab_Beam_up() {
     mg_beam.setStopping(hold);
     mg_beam.spin(reverse);
     wait(1, seconds);
-    while(mg_beam.velocity(percent) < 0) { // reverse direction velocity is negative
-        // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) * 10));
+    while(mg_beam.velocity(percent) < -1) { // reverse direction velocity is negative
+        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
         wait(20, msec);
     }
     // printf("Stop beam\n");
@@ -45,17 +45,17 @@ void myblockfunction_Place_beam() {
     wait(0.1, seconds);
     // move beam down
     printf("beam down\n");
-    mg_beam.setMaxTorque(5.0, percent);
-    mg_beam.setVelocity(100, percent);
+    mg_beam.setMaxTorque(1.0, percent);
+    mg_beam.setVelocity(75, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(forward);
     wait(0.5, seconds);
 
-    while(mg_beam.velocity(percent) > 36) {
+    while(mg_beam.velocity(percent) > 50) {
         wait(20, msec);
-        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) * 10));
+        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
     }
     mg_beam.setStopping(hold);
     mg_beam.stop();
@@ -69,7 +69,8 @@ void myblockfunction_Place_beam() {
     // move robot away
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor(reverse, 60.00000, degrees, true);
+    mg_beam.spinFor(reverse, 60.00000, degrees);
+    wait(0.5, seconds);
     printf("Spinupfinished\n");
     mot_dtLeft.setVelocity(50.0, percent);
     mot_dtRight.setVelocity(50.0, percent);
@@ -193,12 +194,12 @@ int TaskBeam() {
         wait(20, msec);
     }
     mg_beam.stop();
-
+    wait(0.5,seconds);
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,360,degrees);
+    mg_beam.spinFor (spinBeamUp,540,degrees,true);
     beamPos=mid;
-
+    wait(1,seconds);
     printf("Task Beam Start");
     printf("\n");
     f1stLup=true;
