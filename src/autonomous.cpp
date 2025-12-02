@@ -137,7 +137,7 @@ void Step1(){ // grab blue and turn left to yellow
     mot_dtLeft.stop();
     mot_dtRight.stop();
     printf("grab blue\n");
-    myblockfunction_Drop_Down_Grab_Up();
+    Drop_Down_Pin_Grab_Up();
    
     printf("Turning to Yellow\n");
     // turn left
@@ -163,7 +163,7 @@ void Step1(){ // grab blue and turn left to yellow
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     mot_dtRight.setVelocity(driveSpeed, percent);
     mot_dtLeft.setVelocity(driveSpeed, percent); 
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(100), degrees, false);
@@ -181,7 +181,7 @@ void Step2_1(){
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(100), degrees, true);
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    myblockfunction_Grab_then_up();
+    Grab_then_up();
    
     // turn to find red
     // while(1){
@@ -209,7 +209,7 @@ void Step2_1(){
     
     
 
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
 
     // move forward to red
     mot_dtRight.setVelocity(50, percent);
@@ -220,7 +220,7 @@ void Step2_1(){
     mot_dtLeft.stop();
     mot_dtRight.stop();
     // grab red
-    myblockfunction_Grab_then_up();
+    Grab_then_up();
    
 
 }
@@ -261,7 +261,7 @@ void Step2_2(){
     mot_dtRight.stop();
     printf("get Blue\n");
     // grab blue
-    myblockfunction_Drop_Down_Grab_Up();
+    Drop_Down_Pin_Grab_Up();
 
     
 }
@@ -296,7 +296,7 @@ void Step2_3(){
     mot_dtLeft.stop();
     mot_dtRight.stop();
     printf("get yellow\n");
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     pushStackAway();
 
     printf("Step2 End\n");
@@ -311,7 +311,7 @@ void Step3(){
     // }
     printf("Step3 Start\n");
     printf("turning left to Red\n");
-    myblockfunction_Grab_then_up();
+    Grab_then_up();
     // while(1){
     //     //PrintDistance();
     //     wait(0.5, sec);
@@ -337,14 +337,14 @@ void Step3(){
     printf("red 3 found ");
     PrintDistance();
     distanceToGo = dis_left.objectDistance(mm) + 40;
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     mot_dtRight.setVelocity(driveSpeed, percent);
     mot_dtLeft.setVelocity(driveSpeed, percent); 
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    myblockfunction_Grab_then_up();
+    Grab_then_up();
     // while(TouchLED12.pressing() == false){
     //     wait(20, msec);
     // }
@@ -379,7 +379,7 @@ void Step3(){
     // while(TouchLED12.pressing() == false){
     //     wait(20, msec);
     // }
-    myblockfunction_Drop_Down_Grab_Up();
+    Drop_Down_Pin_Grab_Up();
 
     printf("turning left to yellow\n");
     mot_dtLeft.spin(reverse,15, percent);
@@ -410,7 +410,7 @@ void Step3(){
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     pushStackAway();
    // push stack away
    
@@ -419,7 +419,7 @@ void Step3(){
 }
 
 void Step4(){
-    myblockfunction_Grab_then_up();
+    Grab_then_up();
     printf("turning left to Red\n");
     // while(TouchLED12.pressing() == false){
     //     wait(20, msec);
@@ -456,7 +456,7 @@ void Step4(){
     //  while(TouchLED12.pressing() == false){
     //     wait(20, msec);
     // }
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     printf("Moving to Red\n");
     // move forward to red
     mot_dtRight.setVelocity(driveSpeed, percent);
@@ -466,7 +466,7 @@ void Step4(){
     mot_dtLeft.stop();
     mot_dtRight.stop();
     // grab red
-    myblockfunction_Grab_then_up();
+    Grab_then_up();
     // wait(2, sec);
     printf("Serching for Blue\n");
     // dis lef 185, righ 240
@@ -505,7 +505,7 @@ void Step4(){
     mot_dtRight.stop();
     printf("get Blue\n");
     // grab blue
-    myblockfunction_Drop_Down_Grab_Up();
+    Drop_Down_Pin_Grab_Up();
     //  while(TouchLED12.pressing() == false){
     //     wait(20, msec);
     // }
@@ -543,7 +543,7 @@ void Step4(){
     mot_dtLeft.stop();
     mot_dtRight.stop();
     printf("get yellow\n");
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(200), degrees, false);
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(200), degrees, true);
     // wait(2, sec);

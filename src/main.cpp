@@ -75,8 +75,8 @@ void onevent_ControllerButtonL3_pressed_0() {
 // "when Controller ButtonR3 pressed" hat block
 void onevent_ControllerButtonR3_pressed_0() {
     Brain.playSound(siren);
-    myblockfunction_Drop_down();
-    myblockfunction_Drop_down_beam();
+    Drop_Down_Pin();
+    Drop_Down_Pin_beam();
     wait(0.2, seconds);
     Brain.programStop();
 }

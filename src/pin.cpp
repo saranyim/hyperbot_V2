@@ -1,12 +1,13 @@
 
 #include "vex.h"
 #include "main.h"
+#include "pin.h"
 using namespace vex;
 #define pinGrapSpeed 50
 #define pinArmDegree 155    
 
-void myblockfunction_Drop_down();
-void myblockfunction_Grab_then_up() ;
+
+void Grab_then_up() ;
 void ReleasePin() {
     pneuVGrabber.extend(pneuCPinGrab);
     pinGraber = release;
@@ -17,7 +18,7 @@ void GrabPin() {
     pinGraber = grab;
 }   
 // User defined function
-void myblockfunction_Drop_Down_Grab_Up() {
+void Drop_Down_Pin_Grab_Up() {
     OverRideDriveTrain = true;
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -32,7 +33,7 @@ void myblockfunction_Drop_Down_Grab_Up() {
     mot_dtRight.stop();
     OverRideDriveTrain = false;
     
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     printf("drop and up");
     printf("\n");
     mg_pin.setVelocity(50.0, percent);
@@ -52,12 +53,12 @@ void myblockfunction_Drop_Down_Grab_Up() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     OverRideDriveTrain = false;
-    myblockfunction_Grab_then_up();
+    Grab_then_up();
    
 }
 
 // User defined function
-void myblockfunction_Drop_down() {
+void Drop_Down_Pin() {
     printf("drop down");
     printf("\n");
     OverRideDriveTrain = true;
@@ -93,8 +94,8 @@ void myblockfunction_Drop_down() {
 }
 
 // User defined function
-void myblockfunction_Grab_then_up() {
-    printf("myblockfunction_Grab_then_up\n");
+void Grab_then_up() {
+    printf("Grab_then_up\n");
 
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setVelocity(100.0, percent);
@@ -108,11 +109,11 @@ void myblockfunction_Grab_then_up() {
    
     // mg_pin.stop();
    
-    printf("end myblockfunction_Grab_then_up\n");
+    printf("end Grab_then_up\n");
 }
 
 // User defined function
-void myblockfunction_Flip_Pin_Over() {
+void Flip_Pin_Over() {
     GrabPin();
 // set beam arm free to move a little bit
     mg_beam.setStopping(coast);
@@ -183,16 +184,16 @@ int TaskPin() {
     ReleasePin();
     mg_pin.spinFor(reverse, 10.0, degrees, true);
     pneuVGuide.retract(cylinder1);
-    myblockfunction_Drop_down();
+    Drop_Down_Pin();
     while (true) {
         if (fBtnRupPressed) {
             Brain.Timer.reset();
             if (bottom == pinPos) {
-                myblockfunction_Grab_then_up();
+                Grab_then_up();
                 pinPos = top;
             }
             else {
-                myblockfunction_Drop_Down_Grab_Up();
+                Drop_Down_Pin_Grab_Up();
                 pinPos = top;
             }
             fBtnRupPressed = false;
@@ -200,7 +201,7 @@ int TaskPin() {
         if (fBtnRdownPressed) {
             Brain.Timer.reset();
             if ((top == pinPos)||(mid == pinPos)) {
-                myblockfunction_Drop_down();
+                Drop_Down_Pin();
                 pinPos = bottom;
             }
             fBtnRdownPressed = false;
@@ -208,19 +209,22 @@ int TaskPin() {
         if (fBtnEdownPressed) {
             Brain.Timer.reset();
             // if (pinPos == bottom) {
-                myblockfunction_Flip_Pin_Over();
+                Flip_Pin_Over();
             // }
             fBtnEdownPressed = false;
         }
         if(fBtnFupPressed) {
-            if(pinPos == top) {
+            // check flip only if pin is at bottom
+            if(beamPos == bottom){
+                if(pinPos == top) {
 
-                pneuVGuide.retract(pneuCPinGuide);
-                pinPos = mid;
-                mg_pin.spinFor(forward, pinArmDegree/2, degrees, false);
-            }
-            else{
-                 Grab_Release_Pin();
+                    pneuVGuide.retract(pneuCPinGuide);
+                    pinPos = mid;
+                    mg_pin.spinFor(forward, pinArmDegree/2, degrees, false);
+                }
+                else{
+                    Grab_Release_Pin();
+                }
             }
             fBtnFupPressed = false;
         }

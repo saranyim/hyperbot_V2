@@ -1,5 +1,6 @@
 #include "vex.h"
 #include "main.h"
+#include "pin.h"
 using namespace vex;
 #define spinBeamUp reverse
 #define spinBeamDown forward
@@ -7,7 +8,7 @@ using namespace vex;
 bool f1stLup;
 
 // User defined function
-void myblockfunction_Grab_Beam_up() {
+void Grab_Beam_up() {
     // printf("beam up");
     mg_beam.setVelocity(100.0, percent);
     mg_beam.setMaxTorque(100.0, percent);
@@ -37,7 +38,7 @@ void myblockfunction_Grab_Beam_up() {
 }
 
 // User defined function
-void myblockfunction_Place_beam() {
+void Place_beam() {
 
     OverRideDriveTrain = true;
     mot_dtLeft.stop();
@@ -53,9 +54,9 @@ void myblockfunction_Place_beam() {
     mg_beam.spin(spinBeamDown);
     printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
     wait(0.2, seconds);
-printf("after delay beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
+    printf("after delay beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
     while(mg_beam.velocity(percent) > 10) {
-        wait(20, msec);
+        wait(50, msec);
         printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
     }
     mg_beam.setStopping(hold);
@@ -115,7 +116,7 @@ printf("after delay beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
 }
 
 // User defined function
-void myblockfunction_Drop_down_beam() {
+void Drop_Down_Pin_beam() {
     pneuVGuide.retract(cylinder2);
    // put beam arm down 
     mg_beam.setVelocity(100, percent);
@@ -213,15 +214,18 @@ int TaskBeam() {
                 beamPos = top;
                 if (f1stLup==true)
                 {
-                f1stLup=false;
+                    f1stLup=false;
             
                 }
-                else {ReverseDir = false;}
-                
+                else {
+                    ReverseDir = false;
+                }
+                // drop pin down when lifting beam
+                Drop_Down_Pin();
         
-                myblockfunction_Grab_Beam_up();
+                Grab_Beam_up();
             } else if (beamPos == top) {
-                myblockfunction_Place_beam();
+                Place_beam();
                 beamPos = bottom;
             } else {
                 mg_beam.stop();
@@ -233,7 +237,7 @@ int TaskBeam() {
                 printf("L Down");
                 printf("\n");
                 Brain.Timer.reset();
-                myblockfunction_Drop_down_beam();
+                Drop_Down_Pin_beam();
                 beamPos = bottom;
                 ReverseDir = true;
             }

@@ -4,9 +4,9 @@
 
 using namespace vex;
 // User defined function
-void myblockfunction_Drop_Down_Grab_Up();
-void myblockfunction_Drop_down() ;
-void myblockfunction_Grab_then_up() ;
-void myblockfunction_Flip_Pin_Over() ;
+void Drop_Down_Pin_Grab_Up();
+void Drop_Down_Pin() ;
+void Grab_then_up() ;
+void Flip_Pin_Over() ;
 
 int TaskPin() ;
