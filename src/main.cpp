@@ -6,7 +6,7 @@
 /*    Description:  IQ2 project                                               */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
-#include "vex.h"
+
 #include "pin.h"
 #include "beam.h"
 #include "drive.h"
