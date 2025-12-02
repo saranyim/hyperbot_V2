@@ -129,16 +129,16 @@ int main() {
 }
 
 void PrintDistance(){
-    printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-    printf(" Dis Right: %u \n", (uint16_t)dis_right.objectDistance(mm));
+    // printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
+    // printf(" Dis Right: %u \n", (uint16_t)dis_right.objectDistance(mm));
 }
 
 int TaskDebug() {
     while(1){
-        printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-        printf(" Dis Right: %u\n", (uint16_t)dis_right.objectDistance(mm));
-        // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
-        // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
+        // printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
+        // printf(" Dis Right: %u\n", (uint16_t)dis_right.objectDistance(mm));
+        // // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
+        // // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
         
         wait(500, msec);
     }
@@ -176,13 +176,13 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnLUpPressed = true;
                 fBtnLupPressed = true;
-                printf("%u ,L UP Press\n",logTick);
+                // printf("%u ,L UP Press\n",logTick);
             }
         }
         else {
             if(btnLUpPressed) {
                 btnLUpPressed = false;
-                printf("%u ,L UP Release\n",logTick);
+                // printf("%u ,L UP Release\n",logTick);
             }
         }
         if(Controller.ButtonLDown.pressing()) {
@@ -190,13 +190,13 @@ int TaskControl() {
                 BrainTimer.reset();
                 btnLDownPressed = true;
                 fBtnLdownPressed = true;
-                printf("%u ,L Down Press\n",logTick);
+                // printf("%u ,L Down Press\n",logTick);
             }
         }
         else {
             if(btnLDownPressed) {
                 btnLDownPressed = false;
-                printf("%u ,L Down Release\n",logTick);
+                // printf("%u ,L Down Release\n",logTick);
             }
         }
         if(Controller.ButtonRUp.pressing()) {
@@ -204,13 +204,13 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnRUpPressed = true;
                 fBtnRupPressed = true;
-                printf("%u ,R UP Press\n",logTick);
+                // printf("%u ,R UP Press\n",logTick);
             }
         }
         else {
             if(btnRUpPressed) {
                 btnRUpPressed = false;
-                printf("%u ,R UP Release\n",logTick);
+                // printf("%u ,R UP Release\n",logTick);
             }
         }
         if(Controller.ButtonRDown.pressing()) {
@@ -218,13 +218,13 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnRDownPressed = true;
                 fBtnRdownPressed = true;
-                printf("%u ,R Down Press\n",logTick);
+                // printf("%u ,R Down Press\n",logTick);
             }
         }
         else {
             if(btnRDownPressed) {
                 btnRDownPressed = false;
-                printf("%u ,R Down Release\n",logTick);
+                // printf("%u ,R Down Release\n",logTick);
             }
         }
         if(Controller.ButtonEUp.pressing()) {
@@ -232,13 +232,13 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnEUpPressed = true;
                 fBtnEupPressed = true;
-                printf("%u ,E UP Press\n",logTick);
+                // printf("%u ,E UP Press\n",logTick);
             }
         }
         else {
             if(btnEUpPressed) {
                 btnEUpPressed = false;
-                printf("%u ,E UP Release\n",logTick);
+                // printf("%u ,E UP Release\n",logTick);
             }
         }
         if(Controller.ButtonEDown.pressing()) {
@@ -246,13 +246,13 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnEDownPressed = true;
                 fBtnEdownPressed = true;
-                printf("%u ,E Down Press\n",logTick);
+                // printf("%u ,E Down Press\n",logTick);
             }
         }
         else {
             if(btnEDownPressed) {
                 btnEDownPressed = false;
-                printf("%u ,E Down Release\n",logTick);
+                // printf("%u ,E Down Release\n",logTick);
             }
         }
         if(Controller.ButtonFUp.pressing()) {
@@ -260,13 +260,13 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnFUpPressed = true;
                 fBtnFupPressed = true;
-                printf("%u ,F UP Press\n",logTick);
+                // printf("%u ,F UP Press\n",logTick);
             }
         }
         else {
             if(btnFUpPressed) {
                 btnFUpPressed = false;
-                printf("%u ,F UP Release\n",logTick);
+                // printf("%u ,F UP Release\n",logTick);
             }
         }
         if(Controller.ButtonFDown.pressing()) {
@@ -274,13 +274,13 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnFDownPressed = true;
                 fBtnFdownPressed = true;
-                printf("%u ,F Down Press\n",logTick);
+                // printf("%u ,F Down Press\n",logTick);
             }
         }
         else {
             if(btnFDownPressed) {
                 btnFDownPressed = false;
-                printf("%u ,F Down Release\n",logTick);
+                // printf("%u ,F Down Release\n",logTick);
             }
         }
 
@@ -288,52 +288,52 @@ int TaskControl() {
             if(!stickAUp) {
                  BrainTimer.reset();
                 stickAUp = true;
-                printf("%u ,Stick A Up\n",logTick);
+                // printf("%u ,Stick A Up\n",logTick);
             }
         }
         else {
             if(stickAUp) {
                 stickAUp = false;
-                printf("%u ,Stick A Center\n",logTick);
+                // printf("%u ,Stick A Center\n",logTick);
             }
         }
         if(Controller.AxisA.position() < -80) {
             if(!stickADown) {
                  BrainTimer.reset();
                 stickADown = true;
-                printf("%u ,Stick A Down\n",logTick);
+                // printf("%u ,Stick A Down\n",logTick);
             }
         }
         else {
             if(stickADown) {
                 stickADown = false;
-                printf("%u ,Stick A Center\n",logTick);
+                // printf("%u ,Stick A Center\n",logTick);
             }
         }
         if(Controller.AxisB.position() < -80) {
             if(!stickBLeft) {
                  BrainTimer.reset();
                 stickBLeft = true;
-                printf("%u ,Stick B Left\n",logTick);
+                // printf("%u ,Stick B Left\n",logTick);
             }
         }
         else {
             if(stickBLeft) {
                 stickBLeft = false;
-                printf("%u ,Stick B Center\n",logTick);
+                // printf("%u ,Stick B Center\n",logTick);
             }   
         }
         if(Controller.AxisB.position() > 80) {
             if(!stickBRight) {
                  BrainTimer.reset();
                 stickBRight = true;
-                printf("%u ,Stick B Right\n",logTick);
+                // printf("%u ,Stick B Right\n",logTick);
             }
         }
         else {
             if(stickBRight) {
                 stickBRight = false;
-                printf("%u ,Stick B Center\n",logTick);
+                // printf("%u ,Stick B Center\n",logTick);
             }   
         }
         // Brain.Screen.setCursor(1,1);

@@ -11,7 +11,7 @@ void myblockfunction_Grab_Beam_up() {
     // printf("beam up");
     mg_beam.setVelocity(100.0, percent);
     mg_beam.setMaxTorque(100.0, percent);
-    // mg_beam.spin(forward);
+    // mg_beam.spin(spinBeamDown);
     // wait(20, msec);
     // while(mg_beam.velocity(percent) > 0) {
     //     wait(20, msec);
@@ -22,10 +22,10 @@ void myblockfunction_Grab_Beam_up() {
    
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
-    mg_beam.spin(reverse);
+    mg_beam.spin(spinBeamUp);
     wait(1, seconds);
     while(mg_beam.velocity(percent) < -1) { // reverse direction velocity is negative
-        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
+        // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
         wait(20, msec);
     }
     // printf("Stop beam\n");
@@ -45,15 +45,16 @@ void myblockfunction_Place_beam() {
     wait(0.1, seconds);
     // move beam down
     printf("beam down\n");
-    mg_beam.setMaxTorque(1.0, percent);
+    mg_beam.setMaxTorque(3.0, percent);
     mg_beam.setVelocity(75, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
-    mg_beam.spin(forward);
-    wait(0.5, seconds);
-
-    while(mg_beam.velocity(percent) > 50) {
+    mg_beam.spin(spinBeamDown);
+    printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
+    wait(0.2, seconds);
+printf("after delay beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
+    while(mg_beam.velocity(percent) > 10) {
         wait(20, msec);
         printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
     }
@@ -69,7 +70,7 @@ void myblockfunction_Place_beam() {
     // move robot away
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor(reverse, 60.00000, degrees);
+    mg_beam.spinFor(spinBeamUp, 100.00000, degrees);
     wait(0.5, seconds);
     printf("Spinupfinished\n");
     mot_dtLeft.setVelocity(50.0, percent);
@@ -89,7 +90,7 @@ void myblockfunction_Place_beam() {
     mg_beam.setVelocity(100, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -101,7 +102,7 @@ void myblockfunction_Place_beam() {
     mg_beam.setVelocity(beamArmDownTorque, percent);
     mg_beam.setStopping(hold);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -120,7 +121,7 @@ void myblockfunction_Drop_down_beam() {
     mg_beam.setVelocity(100, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -131,7 +132,7 @@ void myblockfunction_Drop_down_beam() {
     mg_beam.setVelocity(beamArmDownTorque, percent);
     mg_beam.setStopping(hold);
     ReverseDir = true;
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
     while(mg_beam.velocity(percent) > 0) {
@@ -156,7 +157,7 @@ void Grab_Beam() {
     else {
         if (release == beamGraber) {
         beamGraber = grab;
-        mg_beam.spin(forward);
+        mg_beam.spin(spinBeamDown);
         OverRideDriveTrain = true;
         wait(0.1, seconds);
         mot_dtLeft.setVelocity(60.0, percent);
@@ -188,7 +189,7 @@ int TaskBeam() {
 // move arm down
     mg_beam.setMaxTorque(20.0, percent);
     mg_beam.setStopping(hold);
-    mg_beam.spin(forward);
+    mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
     while(mg_beam.velocity(percent) > 0) {
         wait(20, msec);
@@ -242,14 +243,14 @@ int TaskBeam() {
             mg_beam.setMaxTorque(100.0, percent);
             mg_beam.setVelocity(100.0, percent);
             mg_beam.setStopping(hold);
-            mg_beam.spin(reverse);
+            mg_beam.spin(spinBeamUp);
             
         }
         else if(Controller.AxisD.position() < -80){
             mg_beam.setMaxTorque(10.0, percent);
             mg_beam.setVelocity(10.0, percent);
             mg_beam.setStopping(hold);
-            mg_beam.spin(forward);
+            mg_beam.spin(spinBeamDown);
            
         }
         else{
