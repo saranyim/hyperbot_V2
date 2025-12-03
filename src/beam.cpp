@@ -39,7 +39,7 @@ void Grab_Beam_up() {
 
 // User defined function
 void Place_beam() {
-
+    double maxSpeed;
     OverRideDriveTrain = true;
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -54,32 +54,41 @@ void Place_beam() {
     mg_beam.spin(spinBeamDown);
     printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
     wait(0.2, seconds);
-    printf("after delay beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
-    while(mg_beam.velocity(percent) > 10) {
-        wait(50, msec);
+    // initial max speed
+    maxSpeed = mg_beam.velocity(percent);
+    while(1) {
+        wait(20, msec);
+        // track max speed
+        if(mg_beam.velocity(percent) > (maxSpeed)) {
+            maxSpeed = mg_beam.velocity(percent);
+        }
+        // check speed drop 3% stop
+        if(maxSpeed - mg_beam.velocity(percent) > 3) {
+            break;
+        }
         printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
     }
     mg_beam.setStopping(hold);
     mg_beam.stop();
-    printf("stop\n");
+    printf("stop and release beam\n");
     pneuVGrabber.retract(cylinder1);
-    printf("beam relase and move away\n");
-    // wait(5,seconds);
-    // mg_beam.spinFor(forward, 80.0, degrees, true);
-    // release beam
-    
-    // move robot away
-    mg_beam.setMaxTorque (100,percent);
-    mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor(spinBeamUp, 100.00000, degrees);
-    wait(0.5, seconds);
+    // wait(0.1,seconds);
+
+    // move arm up a little to release any tension
+    mg_beam.setMaxTorque(100, percent);   
+    mg_beam.spin(spinBeamUp);
+    wait(0.3, seconds);
     printf("Spinupfinished\n");
-    mot_dtLeft.setVelocity(50.0, percent);
-    mot_dtRight.setVelocity(50.0, percent);
+    mg_beam.stop();
+
+    // move robot away
+    mot_dtLeft.setVelocity(100.0, percent);
+    mot_dtRight.setVelocity(100.0, percent);
     mot_dtLeft.spin(forward);
     mot_dtRight.spin(forward);
-    wait(0.8, seconds);
+    wait(0.4, seconds);
     printf("stop moving\n");
+
     // close pneu guide
     pneuVGuide.retract(cylinder2);
     beamGraber = grab;
