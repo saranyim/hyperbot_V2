@@ -1,6 +1,7 @@
 #include "vex.h"
 #include "main.h"
 #include "pin.h"
+#include "beam.h"
 using namespace vex;
 #define spinBeamUp reverse
 #define spinBeamDown forward
@@ -25,7 +26,7 @@ void Grab_Beam_up() {
     mg_beam.setStopping(hold);
     mg_beam.spin(spinBeamUp);
     wait(1, seconds);
-    while(mg_beam.velocity(percent) < -1) { // reverse direction velocity is negative
+    while(mg_beam.velocity(percent) < -5) { // reverse direction velocity is negative
         // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
         wait(20, msec);
     }
@@ -37,9 +38,8 @@ void Grab_Beam_up() {
     beamGraber = grab;
 }
 
-// User defined function
-void Place_beam() {
-    double maxSpeed,beamSpeed;
+void Place_Beam_2_Stack() {
+  
     OverRideDriveTrain = true;
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -47,88 +47,41 @@ void Place_beam() {
     // move beam down
     printf("beam down\n");
     mg_beam.setMaxTorque(100.0, percent);
-    mg_beam.setVelocity(10, percent);
+    mg_beam.setVelocity(80, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    wait(0.4, seconds);
-    // initial max speed
-    
-    maxSpeed = mg_beam.velocity(percent);
-    beamSpeed = maxSpeed;
-    printf("1st vel: %d\n", (uint16_t)maxSpeed);
-   
-    while(1) {
-        wait(50, msec);
-        // track max speed
-        beamSpeed -= 0.1 * (beamSpeed - mg_beam.velocity(percent));
-        if(beamSpeed > (maxSpeed)) {
-            maxSpeed = beamSpeed;
-        }
-        // check speed drop 3% stop
-        printf("beam vel: %d max : %d\n", (uint16_t)beamSpeed, (uint16_t)maxSpeed);
-        if((maxSpeed - beamSpeed) > 5) {
-            break;
-        }
-        
-    }
+    mg_beam.spinFor(spinBeamDown,720,degrees,true);
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
     pneuVGrabber.retract(cylinder1);
     wait(0.1,seconds);
-
-    // move arm up a little to release any tension
-    mg_beam.setMaxTorque(100, percent);   
-    mg_beam.spin(spinBeamUp);
-    wait(0.5, seconds);
-    printf("Spinupfinished\n");
-    mg_beam.stop();
-
-    // move robot away
-    mot_dtLeft.setMaxTorque(100.0, percent);
-    mot_dtRight.setMaxTorque(100.0, percent);
-    mot_dtLeft.setVelocity(100.0, percent);
-    mot_dtRight.setVelocity(100.0, percent);
-    mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
-    wait(0.6, seconds);
-    printf("stop moving\n");
-
-    // close pneu guide
-    pneuVGuide.retract(cylinder2);
-    beamGraber = grab;
+    Drop_Y_Arm();
+}
+// User defined function
+void Place_Beam_Stand_Off() {
+  
+    OverRideDriveTrain = true;
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    OverRideDriveTrain = false;
-    // put beam arm down 
+    wait(0.1, seconds);
+    // move beam down
     printf("beam down\n");
-    mg_beam.setVelocity(100, percent);
+    mg_beam.setMaxTorque(100.0, percent);
+    mg_beam.setVelocity(50, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
-    mg_beam.spin(spinBeamDown);
-    wait(0.2, seconds);
-
-    while(mg_beam.velocity(percent) > 0) {
-        wait(20, msec);
-    }
     mg_beam.stop();
-   
-    // get arm to proprer down position
-    mg_beam.setVelocity(beamArmDownTorque, percent);
+    mg_beam.spin(spinBeamDown);
+    mg_beam.spinFor(spinBeamDown,250,degrees,true);
     mg_beam.setStopping(hold);
-    ReverseDir = true;
-    mg_beam.spin(spinBeamDown);
-    wait(0.2, seconds);
-
-    while(mg_beam.velocity(percent) > 0) {
-        wait(20, msec);
-    }
     mg_beam.stop();
-
-    beamPos = bottom;
-    beamGraber = release;
+    printf("stop and release beam\n");
+    pneuVGrabber.retract(cylinder1);
+    wait(0.1,seconds);
+    Drop_Y_Arm();
 }
 
 
@@ -141,19 +94,24 @@ void Place_Pin_On_Stand_Off() {
     // move beam down
     printf("beam down\n");
     mg_beam.setMaxTorque(100.0, percent);
-    mg_beam.setVelocity(10, percent);
+    mg_beam.setVelocity(100, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    mg_beam.spinFor(spinBeamDown,180,degrees,true);
+    mg_beam.spinFor(spinBeamDown,330,degrees,true);
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
 
     pneuVGrabber.retract(cylinder1);
     wait(0.1,seconds);
+    Drop_Y_Arm();
+}
 
+// User defined function
+void Drop_Y_Arm() {
+   
     // move arm up a little to release any tension
     mg_beam.setMaxTorque(100, percent);   
     mg_beam.spin(spinBeamUp);
@@ -180,59 +138,16 @@ void Place_Pin_On_Stand_Off() {
     // put beam arm down 
     printf("beam down\n");
     mg_beam.setVelocity(100, percent);
-    mg_beam.setStopping(coast);
+    mg_beam.setStopping(brake);
     ReverseDir = true;
     mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
 
-    while(mg_beam.velocity(percent) > 0) {
-        wait(20, msec);
-    }
-    mg_beam.stop();
-   
-    // get arm to proprer down position
-    mg_beam.setVelocity(beamArmDownTorque, percent);
-    mg_beam.setStopping(hold);
-    ReverseDir = true;
-    mg_beam.spin(spinBeamDown);
-    wait(0.2, seconds);
-
-    while(mg_beam.velocity(percent) > 0) {
+    while(mg_beam.velocity(percent) > 5) {
         wait(20, msec);
     }
     mg_beam.stop();
 
-    beamPos = bottom;
-    beamGraber = release;
-}
-
-// User defined function
-void Drop_Down_Pin_beam() {
-    pneuVGuide.retract(cylinder2);
-   // put beam arm down 
-    mg_beam.setVelocity(100, percent);
-    mg_beam.setStopping(coast);
-    ReverseDir = true;
-    mg_beam.spin(spinBeamDown);
-    wait(0.2, seconds);
-
-    while(mg_beam.velocity(percent) > 0) {
-        wait(20, msec);
-    }
-    mg_beam.stop();
-    // get arm to proprer down position
-    mg_beam.setVelocity(beamArmDownTorque, percent);
-    mg_beam.setStopping(hold);
-    ReverseDir = true;
-    mg_beam.spin(spinBeamDown);
-    wait(0.2, seconds);
-
-    while(mg_beam.velocity(percent) > 0) {
-        wait(20, msec);
-    }
-    mg_beam.stop();
-
-    pneuVGrabber.retract(cylinder1);
     beamPos = bottom;
     beamGraber = release;
 }
@@ -310,12 +225,13 @@ int TaskBeam() {
                 }
                 else {
                     ReverseDir = false;
+                    Set_Drop_Pin();
                 }
                 // drop pin down when lifting beam
-                Drop_Down_Pin();
+               
                 Grab_Beam_up();
             } else if (beamPos == top) {
-                Place_beam();
+                Place_Beam_Stand_Off();
                 beamPos = bottom;
             } else {
                 mg_beam.stop();
@@ -323,32 +239,18 @@ int TaskBeam() {
             fBtnLupPressed = false;
         }
         else if (fBtnLdownPressed ) {
-            if((beamPos == top) || (beamPos == mid)){
+            if(beamPos == top ){
                 printf("L Down");
                 printf("\n");
                 Brain.Timer.reset();
-                Drop_Down_Pin_beam();
+                Place_Beam_2_Stack();
                 
                 beamPos = bottom;
                 ReverseDir = true;
             }
             fBtnLdownPressed = false;
         }
-        if(Controller.AxisD.position() > 80){
-            mg_beam.setMaxTorque(100.0, percent);
-            mg_beam.setVelocity(100.0, percent);
-            mg_beam.setStopping(hold);
-            mg_beam.spin(spinBeamUp);
-            
-        }
-        else if(Controller.AxisD.position() < -80){
-            Place_Pin_On_Stand_Off();
-            printf("down vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
-        }
-        else{
-            mg_beam.stop();
-        }
-        if(fBtnFdownPressed) {
+        else if(fBtnFdownPressed) {
             // printf("F Down\n");
             // printf("\n");
             // Grab_Beam();
@@ -362,6 +264,18 @@ int TaskBeam() {
             }
             fBtnFdownPressed = false;
         }
+        else if(Controller.AxisD.position() > 80){
+            Drop_Y_Arm();
+            printf("up vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
+            f1stLup=false;
+        }
+        else if(Controller.AxisD.position() < -80){
+            Place_Pin_On_Stand_Off();
+            printf("down vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
+        }
+  
+        
+       
     wait(20, msec);
     }
     return 0;

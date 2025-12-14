@@ -6,7 +6,7 @@ using namespace vex;
 #define pinGrapSpeed 50
 #define pinArmDegree 155    
 
-
+bool fSetDropPin;
 void Grab_then_up() ;
 void ReleasePin() {
     pneuVGrabber.extend(pneuCPinGrab);
@@ -17,6 +17,10 @@ void GrabPin() {
     pneuVGrabber.retract(pneuCPinGrab);
     pinGraber = grab;
 }   
+
+void Set_Drop_Pin(){
+    fSetDropPin = true;
+}
 // User defined function
 void Drop_Down_Pin_Grab_Up() {
     OverRideDriveTrain = true;
@@ -57,6 +61,28 @@ void Drop_Down_Pin_Grab_Up() {
    
 }
 
+
+// User defined function
+void Drop_Pin_Arm() {
+    printf("drop down");
+    printf("\n");
+   
+    mg_pin.setMaxTorque(10.0, percent);
+    mg_pin.setStopping(coast);
+    mg_pin.setVelocity(40.0, percent);
+    mg_pin.spin(forward);
+    pneuVGuide.retract(cylinder1);
+    
+    wait(0.3, seconds);
+    while(mg_pin.velocity(percent) > 30.0) {
+        wait(20, msec);
+    }
+    mg_pin.stop();
+    
+   
+}
+
+
 // User defined function
 void Drop_Down_Pin() {
     printf("drop down");
@@ -74,7 +100,7 @@ void Drop_Down_Pin() {
     pneuVGuide.retract(cylinder1);
     
     wait(0.3, seconds);
-   while(mg_pin.velocity(percent) > 30.0) {
+    while(mg_pin.velocity(percent) > 30.0) {
         wait(20, msec);
     }
     mg_pin.stop();
@@ -184,7 +210,7 @@ int TaskPin() {
     ReleasePin();
     mg_pin.spinFor(reverse, 10.0, degrees, true);
     pneuVGuide.retract(cylinder1);
-    Drop_Down_Pin();
+    // Drop_Down_Pin();
     while (true) {
         if (fBtnRupPressed) {
             Brain.Timer.reset();
@@ -198,7 +224,7 @@ int TaskPin() {
             }
             fBtnRupPressed = false;
         }
-        if (fBtnRdownPressed) {
+        else if (fBtnRdownPressed) {
             Brain.Timer.reset();
             if ((top == pinPos)||(mid == pinPos)) {
                 Drop_Down_Pin();
@@ -206,27 +232,31 @@ int TaskPin() {
             }
             fBtnRdownPressed = false;
         }
-        if (fBtnEdownPressed) {
+        else if (fBtnEdownPressed) {
             Brain.Timer.reset();
             // if (pinPos == bottom) {
                 Flip_Pin_Over();
             // }
             fBtnEdownPressed = false;
         }
-        if(fBtnFupPressed) {
+        else if(fBtnFupPressed) {
             // check flip only if pin is at bottom
-            if(beamPos == bottom){
-                if(pinPos == top) {
+            
+            if(pinPos == top) {
 
-                    pneuVGuide.retract(pneuCPinGuide);
-                    pinPos = mid;
-                    mg_pin.spinFor(forward, pinArmDegree/2, degrees, false);
-                }
-                else{
-                    Grab_Release_Pin();
-                }
+                pneuVGuide.retract(pneuCPinGuide);
+                pinPos = mid;
+                mg_pin.spinFor(forward, pinArmDegree/2, degrees, false);
             }
+            else{
+                Grab_Release_Pin();
+            }
+            
             fBtnFupPressed = false;
+        }
+        else if(fSetDropPin == true) {
+            Drop_Pin_Arm();
+            fSetDropPin = false;
         }
         wait(5, msec);
     }

@@ -61,6 +61,7 @@ int TaskDebug();
 
 // "when Controller ButtonL3 pressed" hat block
 void onevent_ControllerButtonL3_pressed_0() {
+     printf("L3 Pressed\n");
     if (fBeamGuideOut == true){
         pneuVGuide.retract(cylinder2); 
         fBeamGuideOut = false;
@@ -69,14 +70,14 @@ void onevent_ControllerButtonL3_pressed_0() {
         (fBeamGuideOut = true);
         pneuVGuide.extend(cylinder2);
     }
- 
 }
 
 // "when Controller ButtonR3 pressed" hat block
 void onevent_ControllerButtonR3_pressed_0() {
+    printf("R3 Pressed\n");
     Brain.playSound(siren);
     Drop_Down_Pin();
-    Drop_Down_Pin_beam();
+    Drop_Y_Arm();
     wait(0.2, seconds);
     Brain.programStop();
 }
