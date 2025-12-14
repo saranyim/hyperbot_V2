@@ -129,7 +129,7 @@ void Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, pinArmDegree, degrees, false);
+    mg_pin.spinFor(reverse, 170, degrees, false);
     wait(0.2, seconds);
     pneuVGuide.extend(cylinder1);
    
@@ -246,7 +246,7 @@ int TaskPin() {
 
                 pneuVGuide.retract(pneuCPinGuide);
                 pinPos = mid;
-                mg_pin.spinFor(forward, pinArmDegree/2, degrees, false);
+                mg_pin.spinFor(forward, 65 , degrees, false);
             }
             else{
                 Grab_Release_Pin();
