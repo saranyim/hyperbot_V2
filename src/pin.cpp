@@ -87,12 +87,12 @@ void Drop_Pin_Arm() {
 void Drop_Down_Pin() {
     printf("drop down");
     printf("\n");
-    OverRideDriveTrain = true;
+    // OverRideDriveTrain = true;
     wait(0.1, seconds);
     printf("stop mov");
     printf("\n");
-    mot_dtLeft.stop();
     mot_dtRight.stop();
+    mot_dtLeft.stop();
     mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(40.0, percent);

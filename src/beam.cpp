@@ -8,6 +8,9 @@ using namespace vex;
 #define beamArmDownTorque 10
 bool f1stLup;
 
+
+
+
 // User defined function
 void Grab_Beam_up() {
     // printf("beam up");
@@ -52,7 +55,7 @@ void Place_Beam_2_Stack() {
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    mg_beam.spinFor(spinBeamDown,720,degrees,true);
+    mg_beam.spinFor(spinBeamDown,400,degrees,true);
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
@@ -75,7 +78,7 @@ void Place_Beam_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    mg_beam.spinFor(spinBeamDown,250,degrees,true);
+    mg_beam.spinFor(spinBeamDown,180,degrees,true); 
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
@@ -99,7 +102,7 @@ void Place_Pin_On_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    mg_beam.spinFor(spinBeamDown,330,degrees,true);
+    mg_beam.spinFor(spinBeamDown,150,degrees,true);
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
