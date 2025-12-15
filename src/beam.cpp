@@ -102,7 +102,7 @@ void Place_Pin_On_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    mg_beam.spinFor(spinBeamDown,150,degrees,true);
+    mg_beam.spinFor(spinBeamDown,185,degrees,true);
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");

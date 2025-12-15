@@ -246,7 +246,7 @@ int TaskPin() {
 
                 pneuVGuide.retract(pneuCPinGuide);
                 pinPos = mid;
-                mg_pin.spinFor(forward, 65 , degrees, false);
+                mg_pin.spinFor(forward, 70 , degrees, false);
             }
             else{
                 Grab_Release_Pin();
