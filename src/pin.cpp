@@ -68,7 +68,7 @@ void Drop_Pin_Arm() {
     printf("\n");
    
     mg_pin.setMaxTorque(10.0, percent);
-    mg_pin.setStopping(coast);
+    mg_pin.setStopping(brake);
     mg_pin.setVelocity(40.0, percent);
     mg_pin.spin(forward);
     pneuVGuide.retract(cylinder1);
@@ -77,6 +77,7 @@ void Drop_Pin_Arm() {
     while(mg_pin.velocity(percent) > 30.0) {
         wait(20, msec);
     }
+ 
     mg_pin.stop();
     
    
@@ -113,6 +114,7 @@ void Drop_Down_Pin() {
     while(mg_pin.velocity(percent) > 5.0) {
         wait(20, msec);
     }
+    mg_pin.setStopping(brake);
     mg_pin.stop();
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -129,7 +131,7 @@ void Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, 170, degrees, false);
+    mg_pin.spinFor(reverse, 185, degrees, false);
     wait(0.2, seconds);
     pneuVGuide.extend(cylinder1);
    
@@ -199,6 +201,21 @@ void Grab_Release_Pin() {
     }
 }
 
+
+    
+
+
+
+
+
+
+
+
+
+
+
+   
+
 // "when started" hat block
 int TaskPin() {
   //  pin
@@ -210,7 +227,7 @@ int TaskPin() {
     ReleasePin();
     mg_pin.spinFor(reverse, 10.0, degrees, true);
     pneuVGuide.retract(cylinder1);
-    // Drop_Down_Pin();
+    Drop_Down_Pin();
     while (true) {
         if (fBtnRupPressed) {
             Brain.Timer.reset();
@@ -261,4 +278,5 @@ int TaskPin() {
         wait(5, msec);
     }
     return 0;
-}
+   
+}   

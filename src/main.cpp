@@ -76,9 +76,9 @@ void onevent_ControllerButtonL3_pressed_0() {
 void onevent_ControllerButtonR3_pressed_0() {
     printf("R3 Pressed\n");
     Brain.playSound(siren);
-    Drop_Down_Pin();
-    Drop_Y_Arm();
-    wait(0.2, seconds);
+   pneuVGuide.retract(pneuCBeamGuide);
+   pneuVGuide.retract(pneuCPinGuide);
+    wait(1, seconds);
     Brain.programStop();
 }
 
@@ -233,7 +233,7 @@ int TaskControl() {
                  BrainTimer.reset();
                 btnEUpPressed = true;
                 fBtnEupPressed = true;
-                // printf("%u ,E UP Press\n",logTick);
+                // printf("%u ,E UP Press\n",logTick);/
             }
         }
         else {

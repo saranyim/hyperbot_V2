@@ -29,8 +29,9 @@ void Grab_Beam_up() {
     mg_beam.setStopping(hold);
     mg_beam.spin(spinBeamUp);
     wait(1, seconds);
-    while(mg_beam.velocity(percent) < -5) { // reverse direction velocity is negative
-        // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
+     printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
+    while((mg_beam.velocity(percent)) < -1) { // reverse direction velocity is negative
+        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
         wait(20, msec);
     }
     // printf("Stop beam\n");
@@ -55,7 +56,7 @@ void Place_Beam_2_Stack() {
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    mg_beam.spinFor(spinBeamDown,400,degrees,true);
+    mg_beam.spinFor(spinBeamDown,467,degrees,true);
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
@@ -78,7 +79,7 @@ void Place_Beam_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    mg_beam.spinFor(spinBeamDown,180,degrees,true); 
+    mg_beam.spinFor(spinBeamDown,75,degrees,true); 
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
@@ -185,6 +186,14 @@ void Grab_Beam() {
     }
 }
 
+void Prep_Load_Pin() {
+  mg_beam.setMaxTorque (100,percent);
+    mg_beam.setVelocity (100,percent);
+    mg_beam.spinFor (spinBeamUp,500,degrees,true);
+    beamPos=top;
+
+}
+
 // "when started" hat block
 int TaskBeam() {
   //  beam
@@ -231,6 +240,9 @@ int TaskBeam() {
                     Set_Drop_Pin();
                 }
                 // drop pin down when lifting beam
+                 
+
+                    
                
                 Grab_Beam_up();
             } else if (beamPos == top) {
@@ -276,6 +288,9 @@ int TaskBeam() {
             Place_Pin_On_Stand_Off();
             printf("down vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
         }
+        if (Controller.AxisC.position() > 80){
+            Prep_Load_Pin();
+        }
   
         
        
@@ -283,3 +298,4 @@ int TaskBeam() {
     }
     return 0;
 }
+
