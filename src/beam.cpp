@@ -7,6 +7,7 @@ using namespace vex;
 #define spinBeamDown forward
 #define beamArmDownTorque 10
 bool f1stLup;
+#define 
 
 
 
@@ -30,9 +31,9 @@ void Grab_Beam_up() {
     mg_beam.spin(spinBeamUp);
     wait(1, seconds);
      printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
-    while((mg_beam.velocity(percent)) < -1) { // reverse direction velocity is negative
-        printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
-        wait(20, msec);
+    while((mg_beam.velocity(percent)) < -20) { // reverse direction velocity is negative
+        // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
+        wait(5, msec);
     }
     // printf("Stop beam\n");
         
@@ -47,7 +48,17 @@ void Place_Beam_2_Stack() {
     OverRideDriveTrain = true;
     mot_dtLeft.stop();
     mot_dtRight.stop();
+    mot_dtRight.setVelocity(20, percent);
+    mot_dtLeft.setVelocity(20, percent);
+    mot_dtRight.setMaxTorque(100, percent);
+    mot_dtLeft.setMaxTorque(100, percent);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    wait(0.3, seconds);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
     wait(0.1, seconds);
+    OverRideDriveTrain = false;
     // move beam down
     printf("beam down\n");
     mg_beam.setMaxTorque(100.0, percent);
@@ -122,6 +133,7 @@ void Drop_Y_Arm() {
     wait(0.5, seconds);
     printf("Spinupfinished\n");
     mg_beam.stop();
+    OverRideDriveTrain = true;
 
     // move robot away
     mot_dtLeft.setMaxTorque(100.0, percent);
@@ -142,6 +154,7 @@ void Drop_Y_Arm() {
     // put beam arm down 
     printf("beam down\n");
     mg_beam.setVelocity(100, percent);
+    mg_beam.setMaxTorque(10, percent);
     mg_beam.setStopping(brake);
     ReverseDir = true;
     mg_beam.spin(spinBeamDown);
@@ -194,9 +207,9 @@ void Prep_Load_Pin() {
 
 }
 
-// "when started" hat block
+"when started" hat block
 int TaskBeam() {
-  //  beam
+//    beam
     
     
     beamPos = bottom;

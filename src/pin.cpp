@@ -131,7 +131,7 @@ void Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, 185, degrees, false);
+    mg_pin.spinFor(reverse, 195 , degrees, false);
     wait(0.2, seconds);
     pneuVGuide.extend(cylinder1);
    
@@ -246,9 +246,10 @@ int TaskPin() {
             if ((top == pinPos)||(mid == pinPos)) {
                 Drop_Down_Pin();
                 pinPos = bottom;
+                
             }
             fBtnRdownPressed = false;
-        }
+        }   
         else if (fBtnEdownPressed) {
             Brain.Timer.reset();
             // if (pinPos == bottom) {
@@ -280,3 +281,9 @@ int TaskPin() {
     return 0;
    
 }   
+
+
+
+
+
+

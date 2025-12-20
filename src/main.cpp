@@ -61,16 +61,25 @@ int TaskDebug();
 
 // "when Controller ButtonL3 pressed" hat block
 void onevent_ControllerButtonL3_pressed_0() {
-     printf("L3 Pressed\n");
-    if (fBeamGuideOut == true){
-        pneuVGuide.retract(cylinder2); 
-        fBeamGuideOut = false;
-    } 
-    else {
-        (fBeamGuideOut = true);
-        pneuVGuide.extend(cylinder2);
+    printf("L3 Pressed\n");
+
+    if (beamPos = top) {
+        // Beam is at top, allow pneumatic toggle
+        if (fBeamGuideOut) {
+            pneuVGuide.retract(cylinder2);
+            fBeamGuideOut = false;
+            
+        } else {
+            pneuVGuide.extend(cylinder2);
+            fBeamGuideOut = true;
+        }
+    } else {
+        // Beam is not at top, do nothing
+        pneuVGuide.retract(cylinder2);
+        
     }
 }
+
 
 // "when Controller ButtonR3 pressed" hat block
 void onevent_ControllerButtonR3_pressed_0() {
@@ -126,20 +135,20 @@ int main() {
     // vex::task wsDebug(TaskDebug);
     vex::task ws3(TaskControl);
     TaskDriveTrain();
-    // TaskAutonomous();
+    TaskAutonomous();
 }
 
 void PrintDistance(){
-    // printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-    // printf(" Dis Right: %u \n", (uint16_t)dis_right.objectDistance(mm));
+    printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
+    printf(" Dis Right: %u \n", (uint16_t)dis_right.objectDistance(mm));
 }
 
 int TaskDebug() {
     while(1){
-        // printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-        // printf(" Dis Right: %u\n", (uint16_t)dis_right.objectDistance(mm));
-        // // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
-        // // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
+        printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
+        printf(" Dis Right: %u\n", (uint16_t)dis_right.objectDistance(mm));
+        printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
+        printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
         
         wait(500, msec);
     }
