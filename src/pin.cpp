@@ -142,6 +142,7 @@ void Grab_then_up() {
 
 // User defined function
 void Flip_Pin_Over() {
+    printf("start flip\n");
     GrabPin();
 // set beam arm free to move a little bit
     mg_beam.setStopping(coast);
@@ -157,8 +158,10 @@ void Flip_Pin_Over() {
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.spin(reverse);
     wait(1.5, seconds);
-
-    while(mg_pin.velocity(percent) > 0) {
+    printf("mgpin speed %d\n",(int16_t)mg_pin.velocity(percent));
+       
+    while((int16_t)mg_pin.velocity(percent) < 0) {
+        printf("mgpin speed %d\n",(int16_t)mg_pin.velocity(percent));
         wait(20, msec);
     }
     mg_pin.stop();
@@ -170,6 +173,11 @@ void Flip_Pin_Over() {
     mg_pin.setVelocity(100.0, percent);
     mg_pin.spin(forward);
     wait(0.4, seconds);
+    mg_beam.setMaxTorque(100, percent);
+    mg_beam.setVelocity(100, percent);
+    mg_beam.setStopping(hold);
+    mg_beam.spinFor(reverse, 250, degrees, false);
+
 
     while(mg_pin.velocity(percent) > 30.0) {
         wait(20, msec);
@@ -201,21 +209,7 @@ void Grab_Release_Pin() {
     }
 }
 
-
-    
-
-
-
-
-
-
-
-
-
-
-
    
-
 // "when started" hat block
 int TaskPin() {
   //  pin

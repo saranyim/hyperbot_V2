@@ -7,7 +7,7 @@ using namespace vex;
 #define spinBeamDown forward
 #define beamArmDownTorque 10
 bool f1stLup;
-#define 
+
 
 
 
@@ -207,7 +207,7 @@ void Prep_Load_Pin() {
 
 }
 
-"when started" hat block
+
 int TaskBeam() {
 //    beam
     
@@ -293,7 +293,21 @@ int TaskBeam() {
             fBtnFdownPressed = false;
         }
         else if(Controller.AxisD.position() > 80){
-            Drop_Y_Arm();
+            mg_beam.setVelocity(100, percent);
+            mg_beam.setMaxTorque(10, percent);
+            mg_beam.setStopping(brake);
+            ReverseDir = true;
+            mg_beam.spin(spinBeamDown);
+            wait(0.2, seconds);
+
+            while(mg_beam.velocity(percent) > 5) {
+                wait(20, msec);
+            }
+            mg_beam.stop();
+
+            beamPos = bottom;
+            beamGraber = release;
+    
             printf("up vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
             f1stLup=false;
         }
@@ -301,14 +315,12 @@ int TaskBeam() {
             Place_Pin_On_Stand_Off();
             printf("down vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
         }
-        if (Controller.AxisC.position() > 80){
-            Prep_Load_Pin();
-        }
-  
+        
         
        
     wait(20, msec);
     }
     return 0;
-}
+}    
+
 
