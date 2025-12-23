@@ -48,8 +48,8 @@ void Place_Beam_2_Stack() {
     OverRideDriveTrain = true;
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    mot_dtRight.setVelocity(20, percent);
-    mot_dtLeft.setVelocity(20, percent);
+    mot_dtRight.setVelocity(30, percent);
+    mot_dtLeft.setVelocity(30, percent);
     mot_dtRight.setMaxTorque(100, percent);
     mot_dtLeft.setMaxTorque(100, percent);
     mot_dtLeft.spin(reverse);
@@ -58,7 +58,7 @@ void Place_Beam_2_Stack() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     wait(0.1, seconds);
-    OverRideDriveTrain = false;
+    
     // move beam down
     printf("beam down\n");
     mg_beam.setMaxTorque(100.0, percent);
@@ -96,6 +96,7 @@ void Place_Beam_Stand_Off() {
     printf("stop and release beam\n");
     pneuVGrabber.retract(cylinder1);
     wait(0.1,seconds);
+    OverRideDriveTrain = false;
     Drop_Y_Arm();
 }
 

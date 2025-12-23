@@ -132,7 +132,7 @@ void Grab_then_up() {
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
     mg_pin.spinFor(reverse, 195 , degrees, false);
-    wait(0.2, seconds);
+    wait(0.3, seconds);
     pneuVGuide.extend(cylinder1);
    
     // mg_pin.stop();
@@ -219,7 +219,9 @@ int TaskPin() {
 
     mg_pin.stop();
     ReleasePin();
-    mg_pin.spinFor(reverse, 10.0, degrees, true);
+    mg_pin.spin(reverse);
+    wait(0.2, seconds);
+    mg_pin.stop();
     pneuVGuide.retract(cylinder1);
     Drop_Down_Pin();
     while (true) {
@@ -269,6 +271,7 @@ int TaskPin() {
         else if(fSetDropPin == true) {
             Drop_Pin_Arm();
             fSetDropPin = false;
+            pinPos = bottom;
         }
         wait(5, msec);
     }
