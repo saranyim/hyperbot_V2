@@ -3,8 +3,7 @@
 #include "pin.h"
 #include "beam.h"
 using namespace vex;
-#define spinBeamUp reverse
-#define spinBeamDown forward
+
 #define beamArmDownTorque 10
 bool f1stLup;
 

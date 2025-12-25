@@ -24,6 +24,7 @@ extern bool OverRideDriveTrain;
 extern bool ReverseDir;
 extern vex::brain Brain;
 extern vex::controller Controller;
+extern vex::inertial Inertial;
 
 extern motor mot_dtLeft;
 extern motor mot_dtRight;

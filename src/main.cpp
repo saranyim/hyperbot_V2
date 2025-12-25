@@ -16,11 +16,12 @@ using namespace vex;
 // A global instance of vex::brain used for printing to the IQ2 brain screen
 vex::brain       Brain;
 vex::controller  Controller;
+vex::inertial Inertial;
 bool fBeamGuideOut;
 motor mot_dtLeft( vex::PORT3);
-motor mot_dtRight( vex::PORT9, true);
+motor mot_dtRight( vex::PORT7, true);
 
-motor mot_pinLeft( vex::PORT10 );
+motor mot_pinLeft( vex::PORT5 );
 motor mot_pinRight( vex::PORT11 , true);
 
 motor mot_beamLeft( vex::PORT2 );
@@ -33,8 +34,8 @@ motor_group mg_beam( mot_beamLeft, mot_beamRight );
 pneumatic pneuVGuide( vex::PORT1 );
 pneumatic pneuVGrabber( vex::PORT6 );
 
-distance dis_left( vex::PORT5 );
-distance dis_right( vex::PORT4 );
+distance dis_left( vex::PORT4 );
+distance dis_right( vex::PORT10 );
 touchled TouchLED12( vex::PORT12 );
 
 position_t pinPos;
@@ -130,11 +131,11 @@ int main() {
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
    
     wait(15, msec);
-    vex::task ws1(TaskPin);
-    vex::task ws2(TaskBeam);
-    // vex::task wsDebug(TaskDebug);
+    // vex::task ws1(TaskPin);
+    // vex::task ws2(TaskBeam);
+    vex::task wsDebug(TaskDebug);
     vex::task ws3(TaskControl);
-    TaskDriveTrain();
+    // TaskDriveTrain();
     TaskAutonomous();
 }
 
@@ -146,9 +147,10 @@ void PrintDistance(){
 int TaskDebug() {
     while(1){
         printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-        printf(" Dis Right: %u\n", (uint16_t)dis_right.objectDistance(mm));
-        printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
-        printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
+        printf(" Dis Right: %u", (uint16_t)dis_right.objectDistance(mm));
+        printf(" heading: %u\n", (uint16_t)Inertial.angle());
+        // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
+        // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
         
         wait(500, msec);
     }

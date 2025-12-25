@@ -1,11 +1,15 @@
 #include "vex.h"
 #include "main.h"
 #include "pin.h"
+#include "beam.h"
 using namespace vex;
+
+
 
 #define IS_IN_RANGE(value, min, max) ((value >= min) && (value <= max))
 
 uint16_t driveSpeed = 70;
+uint16_t turnSpeed = 15;
 double distanceToGo;
 void Setup();
 void Step1(); // 1st 3colors stack
@@ -15,65 +19,344 @@ void Step2_3();
 void Step3();
 void Step4();
 void pushStackAway();
+void from_Start_to_Yellow();
+void reverse_to_get_Blue();
+void spin_to_get_blue();
+void spin_to_get_to_position();
+void go_forward_to_make_stack();
+void Spin_to_place_pin_on_stand_off();
+void go_backwards_to_place_pin_on_stand_off();
+void spin_to_get_beam();
+void go_backwards_to_get_beam();
+ double Distance_MM_to_Degrees(double distance_mm);
 
 int TaskAutoCnt(){
     wait(60,sec);
-    Brain.programStop();
+    // Brain.programStop();
      return 0;
 }
 
 
 // 1 wheel rotation = 8 inches
 int TaskAutonomous() {
+    int ledBlinkCount;
+    pneuVGuide.retract(pneuCPinGuide);
    
     Brain.Screen.setCursor(2, 1);
-  
+    TouchLED12.setColor(red);
+    while(TouchLED12.pressing() == false){
+        wait(0.02, seconds);
+    }
+    // debouce
+    while(TouchLED12.pressing() == true){
+
+         wait(0.02, seconds);
+    
+    }
+
+    Inertial.calibrate();
+    ledBlinkCount = 5;
+    while(ledBlinkCount--){
+        TouchLED12.setColor(yellow);
+        wait(0.5,seconds);
+        TouchLED12.setColor(red);
+        wait(0.5,seconds);
+    }
+
+   Inertial.setHeading(0, degrees);
+    mg_beam.setMaxTorque (100,percent);
+    mg_beam.setVelocity (100,percent);
+    mg_beam.spinFor (spinBeamUp,540,degrees,true);
+    beamPos=mid;
+    pneuVGrabber.retract(pneuCBeamGrab);
+    while(true){
+        
+        TouchLED12.setColor(green);
+        
+        wait(0.1, seconds);
+        TouchLED12.setColor(blue_green);
+        wait(0.1, seconds);
+        if(TouchLED12.pressing()){
+            // debouce
+            while(TouchLED12.pressing() == true){
+
+                wait(0.02, seconds);
+            
+            }
+            break;
+        }
+    }
+    pneuVGrabber.extend(pneuCBeamGrab);
+    while(true){
+        if(IS_IN_RANGE((uint16_t)Inertial.heading(),301,302)){
+            TouchLED12.setColor(green);
+        }
+        else{
+            TouchLED12.setColor(yellow);
+        }
+        wait(0.02, seconds);
+        if(TouchLED12.pressing()){
+            break;
+        }
+    }
     OverRideDriveTrain = false;
     mot_dtRight.setVelocity(driveSpeed, percent);
     mot_dtLeft.setVelocity(driveSpeed, percent);
     mot_dtLeft.setPosition(0.0, degrees);
     mot_dtRight.setPosition(0.0, degrees);
-    Setup();
+    Grab_then_up();
+   
+    // while (1)
+    // {
+    //     wait(1, seconds);
+    //    printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm)); /* code */
+    // }
+    
+    
+    // Setup();
+    TouchLED12.setBlink(green, 0.1, 0.1);
     while(TouchLED12.pressing() == false){
-        wait(20, msec);
+    
+        wait(0.02, seconds);
+        // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
     }
+    TouchLED12.setColor(yellow_green);
+    printf("touch\n");
+    mot_dtRight.setVelocity(driveSpeed, percent);
+    mot_dtLeft.setVelocity(driveSpeed, percent);
+    distanceToGo = dis_left.objectDistance(mm);
+    Drop_Down_Pin();
+    from_Start_to_Yellow();
+    wait(0.5, seconds);
+
+    // while(TouchLED12.pressing() == false){
+    //       wait(0.02, seconds);
+          
+    //     // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+    // }
+    spin_to_get_to_position();
+    wait(0.5, seconds);
+    // while(TouchLED12.pressing() == false){
+    //        wait(0.02, seconds);
+    //     // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+    // }
+    // printf("touch\n");
+       
+    reverse_to_get_Blue();
+    wait(0.5, seconds);
+    Grab_Beam_up();
+
+    // while(TouchLED12.pressing() == false){
+    //       wait(0.02, seconds);
+          
+    //     // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+    // }
+    // printf("touch\n");
+    spin_to_get_blue();
+    wait(0.5, seconds);
+    
+    
      vex::task wsAuto(TaskAutoCnt);
     // TaskDriveTrain();
-    Step1();
-    Step2_1();
-    Step2_2();
-    Step2_3();
-    Step3();
-    Step4();
-    while (true) {
-        if(!OverRideDriveTrain) {
-            if(Controller.AxisA.position() > 80){
-                mot_dtLeft.spin(forward);
-                mot_dtRight.spin(forward);
-            }
-            else if(Controller.AxisA.position() < -80){
-                mot_dtLeft.spin(reverse);
-                mot_dtRight.spin(reverse);
-            }
-            else if(Controller.AxisB.position() > 80){
-                mot_dtLeft.spin(forward);
-                mot_dtRight.spin(reverse);
-            }
-            else if(Controller.AxisB.position() < -80){
-                mot_dtLeft.spin(reverse);
-                mot_dtRight.spin(forward);
-            
-            }
-            else {
-                mot_dtLeft.stop();
-                mot_dtRight.stop();
-            }
-        
-        }
-    wait(20, msec);
-    }
+
+    // while(TouchLED12.pressing() == false){
+    //       wait(0.02, seconds);
+          
+    //     // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+    // }
+    go_forward_to_make_stack();
+    Drop_Down_Pin_Grab_Up();
+    wait(0.5, seconds);
+
+    Spin_to_place_pin_on_stand_off();
+
+    wait(0.5, seconds);
+
+    go_backwards_to_place_pin_on_stand_off();
+    wait(0.3, seconds);
+    
+
+    spin_to_get_beam();
+    wait(0.5, seconds);
+
+    go_backwards_to_get_beam();
+    wait(0.5, seconds);
+    Flip_Pin_Over();
+
+    
     return 0;
+    
 }
+void from_Start_to_Yellow(){
+    distanceToGo = 1000;
+    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    mot_dtLeft.setVelocity(30, percent);
+    mot_dtRight.setVelocity(30, percent);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
+    wait(0.80, seconds);
+    mot_dtRight.stop();
+    mot_dtLeft.stop();
+    wait(0.2, seconds);
+    Grab_then_up();
+    
+    // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+    
+}
+
+void spin_to_get_to_position(){
+    mot_dtLeft.setVelocity(turnSpeed, percent);
+    mot_dtRight.setVelocity(turnSpeed, percent);
+    mot_dtRight.spin(forward);
+    mot_dtLeft.spin(reverse);
+
+     while(1){
+    //      if(IS_IN_RANGE((uint16_t)dis_left.objectDistance(mm),700,2000) 
+    //         && IS_IN_RANGE((uint16_t)dis_right.objectDistance(mm),260,270) 
+    
+        if(
+            (uint16_t)Inertial.angle()<268
+        )
+        {
+            break;
+        }
+
+        wait(5, msec);
+        
+    }
+    printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+   
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+}
+
+
+
+void reverse_to_get_Blue(){
+    mot_dtRight.setVelocity(100, percent);
+    mot_dtLeft.setVelocity(100, percent);
+    distanceToGo = 1000-dis_left.objectDistance(mm);
+ mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtRight.stop();
+    mot_dtRight.stop();
+
+      
+}
+
+void spin_to_get_blue(){
+    mot_dtRight.setVelocity(turnSpeed, percent);
+    mot_dtLeft.setVelocity(turnSpeed, percent);
+    mot_dtRight.spin(reverse);
+    mot_dtLeft.spin(forward);
+     
+  
+    
+    while(1){
+    //      if(IS_IN_RANGE((uint16_t)dis_left.objectDistance(mm),700,2000) 
+    //         && IS_IN_RANGE((uint16_t)dis_right.objectDistance(mm),260,270) 
+    
+        if(
+            (uint16_t)Inertial.angle()>288
+        )
+        {
+            break;
+        }
+
+        wait(5, msec);
+        
+    }
+    printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+   
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+}
+
+void go_forward_to_make_stack(){
+mot_dtLeft.setVelocity(driveSpeed, percent);
+mot_dtRight.setVelocity(driveSpeed, percent);
+    distanceToGo = dis_left.objectDistance(mm);
+ mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtRight.stop();
+    mot_dtLeft.stop();
+     mot_dtLeft.setVelocity(30, percent);
+    mot_dtRight.setVelocity(30, percent);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
+    wait(0.55, seconds);
+    mot_dtRight.stop();
+    mot_dtLeft.stop();
+}
+
+void Spin_to_place_pin_on_stand_off(){
+    mot_dtLeft.setVelocity(turnSpeed, percent);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(forward);
+
+     while(1){
+    //      if(IS_IN_RANGE((uint16_t)dis_left.objectDistance(mm),700,2000) 
+    //         && IS_IN_RANGE((uint16_t)dis_right.objectDistance(mm),260,270) 
+    
+        if(
+            (uint16_t)Inertial.angle()<282
+        )
+        {
+            break;
+        }
+
+        wait(5, msec);
+        
+    }
+    printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+   
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+}
+
+void go_backwards_to_place_pin_on_stand_off(){
+    mot_dtRight.setVelocity(driveSpeed, percent);
+    mot_dtLeft.setVelocity(driveSpeed, percent);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    wait(1.8, seconds);
+    mot_dtRight.stop();
+    mot_dtRight.stop();
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    wait(0.5, seconds);
+    mot_dtRight.stop();
+    mot_dtRight.stop();
+    Place_Pin_On_Stand_Off();
+}
+
+void spin_to_get_beam(){
+    mot_dtRight.setVelocity(100, percent);
+    mot_dtLeft.setVelocity(100, percent);
+    distanceToGo = 775-dis_left.objectDistance(mm);
+ mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtRight.stop();
+    mot_dtRight.stop();
+
+}
+
+void go_backwards_to_get_beam(){
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    wait(1, seconds);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    wait(0.2, seconds);
+    pneuVGrabber.extend(cylinder1);
+    
+}
+
+
+
 
 double Distance_MM_to_Degrees(double distance_mm){
     return distance_mm / (8.0* 25.4) * 360.0;
@@ -230,8 +513,6 @@ void Step2_2(){
     // dis lef 185, righ 240
     // turn right to blue
     // turn to dis left < 240 righ > 500
-    mot_dtLeft.spin(forward,10, percent);
-    mot_dtRight.spin(reverse,10, percent);
     // wait(1, sec);
     while(1){
          if(IS_IN_RANGE((uint16_t)dis_left.objectDistance(mm),200,320) 
@@ -298,9 +579,9 @@ void Step2_3(){
     printf("get yellow\n");
     Drop_Down_Pin();
     pushStackAway();
-
     printf("Step2 End\n");
 }
+    
 
 void Step3(){
     // move backward
