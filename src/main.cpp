@@ -64,7 +64,7 @@ int TaskDebug();
 void onevent_ControllerButtonL3_pressed_0() {
     printf("L3 Pressed\n");
 
-    if (beamPos = top) {
+    if (beamPos == top) {
         // Beam is at top, allow pneumatic toggle
         if (fBeamGuideOut) {
             pneuVGuide.retract(cylinder2);

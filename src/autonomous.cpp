@@ -13,20 +13,19 @@ uint16_t turnSpeed = 15;
 uint16_t adjustTurnSpeed = 6;
 double distanceToGo;
 void Auto_Drop_Down_Pin_Grab_Up();
+void Auto_Flip_Pin_Over();
 void from_Start_to_Yellow();
 void reverse_to_get_Blue();
 void spin_to_get_blue();
 void spin_to_get_to_position();
 void go_forward_to_make_stack();
-void Spin_to_place_pin_on_stand_off();
 void go_backwards_to_place_pin_on_stand_off();
 void spin_to_get_beam();
 void go_backwards_to_get_beam();
 void go_forward_to_spin_to_stand_off();
-void spin_to_get_to_standoff();
 void go_reverse_to_stand_off();
-void go_backwards_to_get_in_position();
-void spin_to_get_beam_2();
+void reverse_to_set_distance();
+void spin_to_get_to_standoff();
 double Distance_MM_to_Degrees(double distance_mm);
 
 void SpinLeft(uint16_t heading);
@@ -134,72 +133,73 @@ int TaskAutonomous() {
     distanceToGo = dis_left.objectDistance(mm);
     Drop_Down_Pin();
     from_Start_to_Yellow();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     // WaitTouchDebug();
 
     spin_to_get_to_position();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     // WaitTouchDebug();
     printf("touch\n");
 
     reverse_to_get_Blue();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     Grab_Beam_up();
     // WaitTouchDebug();
     printf("touch\n");
     spin_to_get_blue();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     // WaitTouchDebug();
 
     go_forward_to_make_stack();
     Auto_Drop_Down_Pin_Grab_Up();
-    wait(0.5, seconds);
-    // WaitTouchDebug();
+    distanceToGo = 30;
+    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtRight.stop();
+    mot_dtLeft.stop();
 
 
-    Spin_to_place_pin_on_stand_off();
+    // wait(0.5, seconds);
 
-    wait(0.5, seconds);
-    // WaitTouchDebug();
+
+     reverse_to_set_distance();
+    //  wait(0.5, seconds);
+
+
+
+    
 
     go_backwards_to_place_pin_on_stand_off();
-    wait(0.3, seconds);
+    // wait(0.3, seconds);
     // WaitTouchDebug();
 
 
 
     spin_to_get_beam();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     // WaitTouchDebug();
-
-    go_backwards_to_get_in_position();
-    wait(0.5, seconds);
-
-    spin_to_get_beam_2();
-    wait(0.5, seconds);
 
     go_backwards_to_get_beam();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     // WaitTouchDebug();
 
-    Flip_Pin_Over();
-    wait(0.5, seconds);
+    Auto_Flip_Pin_Over();
+    // wait(0.5, seconds);
     go_forward_to_spin_to_stand_off();
     // WaitTouchDebug();
 
-    spin_to_get_to_standoff();
-    wait(0.3, seconds);
-    // WaitTouchDebug();
 
     Grab_Beam_up();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     // WaitTouchDebug();
+    spin_to_get_to_standoff();
+    wait(0.5, seconds);
 
     go_reverse_to_stand_off();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
     // WaitTouchDebug();
     Place_Beam_Stand_Off();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
 
 
     
@@ -243,13 +243,13 @@ void reverse_to_get_Blue(){
 }
 
 void spin_to_get_blue(){
-   SpinRight(285);
+   SpinRight(285);  
 }
 
 void go_forward_to_make_stack(){
     mot_dtLeft.setVelocity(driveSpeed, percent);
     mot_dtRight.setVelocity(driveSpeed, percent);
-    distanceToGo = 550;
+    distanceToGo = 560;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
@@ -263,9 +263,27 @@ void go_forward_to_make_stack(){
     mot_dtLeft.stop();
 }
 
-void Spin_to_place_pin_on_stand_off(){
-    SpinLeft(266);
+void reverse_to_set_distance(){
+SpinLeft(180);
+mot_dtRight.setVelocity(100, percent);
+    mot_dtLeft.setVelocity(100, percent);
+    distanceToGo = 1300-dis_left.objectDistance(mm);
+    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtRight.stop();
+    mot_dtRight.stop();
+    wait(0.5, seconds);
+    distanceToGo = dis_left.objectDistance(mm)-1160;
+    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtRight.stop();
+    mot_dtRight.stop();
+    wait(0.5, seconds);
+    SpinRight(270);
+
+      
 }
+
 
 void go_backwards_to_place_pin_on_stand_off(){
     mot_dtRight.setVelocity(85, percent);
@@ -279,24 +297,10 @@ void go_backwards_to_place_pin_on_stand_off(){
 }
 
 void spin_to_get_beam(){
-    SpinRight(50                                              );
+    SpinRight(90);
 }
 
-void go_backwards_to_get_in_position(){
-    mot_dtLeft.setVelocity(100, percent);
-    mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-    wait(0.5, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
 
-
-}
-
-void spin_to_get_beam_2(){
-    SpinRight(50                                              );
-}
 
 void go_backwards_to_get_beam(){
     mot_dtLeft.setVelocity(100, percent);
@@ -320,7 +324,7 @@ void go_forward_to_spin_to_stand_off(){
 }
 
 void spin_to_get_to_standoff(){
-    SpinRight(266);
+    SpinRight(270);
 }
 
 void go_reverse_to_stand_off(){
@@ -339,6 +343,8 @@ void go_reverse_to_stand_off(){
 double Distance_MM_to_Degrees(double distance_mm){
     return distance_mm / (8.0* 25.4) * 360.0;
 }
+
+
 
 
 
