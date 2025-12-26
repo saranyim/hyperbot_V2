@@ -7,7 +7,7 @@ using namespace vex;
 #define pinArmDegree 155    
 
 bool fSetDropPin;
-void Grab_then_up() ;
+
 void ReleasePin() {
     pneuVGrabber.extend(pneuCPinGrab);
     pinGraber = release;
@@ -181,6 +181,10 @@ void Flip_Pin_Over() {
     mg_pin.stop();
 
     pinPos = bottom;
+    mg_beam.spinFor(120, mm);
+    wait(0.5, seconds);
+    mg_beam.stop();
+
 }
 
 

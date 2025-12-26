@@ -9,6 +9,6 @@ void Drop_Down_Pin() ;
 void Grab_then_up() ;
 void Set_Drop_Pin() ;
 void Flip_Pin_Over() ;
-
-
+void ReleasePin();
+void GrabPin();
 int TaskPin() ;
