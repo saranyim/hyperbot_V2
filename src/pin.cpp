@@ -185,6 +185,7 @@ void Flip_Pin_Over() {
     mg_beam.setVelocity(100, percent);
     mg_beam.setStopping(hold);
     mg_beam.spinFor(reverse, 250, degrees, false);
+    
 
 }
 
@@ -278,7 +279,11 @@ int TaskPin() {
     }
     return 0;
    
-}   
+} 
+
+
+                                                                                                                                                                                                    
+
 
 
 

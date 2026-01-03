@@ -131,12 +131,12 @@ int main() {
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
    
     wait(15, msec);
-    vex::task ws1(TaskPin);
-    vex::task ws2(TaskBeam);
+    // vex::task ws1(TaskPin);
+    // vex::task ws2(TaskBeam);
     vex::task wsDebug(TaskDebug);
-    vex::task ws3(TaskControl);
-    TaskDriveTrain();
-    // TaskAutonomous();
+    // vex::task ws3(TaskControl);
+    // TaskDriveTrain();
+    TaskAutonomous();
 }
 
 void PrintDistance(){

@@ -26,6 +26,7 @@ void go_forward_to_spin_to_stand_off();
 void go_reverse_to_stand_off();
 void reverse_to_set_distance();
 void spin_to_get_to_standoff();
+void trim_heading(uint16_t heading);
 double Distance_MM_to_Degrees(double distance_mm);
 
 void SpinLeft(uint16_t heading);
@@ -207,7 +208,7 @@ int TaskAutonomous() {
     
 }
 void from_Start_to_Yellow(){
-    distanceToGo = 1050;
+    distanceToGo = 1065;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtLeft.stop();
@@ -215,8 +216,8 @@ void from_Start_to_Yellow(){
    
     mot_dtLeft.setVelocity(turnSpeed, percent);
     mot_dtRight.setVelocity(turnSpeed, percent);
-    mot_dtLeft.spinFor(forward,180,degrees,false);
-    mot_dtRight.spinFor(forward,180,degrees,false);
+    mot_dtLeft.spinFor(forward,200,degrees,false);
+    mot_dtRight.spinFor(forward,200,degrees,false);
     wait(0.5,seconds);
     Grab_then_up();
     
@@ -410,6 +411,10 @@ mot_dtLeft.setVelocity(turnSpeed, percent);
 
     mot_dtLeft.stop();
     mot_dtRight.stop();
+    trim_heading(heading);
+
+
+
 }
 
 void SpinRight(uint16_t heading){
@@ -446,6 +451,8 @@ void SpinRight(uint16_t heading){
     }
     mot_dtLeft.stop();
     mot_dtRight.stop();
+
+    trim_heading(heading);
 }
 
 void Auto_Flip_Pin_Over() {
@@ -489,3 +496,56 @@ void Auto_Flip_Pin_Over() {
 
     pinPos = bottom;
 }
+
+void trim_heading(uint16_t heading){
+    wait(0.05,seconds);
+    if ((uint16_t)Inertial.angle()>heading){
+        mot_dtRight.setVelocity(15, percent);
+        mot_dtLeft.setVelocity(15, percent);
+        mot_dtRight.spin(reverse);
+        mot_dtLeft.spin(forward);
+
+        while(1){  
+            if((uint16_t)Inertial.angle() == heading)
+            {
+                break;
+            }
+            wait(5, msec);      
+        }
+    printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+   
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+
+
+    }
+    else if ((uint16_t)Inertial.angle() <heading)
+    {
+        /* code */
+    }
+    
+    {
+        mot_dtRight.setVelocity(15, percent);
+        mot_dtLeft.setVelocity(15, percent);
+        mot_dtRight.spin(forward);
+        mot_dtLeft.spin(reverse);
+
+        while(1){  
+            if((uint16_t)Inertial.angle() == heading)
+            {
+                break;
+            }
+            wait(5, msec);      
+        }
+        printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
+    
+        mot_dtLeft.stop();
+        mot_dtRight.stop();
+
+
+    }
+
+
+
+}
+
