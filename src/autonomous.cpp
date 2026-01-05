@@ -259,7 +259,7 @@ void go_forward_to_make_stack(){
     mot_dtRight.setVelocity(30, percent);
     mot_dtLeft.spin(forward);
     mot_dtRight.spin(forward);
-    wait(0.55, seconds);
+    wait(0.6, seconds);
     mot_dtRight.stop();
     mot_dtLeft.stop();
 }
@@ -291,9 +291,10 @@ void go_backwards_to_place_pin_on_stand_off(){
     mot_dtLeft.setVelocity(85, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    wait(1.8, seconds);
+    wait(1.5, seconds);
     mot_dtRight.stop();
-    mot_dtRight.stop();       
+    mot_dtRight.stop(); 
+    wait(0.5, seconds);      
     Place_Pin_On_Stand_Off();
 }
 
@@ -519,11 +520,7 @@ void trim_heading(uint16_t heading){
 
 
     }
-    else if ((uint16_t)Inertial.angle() <heading)
-    {
-        /* code */
-    }
-    
+    else if ((uint16_t)Inertial.angle() <heading) 
     {
         mot_dtRight.setVelocity(15, percent);
         mot_dtLeft.setVelocity(15, percent);

@@ -2,6 +2,7 @@
 #include "vex.h"
 #include "main.h"
 #include "pin.h"
+#include "beam.h"
 using namespace vex;
 #define pinGrapSpeed 50
 #define pinArmDegree 155    
@@ -173,11 +174,12 @@ void Flip_Pin_Over() {
     mg_pin.setVelocity(100.0, percent);
     mg_pin.spin(forward);
     wait(0.4, seconds);
-    mg_beam.setMaxTorque(100, percent);
-    mg_beam.setVelocity(100, percent);
-    mg_beam.setStopping(hold);
-    mg_beam.spinFor(reverse, 250, degrees, false);
-    
+    if(fBeamMovingUp == false){
+        mg_beam.setMaxTorque(100, percent);
+        mg_beam.setVelocity(100, percent);
+        mg_beam.setStopping(hold);
+        mg_beam.spinFor(reverse, 250, degrees, false);
+    }   
 
 
     while(mg_pin.velocity(percent) > 30.0) {

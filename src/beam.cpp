@@ -6,7 +6,7 @@ using namespace vex;
 
 #define beamArmDownTorque 10
 bool f1stLup;
-
+bool fBeamMovingUp;
 
 
 
@@ -14,6 +14,7 @@ bool f1stLup;
 // User defined function
 void Grab_Beam_up() {
     // printf("beam up");
+    fBeamMovingUp = true;
     mg_beam.setVelocity(100.0, percent);
     mg_beam.setMaxTorque(100.0, percent);
     // mg_beam.spin(spinBeamDown);
@@ -40,6 +41,7 @@ void Grab_Beam_up() {
     
     beamPos = top;
     beamGraber = grab;
+    fBeamMovingUp = false;
 }
 
 void Place_Beam_2_Stack() {
@@ -53,7 +55,7 @@ void Place_Beam_2_Stack() {
     mot_dtLeft.setMaxTorque(100, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    wait(0.3, seconds);
+    wait(0.5, seconds);
     mot_dtLeft.stop();
     mot_dtRight.stop();
     wait(0.1, seconds);

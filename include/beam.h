@@ -7,7 +7,7 @@ using namespace vex;
 #define spinBeamUp reverse
 #define spinBeamDown forward
 
-
+extern bool fBeamMovingUp;
 int TaskBeam();
 void Drop_Y_Arm();
 void Grab_Beam_up();
