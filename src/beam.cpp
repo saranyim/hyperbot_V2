@@ -16,7 +16,7 @@ void Grab_Beam_up() {
     // printf("beam up");
     fBeamMovingUp = true;
     mg_beam.setVelocity(100.0, percent);
-    mg_beam.setMaxTorque(100.0, percent);
+    mg_beam.setMaxTorque(80.0, percent);
     // mg_beam.spin(spinBeamDown);
     // wait(20, msec);
     // while(mg_beam.velocity(percent) > 0) {
