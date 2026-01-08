@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       saranyim                                                  */
+/*    Author:       Kin                                                 */
 /*    Created:      11/4/2025, 3:32:57 PM                                     */
 /*    Description:  IQ2 project                                               */
 /*                                                                            */
@@ -133,8 +133,8 @@ int main() {
     wait(15, msec);
     // vex::task ws1(TaskPin);
     // vex::task ws2(TaskBeam);
-    vex::task wsDebug(TaskDebug);
     // vex::task ws3(TaskControl);
+     vex::task wsDebug(TaskDebug);
     // TaskDriveTrain();
     TaskAutonomous();
 }

@@ -75,7 +75,7 @@ int TaskAutonomous() {
         wait(0.5,seconds);
     }
 
-   Inertial.setHeading(0, degrees);
+   Inertial.setHeading(90, degrees);
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
     mg_beam.spinFor (spinBeamUp,540,degrees,true);
@@ -84,7 +84,6 @@ int TaskAutonomous() {
     while(true){
         
         TouchLED12.setColor(green);
-        
         wait(0.1, seconds);
         TouchLED12.setColor(blue_green);
         wait(0.1, seconds);
@@ -100,7 +99,7 @@ int TaskAutonomous() {
     }
     pneuVGrabber.extend(pneuCBeamGrab);
     while(true){
-        if((uint16_t)Inertial.heading() == 301){
+        if((uint16_t)Inertial.heading() ==119){
             TouchLED12.setColor(green);
         }
         else{
@@ -137,10 +136,7 @@ int TaskAutonomous() {
     // wait(0.5, seconds);
     // WaitTouchDebug();
 
-    spin_to_get_to_position();
-    // wait(0.5, seconds);
-    // WaitTouchDebug();
-    printf("touch\n");
+
 
     reverse_to_get_Blue();
     // wait(0.5, seconds);
@@ -153,14 +149,11 @@ int TaskAutonomous() {
 
     go_forward_to_make_stack();
     Auto_Drop_Down_Pin_Grab_Up();
-    distanceToGo = 30;
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtLeft.stop();
+
 
 
     // wait(0.5, seconds);
+    // WaitTouchDebug();
 
 
      reverse_to_set_distance();
@@ -208,7 +201,7 @@ int TaskAutonomous() {
     
 }
 void from_Start_to_Yellow(){
-    distanceToGo = 1065;
+    distanceToGo = 1050;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtLeft.stop();
@@ -216,8 +209,8 @@ void from_Start_to_Yellow(){
    
     mot_dtLeft.setVelocity(turnSpeed, percent);
     mot_dtRight.setVelocity(turnSpeed, percent);
-    mot_dtLeft.spinFor(forward,200,degrees,false);
-    mot_dtRight.spinFor(forward,200,degrees,false);
+    mot_dtLeft.spinFor(forward,220,degrees,false);
+    mot_dtRight.spinFor(forward,220,degrees,false);
     wait(0.5,seconds);
     Grab_then_up();
     
@@ -225,16 +218,12 @@ void from_Start_to_Yellow(){
     
 }
 
-void spin_to_get_to_position(){
-    SpinLeft(260);
-}
-
 
 
 void reverse_to_get_Blue(){
     mot_dtRight.setVelocity(100, percent);
     mot_dtLeft.setVelocity(100, percent);
-    distanceToGo = 600;
+    distanceToGo = 460;
     mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
@@ -244,13 +233,13 @@ void reverse_to_get_Blue(){
 }
 
 void spin_to_get_blue(){
-   SpinRight(285);  
+   SpinRight(150);
 }
 
 void go_forward_to_make_stack(){
     mot_dtLeft.setVelocity(driveSpeed, percent);
     mot_dtRight.setVelocity(driveSpeed, percent);
-    distanceToGo = 560;
+    distanceToGo = 765;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
@@ -265,22 +254,24 @@ void go_forward_to_make_stack(){
 }
 
 void reverse_to_set_distance(){
-SpinLeft(180);
+SpinRight(180);
+// WaitTouchDebug();
 mot_dtRight.setVelocity(100, percent);
     mot_dtLeft.setVelocity(100, percent);
-    distanceToGo = 1300-dis_left.objectDistance(mm);
+    distanceToGo = 1300-dis_right.objectDistance(mm);
     mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
     mot_dtRight.stop();
     wait(0.5, seconds);
-    distanceToGo = dis_left.objectDistance(mm)-1160;
+    // WaitTouchDebug();
+    distanceToGo = dis_right.objectDistance(mm)-1160;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
     mot_dtRight.stop();
     wait(0.5, seconds);
-    SpinRight(270);
+    SpinLeft(90);
 
       
 }
@@ -299,7 +290,7 @@ void go_backwards_to_place_pin_on_stand_off(){
 }
 
 void spin_to_get_beam(){
-    SpinRight(90);
+    SpinRight(270);
 }
 
 
@@ -326,7 +317,7 @@ void go_forward_to_spin_to_stand_off(){
 }
 
 void spin_to_get_to_standoff(){
-    SpinRight(270);
+    SpinRight(90);
 }
 
 void go_reverse_to_stand_off(){
