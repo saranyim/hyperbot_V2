@@ -32,6 +32,8 @@ double Distance_MM_to_Degrees(double distance_mm);
 void SpinLeft(uint16_t heading);
 void SpinRight(uint16_t heading);
 
+void turnTo(double targetDeg) ;
+
 int TaskAutoCnt(){
     wait(60,sec);
     Brain.programStop();
@@ -148,15 +150,22 @@ int TaskAutonomous() {
     // WaitTouchDebug();
 
     go_forward_to_make_stack();
+   
     Auto_Drop_Down_Pin_Grab_Up();
 
 
-
+    distanceToGo = 200;
+    mot_dtLeft.setVelocity(100, percent);
+    mot_dtRight.setVelocity(100, percent);
+    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+    mot_dtRight.stop();
+    mot_dtLeft.stop();
     // wait(0.5, seconds);
     // WaitTouchDebug();
 
 
-     reverse_to_set_distance();
+    reverse_to_set_distance();
     //  wait(0.5, seconds);
 
 
@@ -224,7 +233,7 @@ void from_Start_to_Yellow(){
 void reverse_to_get_Blue(){
     mot_dtRight.setVelocity(100, percent);
     mot_dtLeft.setVelocity(100, percent);
-    distanceToGo = 460;
+    distanceToGo = 480;
     mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
@@ -235,7 +244,8 @@ void reverse_to_get_Blue(){
 }
 
 void spin_to_get_blue(){
-   SpinRight(156);
+    turnTo(155);
+//    SpinRight(156);
 //    WaitTouchDebug();
 }
 
@@ -243,7 +253,7 @@ void go_forward_to_make_stack(){
     // WaitTouchDebug();
     mot_dtLeft.setVelocity(driveSpeed, percent);
     mot_dtRight.setVelocity(driveSpeed, percent);
-    distanceToGo = 785;
+    distanceToGo = 850;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
@@ -258,37 +268,23 @@ void go_forward_to_make_stack(){
 }
 
 void reverse_to_set_distance(){
-SpinRight(180);
+// SpinRight(180);
+    turnTo(180);
+
 // WaitTouchDebug();
-mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.setVelocity(100, percent);
-    if (dis_left.objectDistance(mm) > dis_right.objectDistance(mm))
-    {
-       distanceToGo = 1300-dis_left.objectDistance(mm);
-    }else{
-        distanceToGo = 1300-dis_right.objectDistance(mm);
-    }
+
+    distanceToGo = dis_left.objectDistance(mm)-1080;
+    mot_dtLeft.setVelocity(40, percent);
+    mot_dtRight.setVelocity(40, percent);
+    
     
     mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
     mot_dtRight.stop();
     wait(0.5, seconds);
-    // WaitTouchDebug();
-    if (dis_left.objectDistance(mm) > dis_right.objectDistance(mm))
-    {
-        distanceToGo = dis_left.objectDistance(mm)-1160;
-    }else{
-         distanceToGo = dis_right.objectDistance(mm)-1160;
-    }
-    
-    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtRight.stop();
-    wait(0.5, seconds);
     SpinLeft(90);
-
+    // WaitTouchDebug();
       
 }
 
@@ -298,7 +294,7 @@ void go_backwards_to_place_pin_on_stand_off(){
     mot_dtLeft.setVelocity(85, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    wait(2.2, seconds);
+    wait(1.0, seconds);
     mot_dtRight.stop();
     mot_dtRight.stop(); 
     wait(0.5, seconds);      
@@ -306,7 +302,7 @@ void go_backwards_to_place_pin_on_stand_off(){
 }
 
 void spin_to_get_beam(){
-    SpinRight(270);
+    turnTo(270);
 }
 
 
@@ -333,7 +329,7 @@ void go_forward_to_spin_to_stand_off(){
 }
 
 void spin_to_get_to_standoff(){
-    SpinRight(90);
+    turnTo(90);
 }
 
 void go_reverse_to_stand_off(){
@@ -554,3 +550,42 @@ void trim_heading(uint16_t heading){
 
 }
 
+void turnTo(double targetDeg) {
+
+    double Kp = 1.4;       // ค่าปกติเริ่มต้น
+    double Kd = 0.12;      // ลด overshoot
+    double maxPower = 70;  // จำกัดเพื่อความ smooth
+    double minPower = 10;  // ป้องกัน stall
+    
+    double error, prevError = 0;
+    double derivative;
+    double power;
+
+    while(true) {
+        double angle = Inertial.angle();
+        error = targetDeg - angle;
+
+        // normalize wrap-around
+        if (error > 180) error -= 360;
+        if (error < -180) error += 360;
+
+        if (fabs(error) < 0.5) break; // deadband
+
+        derivative = error - prevError;
+        power = Kp * error + Kd * derivative;
+
+        // limit power
+        if (fabs(power) > maxPower) power = copysign(maxPower, power);
+        if (fabs(power) < minPower) power = copysign(minPower, power);
+
+        // turn
+        mot_dtLeft.spin(fwd,  power, pct);
+        mot_dtRight.spin(fwd, -power, pct);
+
+        prevError = error;
+        wait(10, msec);
+    }
+
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
+}
