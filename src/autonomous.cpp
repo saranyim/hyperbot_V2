@@ -34,7 +34,7 @@ void SpinRight(uint16_t heading);
 
 int TaskAutoCnt(){
     wait(60,sec);
-    // Brain.programStop();
+    Brain.programStop();
      return 0;
 }
 
@@ -187,7 +187,7 @@ int TaskAutonomous() {
     // wait(0.5, seconds);
     // WaitTouchDebug();
     spin_to_get_to_standoff();
-    wait(0.5, seconds);
+    // wait(0.5, seconds);
 
     go_reverse_to_stand_off();
     // wait(0.5, seconds);
@@ -213,6 +213,7 @@ void from_Start_to_Yellow(){
     mot_dtRight.spinFor(forward,220,degrees,false);
     wait(0.5,seconds);
     Grab_then_up();
+    // WaitTouchDebug();
     
     // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
     
@@ -228,18 +229,21 @@ void reverse_to_get_Blue(){
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
     mot_dtRight.stop();
+    // WaitTouchDebug();
 
       
 }
 
 void spin_to_get_blue(){
-   SpinRight(150);
+   SpinRight(156);
+//    WaitTouchDebug();
 }
 
 void go_forward_to_make_stack(){
+    // WaitTouchDebug();
     mot_dtLeft.setVelocity(driveSpeed, percent);
     mot_dtRight.setVelocity(driveSpeed, percent);
-    distanceToGo = 765;
+    distanceToGo = 785;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
@@ -258,14 +262,26 @@ SpinRight(180);
 // WaitTouchDebug();
 mot_dtRight.setVelocity(100, percent);
     mot_dtLeft.setVelocity(100, percent);
-    distanceToGo = 1300-dis_right.objectDistance(mm);
+    if (dis_left.objectDistance(mm) > dis_right.objectDistance(mm))
+    {
+       distanceToGo = 1300-dis_left.objectDistance(mm);
+    }else{
+        distanceToGo = 1300-dis_right.objectDistance(mm);
+    }
+    
     mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
     mot_dtRight.stop();
     wait(0.5, seconds);
     // WaitTouchDebug();
-    distanceToGo = dis_right.objectDistance(mm)-1160;
+    if (dis_left.objectDistance(mm) > dis_right.objectDistance(mm))
+    {
+        distanceToGo = dis_left.objectDistance(mm)-1160;
+    }else{
+         distanceToGo = dis_right.objectDistance(mm)-1160;
+    }
+    
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
     mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
     mot_dtRight.stop();
@@ -282,7 +298,7 @@ void go_backwards_to_place_pin_on_stand_off(){
     mot_dtLeft.setVelocity(85, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    wait(1.5, seconds);
+    wait(2.2, seconds);
     mot_dtRight.stop();
     mot_dtRight.stop(); 
     wait(0.5, seconds);      
@@ -490,6 +506,7 @@ void Auto_Flip_Pin_Over() {
 }
 
 void trim_heading(uint16_t heading){
+    return;
     wait(0.05,seconds);
     if ((uint16_t)Inertial.angle()>heading){
         mot_dtRight.setVelocity(15, percent);
