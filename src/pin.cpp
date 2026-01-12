@@ -268,6 +268,7 @@ int TaskPin() {
             if(pinPos == top) {
 
                 pneuVGuide.retract(pneuCPinGuide);
+                wait(0.2, seconds);
                 pinPos = mid;
                 mg_pin.spinFor(forward, 70 , degrees, false);
             }
