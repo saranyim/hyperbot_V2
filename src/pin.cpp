@@ -257,7 +257,7 @@ int TaskPin() {
         }   
         else if (fBtnEdownPressed) {
             Brain.Timer.reset();
-            if (pinPos == bottom) {
+            if (beamPos == bottom) {
                 Flip_Pin_Over();
             }
             fBtnEdownPressed = false;
