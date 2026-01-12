@@ -18,11 +18,15 @@ int TaskDriveTrain() {
             mot_dtLeft.setVelocity((Controller.AxisA.position() + Controller.AxisB.position()), percent);
             mot_dtLeft.spin(forward);
             mot_dtRight.spin(forward);
+            mot_dtLeft.spin(forward);
+            mot_dtRight.spin(forward);
         }
         else {
             TouchLED12.setColor(orange);
             mot_dtRight.setVelocity((Controller.AxisA.position() + Controller.AxisB.position()), percent);
             mot_dtLeft.setVelocity((Controller.AxisA.position() - Controller.AxisB.position()), percent);
+            mot_dtLeft.spin(reverse);
+            mot_dtRight.spin(reverse);
             mot_dtLeft.spin(reverse);
             mot_dtRight.spin(reverse);
         }
