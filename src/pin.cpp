@@ -32,6 +32,8 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtRight.setVelocity(40, percent);
     mot_dtLeft.spin(forward);
     mot_dtRight.spin(forward);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
 
     wait (0.6, seconds);
     mot_dtLeft.stop();
@@ -48,6 +50,8 @@ void Drop_Down_Pin_Grab_Up() {
     mg_pin.setMaxTorque(100.0, percent);
     mot_dtLeft.setVelocity(pinGrapSpeed, percent);
     mot_dtRight.setVelocity(pinGrapSpeed, percent);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
     mot_dtLeft.spin(forward);
     mot_dtRight.spin(forward);
 
@@ -132,8 +136,8 @@ void Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, 195 , degrees, false);
-    wait(0.3, seconds);
+    mg_pin.spinFor(reverse, 195 , degrees, true);
+    // wait(0.3, seconds);
     pneuVGuide.extend(cylinder1);
    
     // mg_pin.stop();
@@ -253,9 +257,9 @@ int TaskPin() {
         }   
         else if (fBtnEdownPressed) {
             Brain.Timer.reset();
-            // if (pinPos == bottom) {
+            if (pinPos == bottom) {
                 Flip_Pin_Over();
-            // }
+            }
             fBtnEdownPressed = false;
         }
         else if(fBtnFupPressed) {
