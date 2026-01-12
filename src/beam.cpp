@@ -55,6 +55,8 @@ void Place_Beam_2_Stack() {
     mot_dtLeft.setMaxTorque(100, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
     wait(0.5, seconds);
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -144,6 +146,8 @@ void Drop_Y_Arm() {
     mot_dtRight.setVelocity(100.0, percent);
     mot_dtLeft.spin(forward);
     mot_dtRight.spin(forward);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
     wait(0.6, seconds);
     printf("stop moving\n");
 
@@ -190,6 +194,8 @@ void Grab_Beam() {
         mot_dtRight.setVelocity(60.0, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
+        mot_dtLeft.spin(reverse);
+        mot_dtRight.spin(reverse);
         wait(0.1, seconds);
         pneuVGrabber.extend(pneuCBeamGrab);
         wait(0.1, seconds);
@@ -202,7 +208,7 @@ void Grab_Beam() {
 }
 
 void Prep_Load_Pin() {
-  mg_beam.setMaxTorque (100,percent);
+    mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
     mg_beam.spinFor (spinBeamUp,500,degrees,true);
     beamPos=top;
@@ -230,9 +236,14 @@ int TaskBeam() {
     }
     mg_beam.stop();
     wait(0.5,seconds);
-    mg_beam.setMaxTorque (100,percent);
+    mg_beam.setMaxTorque (50,percent);
     mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,540,degrees,true);
+    mg_beam.spinFor (spinBeamUp,540,degrees,false);
+    while(mg_beam.velocity(percent) > 0) {
+        wait(20, msec);
+    }
+    mg_beam.stop();
+    
     beamPos=mid;
     wait(1,seconds);
     printf("Task Beam Start");
@@ -255,15 +266,13 @@ int TaskBeam() {
                     Set_Drop_Pin();
                 }
                 // drop pin down when lifting beam
-                 
-
-                    
-               
                 Grab_Beam_up();
-            } else if (beamPos == top) {
+            } 
+            else if (beamPos == top) {
                 Place_Beam_Stand_Off();
                 beamPos = bottom;
-            } else {
+            } 
+            else {
                 mg_beam.stop();
             }
             fBtnLupPressed = false;
