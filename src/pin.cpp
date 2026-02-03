@@ -30,8 +30,10 @@ void Drop_Down_Pin_Grab_Up() {
     mg_pin.setMaxTorque(100.0, percent);
     mot_dtLeft.setVelocity(40, percent);
     mot_dtRight.setVelocity(40, percent);
-    mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
 
     wait (0.6, seconds);
     mot_dtLeft.stop();
@@ -48,8 +50,10 @@ void Drop_Down_Pin_Grab_Up() {
     mg_pin.setMaxTorque(100.0, percent);
     mot_dtLeft.setVelocity(pinGrapSpeed, percent);
     mot_dtRight.setVelocity(pinGrapSpeed, percent);
-    mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
 
     wait(0.3, seconds);
     GrabPin();      
@@ -132,8 +136,8 @@ void Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, 195 , degrees, false);
-    wait(0.3, seconds);
+    mg_pin.spinFor(reverse, 195 , degrees, true);
+    // wait(0.3, seconds);
     pneuVGuide.extend(cylinder1);
    
     // mg_pin.stop();
@@ -253,9 +257,9 @@ int TaskPin() {
         }   
         else if (fBtnEdownPressed) {
             Brain.Timer.reset();
-            // if (pinPos == bottom) {
+            if (beamPos == bottom) {
                 Flip_Pin_Over();
-            // }
+            }
             fBtnEdownPressed = false;
         }
         else if(fBtnFupPressed) {
@@ -264,6 +268,7 @@ int TaskPin() {
             if(pinPos == top) {
 
                 pneuVGuide.retract(pneuCPinGuide);
+                wait(0.2, seconds);
                 pinPos = mid;
                 mg_pin.spinFor(forward, 70 , degrees, false);
             }
