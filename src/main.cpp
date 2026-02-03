@@ -84,12 +84,7 @@ void onevent_ControllerButtonL3_pressed_0() {
 
 // "when Controller ButtonR3 pressed" hat block
 void onevent_ControllerButtonR3_pressed_0() {
-     printf("R3 Pressed\n");
-    Brain.playSound(siren);
-   pneuVGuide.retract(pneuCBeamGuide);
-   pneuVGuide.retract(pneuCPinGuide);
-    wait(1, seconds);
-    Brain.programStop();
+    pneuVGrabber.extend(cylinder1);
 }
 
 // "when started" hat block
@@ -130,7 +125,8 @@ int main() {
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
    
     wait(15, msec);
-    vex::task ws1(TaskPin);   // vex::task ws2(TaskBeam);
+    vex::task ws1(TaskPin);  
+    //  vex::task ws2(TaskBeam);
     vex::task ws3(TaskControl);
     //  vex::task wsDebug(TaskDebug);
     TaskDriveTrain();

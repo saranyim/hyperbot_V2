@@ -99,19 +99,23 @@ void Drop_Down_Pin() {
     printf("\n");
     mot_dtRight.stop();
     mot_dtLeft.stop();
-    mg_pin.setMaxTorque(10.0, percent);
+    mg_pin.setMaxTorque(40.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(40.0, percent);
     mg_pin.spin(forward);
-    pneuVGuide.retract(cylinder1);
+    pneuVGrabber.retract(cylinder1);
     
     wait(0.3, seconds);
+    pneuVGrabber.extend(cylinder1);
+     ReleasePin();
     while(mg_pin.velocity(percent) > 30.0) {
         wait(20, msec);
     }
     mg_pin.stop();
     
-    ReleasePin();
+    
+    
+    
    
     
     mg_pin.spin(forward);
@@ -119,6 +123,7 @@ void Drop_Down_Pin() {
     while(mg_pin.velocity(percent) > 5.0) {
         wait(20, msec);
     }
+    
     mg_pin.setStopping(brake);
     mg_pin.stop();
     mot_dtLeft.stop();
@@ -136,9 +141,9 @@ void Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, 195 , degrees, true);
+    mg_pin.spinFor(reverse, 250 , degrees, true);
+    pneuVGrabber.retract(cylinder1);
     // wait(0.3, seconds);
-    pneuVGuide.extend(cylinder1);
    
     // mg_pin.stop();
    
