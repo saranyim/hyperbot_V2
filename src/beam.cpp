@@ -28,16 +28,8 @@ void Grab_Beam_up() {
    
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
-    mg_beam.spin(spinBeamUp);
-    wait(1, seconds);
-     printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
-    while((mg_beam.velocity(percent)) < -20) { // reverse direction velocity is negative
-        // printf("beam vel: %d\n", (uint16_t)(mg_beam.velocity(percent) ));
-        wait(5, msec);
-    }
-    // printf("Stop beam\n");
-        
-    mg_beam.stop();
+    mg_beam.spinFor(spinBeamUp,325,degrees);
+    
     
     beamPos = top;
     beamGraber = grab;
@@ -201,13 +193,8 @@ void Grab_Beam() {
     }
 }
 
-void Prep_Load_Pin() {
-  mg_beam.setMaxTorque (100,percent);
-    mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,500,degrees,true);
-    beamPos=top;
 
-}
+
 
 
 int TaskBeam() {
@@ -317,6 +304,10 @@ int TaskBeam() {
             Place_Pin_On_Stand_Off();
             printf("down vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
         }
+        else if(Controller.AxisC.position() < -80){
+            mini_Y();
+        }
+
         
         
        
@@ -324,5 +315,38 @@ int TaskBeam() {
     }
     return 0;
 }    
+
+void mini_Y() {
+    OverRideDriveTrain = true;
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    mot_dtRight.setVelocity(30, percent);
+    mot_dtLeft.setVelocity(30, percent);
+    mot_dtRight.setMaxTorque(100, percent);
+    mot_dtLeft.setMaxTorque(100, percent);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
+    wait(1.0, seconds);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    wait(0.1, seconds);
+    
+    // move beam down
+    printf("beam down\n");
+
+    mg_beam.setMaxTorque(100.0, percent);
+    mg_beam.setVelocity(80, percent);
+    mg_beam.setStopping(coast);
+    ReverseDir = true;
+    mg_beam.stop();
+    mg_beam.spin(spinBeamDown);
+    mg_beam.spinFor(spinBeamDown,800,degrees,true);
+    mg_beam.setStopping(hold);
+    mg_beam.stop();
+    printf("stop and release beam\n");
+    pneuVGrabber.retract(cylinder1);
+    wait(0.1,seconds);
+    Drop_Y_Arm();
+}
 
 

@@ -10,12 +10,12 @@ using namespace vex;
 bool fSetDropPin;
 
 void ReleasePin() {
-    pneuVGrabber.extend(pneuCPinGrab);
+    pneuVGrabber.retract(pneuCPinGrab);
     pinGraber = release;
 }
 
 void GrabPin() {
-    pneuVGrabber.retract(pneuCPinGrab);
+    pneuVGrabber. extend(pneuCPinGrab);
     pinGraber = grab;
 }   
 
@@ -52,7 +52,7 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtRight.spin(forward);
 
     wait(0.3, seconds);
-    GrabPin();   
+    GrabPin();      
     wait(0.3, seconds);
     
     mot_dtLeft.stop();
@@ -278,11 +278,32 @@ int TaskPin() {
             fSetDropPin = false;
             pinPos = bottom;
         }
+        else if(Controller.AxisC.position() > 80) {
+            Grab_From_Starting();
+        }
+
+
         wait(5, msec);
     }
     return 0;
    
 } 
+
+void Grab_From_Starting() {
+
+    mg_pin.setMaxTorque(100.0, percent);
+    mg_pin.setVelocity(100.0, percent);
+    mg_pin.setStopping(hold);
+    wait(0.3, seconds);
+    GrabPin();
+    mg_pin.setTimeout(0.5, seconds);
+    mg_pin.spinFor(reverse, 100 , degrees, false);
+    wait(0.3, seconds);
+    pneuVGuide.extend(cylinder1);
+
+}
+
+
 
 
                                                                                                                                                                                                     

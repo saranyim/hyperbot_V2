@@ -18,25 +18,25 @@ vex::brain       Brain;
 vex::controller  Controller;
 vex::inertial Inertial;
 bool fBeamGuideOut;
-motor mot_dtLeft( vex::PORT3);
-motor mot_dtRight( vex::PORT7, true);
+motor mot_dtLeft( vex::PORT1);
+motor mot_dtRight( vex::PORT2, true);
 
-motor mot_pinLeft( vex::PORT5 );
-motor mot_pinRight( vex::PORT11 , true);
+motor mot_pinLeft( vex::PORT8 );
+motor mot_pinRight( vex::PORT7 , true);
 
-motor mot_beamLeft( vex::PORT2 );
-motor mot_beamRight( vex::PORT8, true );
+motor mot_beamLeft( vex::PORT4 );
+motor mot_beamRight( vex::PORT5, true );
 
 
 motor_group mg_pin( mot_pinLeft, mot_pinRight );
 motor_group mg_beam( mot_beamLeft, mot_beamRight );
 // define your global instances of motors and other devices here
-pneumatic pneuVGuide( vex::PORT1 );
-pneumatic pneuVGrabber( vex::PORT6 );
+pneumatic pneuVGuide( vex::PORT11 );
+pneumatic pneuVGrabber( vex::PORT12 );
 
-distance dis_left( vex::PORT4 );
-distance dis_right( vex::PORT10 );
-touchled TouchLED12( vex::PORT12 );
+distance dis_left( vex::PORT6 );
+distance dis_right( vex::PORT3 );
+touchled TouchLED12( vex::PORT9 );
 
 position_t pinPos;
 position_t beamPos;
@@ -84,7 +84,7 @@ void onevent_ControllerButtonL3_pressed_0() {
 
 // "when Controller ButtonR3 pressed" hat block
 void onevent_ControllerButtonR3_pressed_0() {
-    printf("R3 Pressed\n");
+     printf("R3 Pressed\n");
     Brain.playSound(siren);
    pneuVGuide.retract(pneuCBeamGuide);
    pneuVGuide.retract(pneuCPinGuide);
@@ -113,13 +113,12 @@ void onevent_ControllerButtonEUp_pressed_0() {
 
 
 int main() {
-    mg_pin.setPosition(0.0, degrees);
+   
     mg_beam.setPosition(0.0, degrees);
-    mg_pin.setVelocity(80.0, percent);
-    mg_pin.setMaxTorque(100.0, percent);
+    
     mg_beam.setVelocity(100.0, percent);
     mg_beam.setMaxTorque(100.0, percent);
-    mg_pin.setStopping(hold);
+   
     mg_beam.setStopping(hold);
     
     mot_dtLeft.setStopping(brake);
@@ -131,12 +130,11 @@ int main() {
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
    
     wait(15, msec);
-    // vex::task ws1(TaskPin);
-    // vex::task ws2(TaskBeam);
-    // vex::task ws3(TaskControl);
-     vex::task wsDebug(TaskDebug);
-    // TaskDriveTrain();
-    TaskAutonomous();
+    vex::task ws1(TaskPin);   // vex::task ws2(TaskBeam);
+    vex::task ws3(TaskControl);
+    //  vex::task wsDebug(TaskDebug);
+    TaskDriveTrain();
+    // TaskAutonomous();
 }
 
 void PrintDistance(){

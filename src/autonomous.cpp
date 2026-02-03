@@ -301,13 +301,13 @@ void go_backwards_to_place_pin_on_stand_off(){
     Place_Pin_On_Stand_Off();
 }
 
-void spin_to_get_beam(){
-    turnTo(270);
-}
+    void spin_to_get_beam(){
+        turnTo(270);
+    }
 
 
 
-void go_backwards_to_get_beam(){
+    void go_backwards_to_get_beam(){
     mot_dtLeft.setVelocity(100, percent);
     mot_dtRight.setVelocity(100, percent);
     mot_dtLeft.spin(reverse);
