@@ -228,10 +228,9 @@ int TaskBeam() {
     mg_beam.setMaxTorque (50,percent);
     mg_beam.setVelocity (100,percent);
     mg_beam.spinFor (spinBeamUp,540,degrees,false);
-    wait(1, seconds);
-    // while(mg_beam.velocity(percent) > 0) {
-    //     wait(20, msec);
-    // }
+    while(mg_beam.velocity(percent) > 0) {
+        wait(20, msec);
+    }
     mg_beam.stop();
     
     beamPos=mid;
