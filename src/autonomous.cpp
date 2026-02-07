@@ -377,7 +377,7 @@ void Auto_Drop_Down_Pin_Grab_Up() {
     mot_dtRight.spinFor(forward,180,degrees,false);
 
     wait(0.8, seconds);
-    GrabPin();   
+    GrabPin;   
 
     Grab_then_up();
    
@@ -461,7 +461,7 @@ void SpinRight(uint16_t heading){
 
 void Auto_Flip_Pin_Over() {
     printf("start flip\n");
-    GrabPin();
+    GrabPin;
 // set beam arm free to move a little bit
     mg_beam.setStopping(coast);
     mg_beam.stop();
@@ -483,7 +483,7 @@ void Auto_Flip_Pin_Over() {
         wait(20, msec);
     }
     mg_pin.stop();
-    ReleasePin();
+    ReleasePin;
     mg_pin.setTimeout(1.0, seconds);
     mg_pin.setStopping(coast);
     mg_pin.setMaxTorque(100.0, percent);

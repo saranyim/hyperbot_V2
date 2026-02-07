@@ -4,20 +4,12 @@
 #include "pin.h"
 #include "beam.h"
 using namespace vex;
-#define pinGrapSpeed 50
-#define pinArmDegree 155    
+#define pinGrapSpeed 10
+#define pinArmDegree 280    
 
 bool fSetDropPin;
 
-void ReleasePin() {
-    pneuVGrabber.retract(pneuCPinGrab);
-    pinGraber = release;
-}
 
-void GrabPin() {
-    pneuVGrabber. extend(pneuCPinGrab);
-    pinGraber = grab;
-}   
 
 void Set_Drop_Pin(){
     fSetDropPin = true;
@@ -28,14 +20,12 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     mg_pin.setMaxTorque(100.0, percent);
-    mot_dtLeft.setVelocity(40, percent);
-    mot_dtRight.setVelocity(40, percent);
+    mot_dtLeft.setVelocity(10, percent);
+    mot_dtRight.setVelocity(10, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-
-    wait (0.6, seconds);
+   
+    wait (0.3, seconds);
     mot_dtLeft.stop();
     mot_dtRight.stop();
     OverRideDriveTrain = false;
@@ -52,12 +42,10 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtRight.setVelocity(pinGrapSpeed, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
 
     wait(0.3, seconds);
-    GrabPin();      
-    wait(0.3, seconds);
+    // GrabPin;      
+    // wait(0.1, seconds);
     
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -69,14 +57,14 @@ void Drop_Down_Pin_Grab_Up() {
 
 // User defined function
 void Drop_Pin_Arm() {
-    printf("drop down");
+    printf("drop pin arm");
     printf("\n");
    
     mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(brake);
     mg_pin.setVelocity(40.0, percent);
     mg_pin.spin(forward);
-    pneuVGuide.retract(cylinder1);
+    pinGuidIn;
     
     wait(0.3, seconds);
     while(mg_pin.velocity(percent) > 30.0) {
@@ -91,7 +79,7 @@ void Drop_Pin_Arm() {
 
 // User defined function
 void Drop_Down_Pin() {
-    printf("drop down");
+    printf("drop down pin");
     printf("\n");
     // OverRideDriveTrain = true;
     wait(0.1, seconds);
@@ -103,29 +91,26 @@ void Drop_Down_Pin() {
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(40.0, percent);
     mg_pin.spin(forward);
-    pneuVGrabber.retract(cylinder1);
+ 
     
-    wait(0.3, seconds);
-    pneuVGrabber.extend(cylinder1);
-     ReleasePin();
+    wait(0.2, seconds);
+    // pneuVGrabber.extend(cylinder1);
+    
     while(mg_pin.velocity(percent) > 30.0) {
         wait(20, msec);
     }
-    mg_pin.stop();
+    ReleasePin; 
+
     
-    
-    
-    
-   
-    
-    mg_pin.spin(forward);
     wait(0.2, seconds);
+    
     while(mg_pin.velocity(percent) > 5.0) {
         wait(20, msec);
     }
     
     mg_pin.setStopping(brake);
     mg_pin.stop();
+   
     mot_dtLeft.stop();
     mot_dtRight.stop();
     OverRideDriveTrain = false;
@@ -137,12 +122,13 @@ void Grab_then_up() {
 
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setVelocity(100.0, percent);
-    GrabPin();
+    GrabPin;
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
+   
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, 250 , degrees, true);
-    pneuVGrabber.retract(cylinder1);
+    mg_pin.spinFor(reverse, pinArmDegree , degrees, true);
+
     // wait(0.3, seconds);
    
     // mg_pin.stop();
@@ -153,16 +139,16 @@ void Grab_then_up() {
 // User defined function
 void Flip_Pin_Over() {
     printf("start flip\n");
-    GrabPin();
+    GrabPin;
 // set beam arm free to move a little bit
     mg_beam.setStopping(coast);
     mg_beam.stop();
 // move pin over
-    pneuVGuide.retract(cylinder1);
+    pinGuidIn;
     mg_beam.spin(forward);
     wait(0.2, seconds);
     mg_beam.stop();
-    pneuVGrabber.extend(cylinder1);
+    GrabPin;
     mg_beam.setTimeout(1.0, seconds);
     mg_pin.setVelocity(100.0, percent);
     mg_pin.setMaxTorque(100.0, percent);
@@ -175,7 +161,7 @@ void Flip_Pin_Over() {
         wait(20, msec);
     }
     mg_pin.stop();
-    ReleasePin();
+    ReleasePin;
     mg_pin.setTimeout(1.0, seconds);
     mg_pin.setStopping(coast);
     mg_pin.setMaxTorque(100.0, percent);
@@ -187,7 +173,7 @@ void Flip_Pin_Over() {
         mg_beam.setMaxTorque(100, percent);
         mg_beam.setVelocity(100, percent);
         mg_beam.setStopping(hold);
-        mg_beam.spinFor(reverse, 250, degrees, false);
+        mg_beam.spinFor(reverse, 50, degrees, false);
     }   
 
 
@@ -209,17 +195,17 @@ void Grab_Release_Pin() {
     Brain.Timer.reset();
     if (bottom == pinPos) {
         if (grab == pinGraber) {
-            ReleasePin();
+            ReleasePin;
         }
         else {
-            GrabPin();
+            GrabPin;
         }
     }
     else if(mid == pinPos) {
-        ReleasePin();
+        ReleasePin;
     }
     else {
-        GrabPin();
+        GrabPin;
     }
 }
 
@@ -232,14 +218,17 @@ int TaskPin() {
     mg_pin.setStopping(hold);
 
     mg_pin.stop();
-    ReleasePin();
+    ReleasePin;
     mg_pin.spin(reverse);
     wait(0.2, seconds);
     mg_pin.stop();
-    pneuVGuide.retract(cylinder1);
+    pinGuidIn;
     Drop_Down_Pin();
+    pinPos = bottom;
+    pinGuidOut;
     while (true) {
         if (fBtnRupPressed) {
+            pinGuidOut;
             Brain.Timer.reset();
             if (bottom == pinPos) {
                 Grab_then_up();
@@ -271,11 +260,12 @@ int TaskPin() {
             // check flip only if pin is at bottom
             
             if(pinPos == top) {
-
-                pneuVGuide.retract(pneuCPinGuide);
+                pinGuidIn;
+                // pneuVGuide.retract(pneuCPinGuide);
                 wait(0.2, seconds);
+                mg_pin.setMaxTorque(100.0, percent);
                 pinPos = mid;
-                mg_pin.spinFor(forward, 70 , degrees, false);
+                mg_pin.spinFor(forward, 160 , degrees, false);
             }
             else{
                 Grab_Release_Pin();
@@ -288,9 +278,12 @@ int TaskPin() {
             fSetDropPin = false;
             pinPos = bottom;
         }
-        else if(Controller.AxisC.position() > 80) {
-            Grab_From_Starting();
-        }
+        // else if(Controller.AxisC.position() > 80) {
+        //     GrabBeam;
+        // }
+        // else if(Controller.AxisC.position() < -80){
+        //     ReleaseBeam;
+        // }
 
 
         wait(5, msec);
@@ -305,11 +298,11 @@ void Grab_From_Starting() {
     mg_pin.setVelocity(100.0, percent);
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
-    GrabPin();
+    GrabPin;
     mg_pin.setTimeout(0.5, seconds);
     mg_pin.spinFor(reverse, 100 , degrees, false);
     wait(0.3, seconds);
-    pneuVGuide.extend(cylinder1);
+    pinGuidOut;
 
 }
 
