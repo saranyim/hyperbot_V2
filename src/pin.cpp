@@ -20,17 +20,24 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     mg_pin.setMaxTorque(100.0, percent);
-    mot_dtLeft.setVelocity(10, percent);
-    mot_dtRight.setVelocity(10, percent);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
    
-    wait (0.3, seconds);
+    wait (0.1, seconds);
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    OverRideDriveTrain = false;
+    mot_dtLeft.setVelocity(50, percent);
+    mot_dtRight.setVelocity(50, percent);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    wait(0.3, seconds);
+    
+
+    
     
     Drop_Down_Pin();
+    
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    
     printf("drop and up");
     printf("\n");
     mg_pin.setVelocity(50.0, percent);
@@ -38,12 +45,12 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     mg_pin.setMaxTorque(100.0, percent);
-    mot_dtLeft.setVelocity(pinGrapSpeed, percent);
-    mot_dtRight.setVelocity(pinGrapSpeed, percent);
+    mot_dtLeft.setVelocity(100, percent);
+    mot_dtRight.setVelocity(100, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
 
-    wait(0.3, seconds);
+    wait(0.4, seconds);
     // GrabPin;      
     // wait(0.1, seconds);
     
@@ -177,10 +184,10 @@ void Flip_Pin_Over() {
     }   
 
 
-    while(mg_pin.velocity(percent) > 30.0) {
+    while(mg_pin.velocity(percent) > 5.0) {
         wait(20, msec);
     }
-    mg_pin.stop();
+    mg_pin.stop(brake);
 
     pinPos = bottom;
     
