@@ -13,23 +13,22 @@ int TaskDriveTrain() {
     printf("\n");
     while (true) {
         if (!OverRideDriveTrain) {
-        if (ReverseDir) {
-            TouchLED12.setColor(green);
-            mot_dtRight.setVelocity((Controller.AxisA.position() - (Controller.AxisB.position() * turnFactor)), percent);
-            mot_dtLeft.setVelocity((Controller.AxisA.position() + (Controller.AxisB.position() * turnFactor)), percent);
+            if (ReverseDir) {
+                TouchLED12.setColor(green);
+                mot_dtRight.setVelocity((Controller.AxisA.position() - (Controller.AxisB.position() * turnFactor)), percent);
+                mot_dtLeft.setVelocity((Controller.AxisA.position() + (Controller.AxisB.position() * turnFactor)), percent);
 
-            mot_dtLeft.spin(reverse);
-            mot_dtRight.spin(reverse);
-       }
-        else {
-            TouchLED12.setColor(orange);
-            mot_dtRight.setVelocity((Controller.AxisA.position() + (Controller.AxisB.position() * turnFactor)), percent);
-            mot_dtLeft.setVelocity((Controller.AxisA.position() - (Controller.AxisB.position() * turnFactor)), percent);
-            mot_dtLeft.spin(reverse);
-            mot_dtRight.spin(reverse);
-            mot_dtLeft.spin(reverse);
-            mot_dtRight.spin(reverse);
+                mot_dtLeft.spin(reverse);
+                mot_dtRight.spin(reverse);
         }
+            else {
+                TouchLED12.setColor(orange);
+                mot_dtRight.setVelocity((Controller.AxisA.position() + (Controller.AxisB.position() * turnFactor)), percent);
+                mot_dtLeft.setVelocity((Controller.AxisA.position() - (Controller.AxisB.position() * turnFactor)), percent);
+                mot_dtLeft.spin(forward);
+                mot_dtRight.spin(forward);
+
+            }
         }
     wait(20, msec);
     }
