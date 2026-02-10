@@ -40,8 +40,7 @@ extern motor_group mg_beam;
 // define your global instances of motors and other devices here
 extern pneumatic pneuVGuide;
 extern pneumatic pneuVGrabber;
-extern distance dis_left;
-extern distance dis_right;
+extern distance dis_rear;
 extern touchled TouchLED12;
 
 extern bool fBtnFupPressed ;
@@ -74,3 +73,5 @@ extern bool fBtnLdownPressed ;
 #define pinGuidOut pneuVGrabber.extend(pneuCBeamGrab)
 
 void PrintDistance();
+
+#define IS_IN_RANGE(value, min, max) ((value >= min) && (value <= max))

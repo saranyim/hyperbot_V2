@@ -6,7 +6,6 @@ using namespace vex;
 
 
 
-#define IS_IN_RANGE(value, min, max) ((value >= min) && (value <= max))
 
 uint16_t driveSpeed = 70;
 uint16_t turnSpeed = 15;
@@ -124,15 +123,14 @@ int TaskAutonomous() {
     while(TouchLED12.pressing() == false){
     
         wait(0.02, seconds);
-        // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
-    }
+        }
     vex::task wsAuto(TaskAutoCnt);
     
     TouchLED12.setColor(yellow_green);
     printf("touch\n");
     mot_dtRight.setVelocity(driveSpeed, percent);
     mot_dtLeft.setVelocity(driveSpeed, percent);
-    distanceToGo = dis_left.objectDistance(mm);
+    distanceToGo = dis_rear.objectDistance(mm);
     Drop_Down_Pin();
     from_Start_to_Yellow();
     // wait(0.5, seconds);
@@ -224,8 +222,6 @@ void from_Start_to_Yellow(){
     Grab_then_up();
     // WaitTouchDebug();
     
-    // printf("dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
-    
 }
 
 
@@ -273,7 +269,7 @@ void reverse_to_set_distance(){
 
 // WaitTouchDebug();
 
-    distanceToGo = dis_left.objectDistance(mm)-1080;
+    distanceToGo = dis_rear.objectDistance(mm)-1080;
     mot_dtLeft.setVelocity(40, percent);
     mot_dtRight.setVelocity(40, percent);
     
@@ -435,8 +431,7 @@ void SpinRight(uint16_t heading){
         }
         wait(5, msec);      
     }
-    printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
-   
+    
     mot_dtLeft.stop();
     mot_dtRight.stop();
     wait(0.5,seconds);
@@ -517,8 +512,7 @@ void trim_heading(uint16_t heading){
             }
             wait(5, msec);      
         }
-    printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
-   
+      
     mot_dtLeft.stop();
     mot_dtRight.stop();
 
@@ -538,8 +532,7 @@ void trim_heading(uint16_t heading){
             }
             wait(5, msec);      
         }
-        printf("Stop dis_left = %d dis_right = %d\n",(uint16_t)dis_left.objectDistance(mm), (uint16_t)dis_right.objectDistance(mm));
-    
+       
         mot_dtLeft.stop();
         mot_dtRight.stop();
 

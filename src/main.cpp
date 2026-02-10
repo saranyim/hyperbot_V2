@@ -18,6 +18,8 @@ vex::brain       Brain;
 vex::controller  Controller;
 vex::inertial Inertial;
 bool fBeamGuideOut;
+
+
 motor mot_dtLeft( vex::PORT1);
 motor mot_dtRight( vex::PORT2, true);
 
@@ -34,8 +36,7 @@ motor_group mg_beam( mot_beamLeft, mot_beamRight );
 pneumatic pneuVGuide( vex::PORT11 );
 pneumatic pneuVGrabber( vex::PORT12 );
 
-distance dis_left( vex::PORT6 );
-distance dis_right( vex::PORT3 );
+distance dis_rear( vex::PORT10 );
 touchled TouchLED12( vex::PORT9 );
 
 position_t pinPos;
@@ -133,24 +134,24 @@ int main() {
     vex::task ws1(TaskPin);  
     vex::task ws2(TaskBeam);
     vex::task ws3(TaskControl);
-    //  vex::task wsDebug(TaskDebug);
+     vex::task wsDebug(TaskDebug);
     TaskDriveTrain();
     // TaskAutonomous();
 }
 
 void PrintDistance(){
-    printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-    printf(" Dis Right: %u \n", (uint16_t)dis_right.objectDistance(mm));
+    printf("Distance : %u\n", (uint16_t)dis_rear.objectDistance(mm));
+    
 }
 
 int TaskDebug() {
     while(1){
-        printf("Dis Left: %u ", (uint16_t)dis_left.objectDistance(mm));
-        printf(" Dis Right: %u", (uint16_t)dis_right.objectDistance(mm));
-        printf(" heading: %u\n", (uint16_t)Inertial.angle());
+        // printf("Dis Left: %u ", (uint16_t)dis_rear.objectDistance(mm));
+        // printf(" Dis Right: %u", (uint16_t)dis_right.objectDistance(mm));
+        // printf(" heading: %u\n", (uint16_t)Inertial.angle());
         // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
         // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
-        
+        PrintDistance();
         wait(500, msec);
     }
 }

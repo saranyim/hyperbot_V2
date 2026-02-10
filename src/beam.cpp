@@ -52,9 +52,9 @@ void Place_Beam_2_Stack() {
     mot_dtLeft.setMaxTorque(100, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-    wait(0.5, seconds);
+    while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 120, 130) == false) {
+        wait(2, msec);
+    }
     mot_dtLeft.stop();
     mot_dtRight.stop();
     wait(0.1, seconds);
@@ -69,7 +69,7 @@ void Place_Beam_2_Stack() {
 
     mg_beam.spinFor(spinBeamDown,200,degrees,true);
     mg_beam.setStopping(hold);
-    mg_beam.stop();
+    // mg_beam.stop();
     printf("stop and release beam\n");
     ReleaseBeam;
     wait(0.1,seconds);

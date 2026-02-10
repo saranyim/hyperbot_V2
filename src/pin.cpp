@@ -128,7 +128,7 @@ void Grab_then_up() {
    
     mg_pin.setTimeout(0.5, seconds);
     mg_pin.spinFor(reverse, pinArmDegree , degrees, true);
-
+    pinGuidOut;
     // wait(0.3, seconds);
    
     // mg_pin.stop();
@@ -228,7 +228,7 @@ int TaskPin() {
     pinGuidOut;
     while (true) {
         if (fBtnRupPressed) {
-            pinGuidOut;
+            
             Brain.Timer.reset();
             if (bottom == pinPos) {
                 Grab_then_up();
