@@ -5,7 +5,7 @@
 #include "beam.h"
 using namespace vex;
 #define pinGrapSpeed 10
-#define pinArmDegree 280    
+#define pinArmDegree 280        
 
 #define pinGrabSpeed 15
 bool fSetDropPin;
@@ -21,18 +21,19 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     mg_pin.setMaxTorque(100.0, percent);
-    mot_dtLeft.setVelocity(pinGrabSpeed, percent);
-    mot_dtRight.setVelocity(pinGrabSpeed, percent);
+    mot_dtLeft.setVelocity(20, percent);
+    mot_dtRight.setVelocity(20, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
     wait(0.8, seconds);
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    pinGuidIn;
+    
 
     
     
     Drop_Down_Pin();
+    pinGuidIn;
     
 
     
@@ -84,18 +85,26 @@ void Drop_Pin_Arm() {
 
 // User defined function
 void Drop_Down_Pin() {
-    pinGuidIn;
+    
     printf("drop down pin");
     printf("\n");
-    // OverRideDriveTrain = true;
+    OverRideDriveTrain = true;
     wait(0.1, seconds);
     printf("stop mov");
     printf("\n");
     mot_dtRight.stop();
     mot_dtLeft.stop();
+    mot_dtLeft.setVelocity(15, percent);
+    mot_dtRight.setVelocity(15, percent);
+    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    wait(0.6, seconds);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
     mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(80.0, percent);
+    pinGuidIn;
     mg_pin.spin(forward);
  
     
@@ -243,6 +252,7 @@ int TaskPin() {
                 Grab_then_up();
                 pinPos = top;
             }
+
             else {
                 Drop_Down_Pin_Grab_Up();
                 pinPos = top;
@@ -295,7 +305,7 @@ int TaskPin() {
         else if(Controller.AxisC.position() < -80){
             mg_pin.setMaxTorque(100.0, percent);
          mg_pin.setVelocity(100, percent);
-            mg_pin.spinFor(reverse, 67 , degrees, false);
+            mg_pin.spinFor(reverse, 30 , degrees, false);
         }
 
 
