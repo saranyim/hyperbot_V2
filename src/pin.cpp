@@ -287,12 +287,16 @@ int TaskPin() {
             fSetDropPin = false;
             pinPos = bottom;
         }
-        // else if(Controller.AxisC.position() > 80) {
-        //     GrabBeam;
-        // }
-        // else if(Controller.AxisC.position() < -80){
-        //     ReleaseBeam;
-        // }
+        else if(Controller.AxisC.position() > 80) {
+            mg_pin.spinFor(reverse, 35 , degrees, false);
+            GrabPin;
+            pinPos = top;
+        }
+        else if(Controller.AxisC.position() < -80){
+            mg_pin.setMaxTorque(100.0, percent);
+         mg_pin.setVelocity(100, percent);
+            mg_pin.spinFor(reverse, 67 , degrees, false);
+        }
 
 
         wait(5, msec);
