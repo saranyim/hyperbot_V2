@@ -94,13 +94,6 @@ void Drop_Down_Pin() {
     printf("\n");
     mot_dtRight.stop();
     mot_dtLeft.stop();
-    mot_dtLeft.setVelocity(15, percent);
-    mot_dtRight.setVelocity(15, percent);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-    wait(0.6, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
     mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(80.0, percent);
@@ -326,6 +319,7 @@ void Grab_From_Starting() {
     mg_pin.spinFor(reverse, 100 , degrees, false);
     wait(0.3, seconds);
     pinGuidOut;
+    //auto is gay;
 
 }
 
