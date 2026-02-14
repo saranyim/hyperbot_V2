@@ -87,7 +87,13 @@ void onevent_ControllerButtonL3_pressed_0() {
 
 // "when Controller ButtonR3 pressed" hat block
 void onevent_ControllerButtonR3_pressed_0() {
-    // Brain.stopAllPrograms();
+    pinGuidIn;
+    Drop_Y_Arm();
+    Drop_Down_Pin();
+    ReleaseBeam;
+    ReleasePin;
+    
+    Brain.programStop();
 }
 
 // "when started" hat block

@@ -7,6 +7,7 @@ using namespace vex;
 #define pinGrapSpeed 10
 #define pinArmDegree 280    
 
+#define pinGrabSpeed 15
 bool fSetDropPin;
 
 
@@ -20,23 +21,20 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     mg_pin.setMaxTorque(100.0, percent);
-   
-    wait (0.1, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-    mot_dtLeft.setVelocity(50, percent);
-    mot_dtRight.setVelocity(50, percent);
+    mot_dtLeft.setVelocity(pinGrabSpeed, percent);
+    mot_dtRight.setVelocity(pinGrabSpeed, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
-    wait(0.3, seconds);
-    
+    wait(0.8, seconds);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    pinGuidIn;
 
     
     
     Drop_Down_Pin();
     
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
+
     
     printf("drop and up");
     printf("\n");
@@ -45,8 +43,8 @@ void Drop_Down_Pin_Grab_Up() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     mg_pin.setMaxTorque(100.0, percent);
-    mot_dtLeft.setVelocity(100, percent);
-    mot_dtRight.setVelocity(100, percent);
+    mot_dtLeft.setVelocity(40, percent);
+    mot_dtRight.setVelocity(40, percent);
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
 
@@ -86,6 +84,7 @@ void Drop_Pin_Arm() {
 
 // User defined function
 void Drop_Down_Pin() {
+    pinGuidIn;
     printf("drop down pin");
     printf("\n");
     // OverRideDriveTrain = true;
@@ -94,23 +93,26 @@ void Drop_Down_Pin() {
     printf("\n");
     mot_dtRight.stop();
     mot_dtLeft.stop();
-    mg_pin.setMaxTorque(40.0, percent);
+    mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(coast);
-    mg_pin.setVelocity(40.0, percent);
+    mg_pin.setVelocity(80.0, percent);
     mg_pin.spin(forward);
  
     
     wait(0.2, seconds);
     // pneuVGrabber.extend(cylinder1);
     
-    while(mg_pin.velocity(percent) > 30.0) {
+    while(abs(mg_pin.velocity(percent)) > 50.0) {
         wait(20, msec);
+        printf("velo : %d\n", (uint16_t)mg_pin.velocity(percent));
     }
+    mg_pin.stop();
     ReleasePin; 
 
     
     wait(0.2, seconds);
-    
+    mg_pin.spin(forward);
+     wait(0.2, seconds);
     while(mg_pin.velocity(percent) > 5.0) {
         wait(20, msec);
     }
@@ -175,7 +177,7 @@ void Flip_Pin_Over() {
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(100.0, percent);
     mg_pin.spin(forward);
-    wait(0.4, seconds);
+    wait(1.5, seconds);
     if(fBeamMovingUp == false){
         mg_beam.setMaxTorque(100, percent);
         mg_beam.setVelocity(100, percent);
@@ -232,7 +234,7 @@ int TaskPin() {
     pinGuidIn;
     Drop_Down_Pin();
     pinPos = bottom;
-    pinGuidOut;
+
     while (true) {
         if (fBtnRupPressed) {
             

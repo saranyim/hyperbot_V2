@@ -34,7 +34,7 @@ void Grab_Beam_up() {
    
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
-    mg_beam.spinFor(spinBeamUp,500,degrees);
+    mg_beam.spinFor(spinBeamUp,530,degrees);
     
     
     beamPos = top;
@@ -48,8 +48,8 @@ void Place_Beam_2_Stack() {
     OverRideDriveTrain = true;
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    mot_dtRight.setVelocity(30, percent);
-    mot_dtLeft.setVelocity(30, percent);
+    mot_dtRight.setVelocity(20, percent);
+    mot_dtLeft.setVelocity(20, percent);
     mot_dtRight.setMaxTorque(100, percent);
     mot_dtLeft.setMaxTorque(100, percent);
     if((uint16_t)dis_rear.objectDistance(mm) < 45){
@@ -59,11 +59,11 @@ void Place_Beam_2_Stack() {
         mot_dtLeft.setMaxTorque(100, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
-        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 120, 130) == false) {
+        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 90, 110) == false) {
             wait(2, msec);
         }
-        mot_dtLeft.stop();
-        mot_dtRight.stop();
+        mot_dtLeft.stop(brake);
+        mot_dtRight.stop(brake);
     }
     wait(0.1, seconds);
     
@@ -75,7 +75,7 @@ void Place_Beam_2_Stack() {
     ReverseDir = true;
     mg_beam.stop();
 
-    mg_beam.spinFor(spinBeamDown,200,degrees,true);
+    mg_beam.spinFor(spinBeamDown,230,degrees,true);
     mg_beam.setStopping(hold);
     // mg_beam.stop();
     printf("stop and release beam\n");
@@ -88,17 +88,17 @@ void Place_Beam_Stand_Off() {
   
     OverRideDriveTrain = true;
     if((uint16_t)dis_rear.objectDistance(mm) < 45){
-        mot_dtRight.setVelocity(30, percent);
-        mot_dtLeft.setVelocity(30, percent);
+        mot_dtRight.setVelocity(20, percent);
+        mot_dtLeft.setVelocity(20, percent);
         mot_dtRight.setMaxTorque(100, percent);
         mot_dtLeft.setMaxTorque(100, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
-        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 45, 55) == false) {
+        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 40, 50) == false) {
             wait(2, msec);
         }
-        mot_dtLeft.stop();
-        mot_dtRight.stop();
+        mot_dtLeft.stop(brake);
+        mot_dtRight.stop(brake);
     }
     mot_dtLeft.stop();
     mot_dtRight.stop();
@@ -111,7 +111,7 @@ void Place_Beam_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
 
-    mg_beam.spinFor(spinBeamDown,75,degrees,true); 
+    mg_beam.spinFor(spinBeamDown,100,degrees,true); 
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
@@ -126,17 +126,17 @@ void Place_Beam_Stand_Off() {
 void Place_Pin_On_Stand_Off() {
     OverRideDriveTrain = true;
     if((uint16_t)dis_rear.objectDistance(mm) < 45){
-           mot_dtRight.setVelocity(30, percent);
-        mot_dtLeft.setVelocity(30, percent);
+        mot_dtRight.setVelocity(20, percent);
+        mot_dtLeft.setVelocity(20, percent);
         mot_dtRight.setMaxTorque(100, percent);
         mot_dtLeft.setMaxTorque(100, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
-        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 45, 55) == false) {
+        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 25, 35) == false) {
             wait(2, msec);
         }
-        mot_dtLeft.stop();
-        mot_dtRight.stop();
+        mot_dtLeft.stop(brake);
+        mot_dtRight.stop(brake);
     }
     wait(0.1, seconds);
     // move beam down
@@ -147,7 +147,7 @@ void Place_Pin_On_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
 
-    mg_beam.spinFor(spinBeamDown,100,degrees,true);
+    mg_beam.spinFor(spinBeamDown,130,degrees,true);
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
