@@ -33,23 +33,26 @@ void SpinRight(uint16_t heading);
 
 void turnTo(double targetDeg) ;
 
+// Safety timer to stop auton after 60 seconds.
 int TaskAutoCnt(){
     wait(60,sec);
     Brain.programStop();
-     return 0;
+    return 0;
 }
 
+// Wait for a touch LED press and release.
 void WaitTouchDebug(){
-     while(TouchLED12.pressing() == false){
+    while(TouchLED12.pressing() == false){
         wait(0.02, seconds);
     }
     // debouce
     while(TouchLED12.pressing() == true){
-         wait(0.02, seconds);
+        wait(0.02, seconds);
     }
 }
 
 // 1 wheel rotation = 8 inches
+// Main autonomous routine sequence.
 int TaskAutonomous() {
     int ledBlinkCount;
     pneuVGuide.retract(pneuCPinGuide);
@@ -63,7 +66,7 @@ int TaskAutonomous() {
     // debouce
     while(TouchLED12.pressing() == true){
 
-         wait(0.02, seconds);
+        wait(0.02, seconds);
     
     }
 
@@ -76,7 +79,7 @@ int TaskAutonomous() {
         wait(0.5,seconds);
     }
 
-   Inertial.setHeading(90, degrees);
+    Inertial.setHeading(90, degrees);
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
     mg_beam.spinFor (spinBeamUp,540,degrees,true);
@@ -207,6 +210,7 @@ int TaskAutonomous() {
     return 0;
     
 }
+// Drive from start to the yellow goal and grab.
 void from_Start_to_Yellow(){
     distanceToGo = 1050;
     mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
@@ -226,6 +230,7 @@ void from_Start_to_Yellow(){
 
 
 
+// Reverse to reach the blue goal position.
 void reverse_to_get_Blue(){
     mot_dtRight.setVelocity(100, percent);
     mot_dtLeft.setVelocity(100, percent);
@@ -239,12 +244,14 @@ void reverse_to_get_Blue(){
       
 }
 
+// Turn toward the blue target.
 void spin_to_get_blue(){
     turnTo(155);
 //    SpinRight(156);
 //    WaitTouchDebug();
 }
 
+// Drive forward to stack position.
 void go_forward_to_make_stack(){
     // WaitTouchDebug();
     mot_dtLeft.setVelocity(driveSpeed, percent);
@@ -263,13 +270,17 @@ void go_forward_to_make_stack(){
     mot_dtLeft.stop();
 }
 
+// Reverse to a target distance using the rear sensor.
 void reverse_to_set_distance(){
 // SpinRight(180);
     turnTo(180);
 
 // WaitTouchDebug();
 
-    distanceToGo = dis_rear.objectDistance(mm)-1080;
+    distanceToGo = dis_rear.objectDistance(mm) - 1080;
+    if(distanceToGo < 0) {
+        distanceToGo = 0;
+    }
     mot_dtLeft.setVelocity(40, percent);
     mot_dtRight.setVelocity(40, percent);
     
@@ -285,6 +296,7 @@ void reverse_to_set_distance(){
 }
 
 
+// Back into place and drop the pin on the standoff.
 void go_backwards_to_place_pin_on_stand_off(){
     mot_dtRight.setVelocity(85, percent);
     mot_dtLeft.setVelocity(85, percent);
@@ -297,12 +309,14 @@ void go_backwards_to_place_pin_on_stand_off(){
     Place_Pin_On_Stand_Off();
 }
 
+// Turn to face the beam target.
     void spin_to_get_beam(){
         turnTo(270);
     }
 
 
 
+// Reverse to pick up the beam.
     void go_backwards_to_get_beam(){
     mot_dtLeft.setVelocity(100, percent);
     mot_dtRight.setVelocity(100, percent);
@@ -316,6 +330,7 @@ void go_backwards_to_place_pin_on_stand_off(){
     
 }
 
+// Drive forward before turning to the standoff.
 void go_forward_to_spin_to_stand_off(){
     mot_dtLeft.spin(forward);
     mot_dtRight.spin(forward);
@@ -324,10 +339,12 @@ void go_forward_to_spin_to_stand_off(){
     mot_dtRight.stop();
 }
 
+// Turn to face the standoff.
 void spin_to_get_to_standoff(){
     turnTo(90);
 }
 
+// Reverse into the standoff placement zone.
 void go_reverse_to_stand_off(){
     mot_dtLeft.setVelocity(driveSpeed, percent);
     mot_dtRight.setVelocity(driveSpeed, percent);
@@ -337,18 +354,14 @@ void go_reverse_to_stand_off(){
     mot_dtLeft.stop();
     mot_dtRight.stop();
 }
- 
 
 
-
+// Convert travel distance in mm to wheel degrees.
 double Distance_MM_to_Degrees(double distance_mm){
     return distance_mm / (8.0* 25.4) * 360.0;
 }
 
-
-
-
-
+// Drop the pin and return arm to the up position.
 void Auto_Drop_Down_Pin_Grab_Up() {
 
     mot_dtLeft.stop();
@@ -369,7 +382,7 @@ void Auto_Drop_Down_Pin_Grab_Up() {
     mg_pin.setMaxTorque(100.0, percent);
     mot_dtLeft.setVelocity(turnSpeed, percent);
     mot_dtRight.setVelocity(turnSpeed, percent);
-     mot_dtLeft.spinFor(forward,180,degrees,false);
+    mot_dtLeft.spinFor(forward,180,degrees,false);
     mot_dtRight.spinFor(forward,180,degrees,false);
 
     wait(0.8, seconds);
@@ -380,12 +393,13 @@ void Auto_Drop_Down_Pin_Grab_Up() {
 }
 
 
+// Spin left to a target inertial heading.
 void SpinLeft(uint16_t heading){
 mot_dtLeft.setVelocity(turnSpeed, percent);
     mot_dtRight.setVelocity(turnSpeed, percent);
     mot_dtRight.spin(forward);
     mot_dtLeft.spin(reverse);
-     while(1){
+    while(1){
         if((uint16_t)Inertial.angle()<=heading)
         {
             break;
@@ -401,7 +415,7 @@ mot_dtLeft.setVelocity(turnSpeed, percent);
     
     mot_dtRight.spin(reverse);
     mot_dtLeft.spin(forward);
-     while(1){
+    while(1){
         if((uint16_t)Inertial.angle()>=heading)
         {
             break;
@@ -417,9 +431,10 @@ mot_dtLeft.setVelocity(turnSpeed, percent);
 
 }
 
+// Spin right to a target inertial heading.
 void SpinRight(uint16_t heading){
 
-     mot_dtRight.setVelocity(30, percent);
+    mot_dtRight.setVelocity(30, percent);
     mot_dtLeft.setVelocity(30, percent);
     mot_dtRight.spin(reverse);
     mot_dtLeft.spin(forward);
@@ -454,6 +469,7 @@ void SpinRight(uint16_t heading){
     trim_heading(heading);
 }
 
+// Flip the pin over using the beam arm.
 void Auto_Flip_Pin_Over() {
     printf("start flip\n");
     GrabPin;
@@ -496,6 +512,7 @@ void Auto_Flip_Pin_Over() {
     pinPos = bottom;
 }
 
+// Fine trim toward a heading (currently disabled).
 void trim_heading(uint16_t heading){
     return;
     wait(0.05,seconds);
@@ -512,7 +529,6 @@ void trim_heading(uint16_t heading){
             }
             wait(5, msec);      
         }
-      
     mot_dtLeft.stop();
     mot_dtRight.stop();
 
@@ -532,7 +548,6 @@ void trim_heading(uint16_t heading){
             }
             wait(5, msec);      
         }
-       
         mot_dtLeft.stop();
         mot_dtRight.stop();
 
@@ -543,6 +558,7 @@ void trim_heading(uint16_t heading){
 
 }
 
+// PD turn controller to a target heading.
 void turnTo(double targetDeg) {
 
     double Kp = 1.4;       // ค่าปกติเริ่มต้น

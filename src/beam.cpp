@@ -17,7 +17,7 @@ degree height
 */
 
 
-// User defined function
+// Raise beam arm and grab the beam.
 void Grab_Beam_up() {
     // printf("beam up");
     fBeamMovingUp = true;
@@ -43,6 +43,7 @@ void Grab_Beam_up() {
     
 }
 
+// Place beam on stack using rear distance alignment.
 void Place_Beam_2_Stack() {
   
     OverRideDriveTrain = true;
@@ -59,7 +60,12 @@ void Place_Beam_2_Stack() {
         mot_dtLeft.setMaxTorque(100, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
+        timer rangeTimer;
+        rangeTimer.reset();
         while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 90, 110) == false) {
+            if(rangeTimer.time(msec) > 3000) {
+                break;
+            }
             wait(2, msec);
         }
         mot_dtLeft.stop(brake);
@@ -83,7 +89,7 @@ void Place_Beam_2_Stack() {
     wait(0.1,seconds);
     Drop_Y_Arm();
 }
-// User defined function
+// Place beam on the standoff using rear alignment.
 void Place_Beam_Stand_Off() {
   
     OverRideDriveTrain = true;
@@ -94,7 +100,12 @@ void Place_Beam_Stand_Off() {
         mot_dtLeft.setMaxTorque(100, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
+        timer rangeTimer;
+        rangeTimer.reset();
         while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 40, 50) == false) {
+            if(rangeTimer.time(msec) > 3000) {
+                break;
+            }
             wait(2, msec);
         }
         mot_dtLeft.stop(brake);
@@ -122,7 +133,7 @@ void Place_Beam_Stand_Off() {
 }
 
 
-// User defined function
+// Place pin on standoff using rear alignment.
 void Place_Pin_On_Stand_Off() {
     OverRideDriveTrain = true;
     if((uint16_t)dis_rear.objectDistance(mm) < 45){
@@ -132,7 +143,12 @@ void Place_Pin_On_Stand_Off() {
         mot_dtLeft.setMaxTorque(100, percent);
         mot_dtLeft.spin(reverse);
         mot_dtRight.spin(reverse);
+        timer rangeTimer;
+        rangeTimer.reset();
         while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 25, 35) == false) {
+            if(rangeTimer.time(msec) > 3000) {
+                break;
+            }
             wait(2, msec);
         }
         mot_dtLeft.stop(brake);
@@ -157,7 +173,7 @@ void Place_Pin_On_Stand_Off() {
     Drop_Y_Arm();
 }
 
-// User defined function
+// Lift slightly, back away, and lower the beam arm.
 void Drop_Y_Arm() {
    
     // move arm up a little to release any tension
@@ -212,20 +228,16 @@ void Drop_Y_Arm() {
 
 
 
+// Beam subsystem task for button-driven actions.
 int TaskBeam() {
-//    beam
-    
-    
+
     beamPos = bottom;
     beamGraber = release;
     pinPos = bottom;
     pinGraber = release;
 
-    // beamGuideIn;
     ReleaseBeam;
-    // while(1)
-    //     wait(1,seconds);
-// move arm down
+
     mg_beam.setMaxTorque(20.0, percent);
     mg_beam.setStopping(hold);
     mg_beam.spin(spinBeamDown);
@@ -236,16 +248,7 @@ int TaskBeam() {
     mg_beam.stop();
     
     wait(0.5,seconds);
-    // mg_beam.setMaxTorque (50,percent);
-    // mg_beam.setVelocity (100,percent);
-    // mg_beam.spinFor (spinBeamUp,250,degrees,false);
-    // wait(1, seconds);
-    // while(mg_beam.velocity(percent) > 0) {
-    //     wait(20, msec);
-    // }
-    // mg_beam.stop();
 
-    // beamPos=mid;
     beamPos = bottom;
     wait(1,seconds);
     printf("Task Beam Start");
@@ -313,53 +316,15 @@ int TaskBeam() {
             printf("up vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
             f1stLup=false;
         }
-        else if(Controller.AxisD.position() < -80){
-            Place_Pin_On_Stand_Off();
-            printf("down vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
-        }
-        // else if(Controller.AxisC.position() < -80){
-        //     mini_Y();
+        // else if(Controller.AxisD.position() < -80){
+        //     Place_Pin_On_Stand_Off();
+        //     printf("down vel: %d\n", (uint16_t)mg_beam.velocity(percent) );
         // }
-
+  
         
         
-       
+    
     wait(20, msec);
     }
     return 0;
 }    
-
-void mini_Y() {
-    OverRideDriveTrain = true;
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-    mot_dtRight.setVelocity(30, percent);
-    mot_dtLeft.setVelocity(30, percent);
-    mot_dtRight.setMaxTorque(100, percent);
-    mot_dtLeft.setMaxTorque(100, percent);
-    mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
-    wait(1.0, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-    wait(0.1, seconds);
-    
-    // move beam down
-    printf("beam down\n");
-
-    mg_beam.setMaxTorque(100.0, percent);
-    mg_beam.setVelocity(80, percent);
-    mg_beam.setStopping(coast);
-    ReverseDir = true;
-    mg_beam.stop();
-  
-    mg_beam.spinFor(spinBeamDown,400,degrees,true);
-    mg_beam.setStopping(hold);
-    mg_beam.stop();
-    printf("stop and release beam\n");
-    ReleaseBeam;
-    wait(0.1,seconds);
-    Drop_Y_Arm();
-}
-
-
