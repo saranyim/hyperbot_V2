@@ -268,30 +268,19 @@ int TaskPin() {
             }
             fBtnEdownPressed = false;
         }
-        else if(fBtnFupPressed) {
-            // check flip only if pin is at bottom
-            
-            if(pinPos == top) {
-                pinGuidIn;
-                // pneuVGuide.retract(pneuCPinGuide);
-                wait(0.2, seconds);
-                mg_pin.setMaxTorque(100.0, percent);
-                pinPos = mid;
-                mg_pin.spinFor(forward, 160 , degrees, false);
-            }
-            else{
-                Grab_Release_Pin();
-            }
-            
-            fBtnFupPressed = false;
-        }
+        
         else if(fSetDropPin == true) {
             Drop_Pin_Arm();
             fSetDropPin = false;
             pinPos = bottom;
         }
+        else if(fBtnFupPressed){
+            Grab_Release_Pin();
+            fBtnFupPressed = false;
+        }
+
         else if(Controller.AxisC.position() > 80) {
-            mg_pin.spinFor(reverse, 35 , degrees, false);
+            mg_pin.spinFor(reverse, 45 , degrees, false);
             GrabPin;
             pinPos = top;
         }
