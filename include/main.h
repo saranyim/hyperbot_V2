@@ -1,6 +1,7 @@
 #pragma once
 #include "vex.h"
 
+#define fixHand 0
 using namespace vex;
 
 typedef enum {
