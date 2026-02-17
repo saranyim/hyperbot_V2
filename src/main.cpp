@@ -65,31 +65,31 @@ int TaskDebug();
 void onevent_ControllerButtonL3_pressed_0() {
     printf("L3 Pressed\n");
 
-    if (beamPos == top) {
-        // Beam is at top, allow pneumatic toggle
-        if (fBeamGuideOut) {
-            beamGuideIn;
+    // if (beamPos == top) {
+    //     // Beam is at top, allow pneumatic toggle
+    //     if (fBeamGuideOut) {
+    //         beamGuideIn;
            
-            fBeamGuideOut = false;
+    //         fBeamGuideOut = false;
             
-        } else {
-            beamGuideOut;
+    //     } else {
+    //         beamGuideOut;
             
-            fBeamGuideOut = true;
-        }
-    } else {
-        // Beam is not at top, do nothing
-        beamGuideIn;
+    //         fBeamGuideOut = true;
+    //     }
+    // } else {
+    //     // Beam is not at top, do nothing
+    //     beamGuideIn;
         
-    }
+    // }
 }
 
 
 // "when Controller ButtonR3 pressed" hat block
 void onevent_ControllerButtonR3_pressed_0() {
     pinGuidIn;
-    Drop_Y_Arm();
-    Drop_Down_Pin();
+    // Drop_Y_Arm();
+    // Drop_Down_Pin()
     ReleaseBeam;
     ReleasePin;
     
@@ -140,7 +140,7 @@ int main() {
     vex::task ws1(TaskPin);  
     vex::task ws2(TaskBeam);
     vex::task ws3(TaskControl);
-     vex::task wsDebug(TaskDebug);
+    //  vex::task wsDebug(TaskDebug);
     TaskDriveTrain();
     // TaskAutonomous();
 }

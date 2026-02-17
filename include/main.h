@@ -66,11 +66,14 @@ extern bool fBtnLdownPressed ;
 #define ReleaseBeam  pneuVGuide.retract(cylinder1); beamGraber = release
 #define GrabBeam  pneuVGuide.extend(cylinder1); beamGraber = grab
 
-#define beamGuideOut pneuVGuide.extend(cylinder2)
-#define beamGuideIn pneuVGuide.retract(cylinder2)
+#define handUp pneuVGuide.extend(cylinder2)
+#define handDown pneuVGuide.retract(cylinder2)
 
 #define pinGuidIn pneuVGrabber.retract(pneuCBeamGrab)
 #define pinGuidOut pneuVGrabber.extend(pneuCBeamGrab)
+// #define pinGuidOut pneuVGrabber.retract(pneuCBeamGrab)
+
+
 
 void PrintDistance();
 

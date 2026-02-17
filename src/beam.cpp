@@ -180,7 +180,7 @@ void Drop_Y_Arm() {
     printf("stop moving\n");
 
     // close pneu guide
-    beamGuideIn;
+    // beamGuideIn;
 
     beamGraber = grab;
     mot_dtLeft.stop();
@@ -221,7 +221,7 @@ int TaskBeam() {
     pinPos = bottom;
     pinGraber = release;
 
-    beamGuideIn;
+    // beamGuideIn;
     ReleaseBeam;
     // while(1)
     //     wait(1,seconds);
@@ -238,7 +238,7 @@ int TaskBeam() {
     wait(0.5,seconds);
     // mg_beam.setMaxTorque (50,percent);
     // mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,250,degrees,false);
+    // mg_beam.spinFor (spinBeamUp,250,degrees,false);
     // wait(1, seconds);
     // while(mg_beam.velocity(percent) > 0) {
     //     wait(20, msec);
@@ -250,31 +250,18 @@ int TaskBeam() {
     wait(1,seconds);
     printf("Task Beam Start");
     printf("\n");
-    f1stLup=true;
+    // f1stLup=true;
     while (true) {
         if (fBtnLupPressed) {
             printf("L UP");
             printf("\n");
             Brain.Timer.reset();
             if ((beamPos == bottom) || (beamPos == mid)) {
-                beamPos = top;
-                if (f1stLup==true)
-                {
-                    f1stLup=false;
-                    mg_beam.spinFor(spinBeamUp,300,degrees,false);
-                    wait(2,seconds);
-                    mg_beam.stop(hold);
-                
-                    
-                }
-                else {
-                    ReverseDir = false;
-                    Set_Drop_Pin();
-                    printf("grab beam up\n");
-                    Grab_Beam_up();
-                }
-                // drop pin down when lifting beam
-                
+                beamPos = top;               
+                ReverseDir = false;
+                Set_Drop_Pin();
+                printf("grab beam up\n");
+                Grab_Beam_up();
             } 
             else if (beamPos == top) {
                 printf("place beam stand off\n");

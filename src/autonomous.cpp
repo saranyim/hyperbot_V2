@@ -131,7 +131,7 @@ int TaskAutonomous() {
     mot_dtRight.setVelocity(driveSpeed, percent);
     mot_dtLeft.setVelocity(driveSpeed, percent);
     distanceToGo = dis_rear.objectDistance(mm);
-    Drop_Down_Pin();
+    Set_Drop_Pin();
     from_Start_to_Yellow();
     // wait(0.5, seconds);
     // WaitTouchDebug();
@@ -359,7 +359,7 @@ void Auto_Drop_Down_Pin_Grab_Up() {
     mot_dtLeft.spinFor(forward,180,degrees,false);
     mot_dtRight.spinFor(forward,180,degrees,true);
 
-    Drop_Down_Pin();
+    Set_Drop_Pin();
     printf("drop and up");
     printf("\n");
     mg_pin.setVelocity(50.0, percent);
