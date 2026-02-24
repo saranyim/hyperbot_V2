@@ -4,6 +4,8 @@
 #include "beam.h"
 using namespace vex;
 
+#define Y91 1
+
 #define beamArmDownTorque 10
 bool f1stLup;
 bool fBeamMovingUp;
@@ -34,9 +36,11 @@ void Grab_Beam_up() {
    
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
+#if Y91
+    mg_beam.spinFor(spinBeamUp,450,degrees);
+#else
     mg_beam.spinFor(spinBeamUp,530,degrees);
-    
-    
+#endif
     beamPos = top;
     fBeamMovingUp = false;
 
@@ -53,8 +57,8 @@ void Place_Beam_2_Stack() {
     mot_dtLeft.setVelocity(20, percent);
     mot_dtRight.setMaxTorque(100, percent);
     mot_dtLeft.setMaxTorque(100, percent);
-    if((uint16_t)dis_rear.objectDistance(mm) < 45){
-           mot_dtRight.setVelocity(30, percent);
+    if((uint16_t)dis_rear.objectDistance(mm) < 135){
+        mot_dtRight.setVelocity(30, percent);
         mot_dtLeft.setVelocity(30, percent);
         mot_dtRight.setMaxTorque(100, percent);
         mot_dtLeft.setMaxTorque(100, percent);
@@ -62,8 +66,8 @@ void Place_Beam_2_Stack() {
         mot_dtRight.spin(reverse);
         timer rangeTimer;
         rangeTimer.reset();
-        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 90, 110) == false) {
-            if(rangeTimer.time(msec) > 3000) {
+        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 135, 145) == false) {
+            if(rangeTimer.time(msec) > 5000) {
                 break;
             }
             wait(2, msec);
@@ -80,8 +84,11 @@ void Place_Beam_2_Stack() {
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
-
+#if Y91
+    mg_beam.spinFor(spinBeamDown,170,degrees,true);
+#else
     mg_beam.spinFor(spinBeamDown,230,degrees,true);
+#endif
     mg_beam.setStopping(hold);
     // mg_beam.stop();
     printf("stop and release beam\n");
@@ -268,7 +275,11 @@ int TaskBeam() {
             } 
             else if (beamPos == top) {
                 printf("place beam stand off\n");
+#if Y91
+                Place_Beam_2_Stack();
+#else
                 Place_Beam_Stand_Off();
+#endif
                 beamPos = bottom;
             } 
             else {
@@ -291,9 +302,27 @@ int TaskBeam() {
         else if(fBtnFdownPressed) {
             if (grab == beamGraber) {
                 ReleaseBeam;
+                mg_beam.setVelocity(100, percent);
+                mg_beam.setMaxTorque(10, percent);
+                mg_beam.setStopping(brake);
+                ReverseDir = true;
+                mg_beam.spin(spinBeamDown);
+                wait(0.2, seconds);
+
+                while(mg_beam.velocity(percent) > 5) {
+                    wait(20, msec);
+                }
+                mg_beam.stop();
             }
             else {
                 GrabBeam;
+                mg_beam.setVelocity(100, percent);
+                mg_beam.setMaxTorque(100, percent);
+                mg_beam.setStopping(hold);
+                ReverseDir = true;
+                mg_beam.spin(spinBeamUp);
+                wait(0.3, seconds);
+                mg_beam.stop();
             }
             fBtnFdownPressed = false;
         }

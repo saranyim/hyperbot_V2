@@ -4,7 +4,7 @@
 #include "beam.h"
 using namespace vex;
 #define pinGrapSpeed 10
-#define pinArmDegree 280        
+#define pinArmDegree 300        
 
 #define pinGrabSpeed 15
 bool fSetDropPin;
@@ -129,12 +129,14 @@ void Flip_Pin_Over() {
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setVelocity(100.0, percent);
     mg_pin.spin(forward);
-    wait(1.5, seconds);
+    wait(0.5, seconds);
     if(fBeamMovingUp == false){
         mg_beam.setMaxTorque(100, percent);
-        mg_beam.setVelocity(100, percent);
         mg_beam.setStopping(hold);
-        mg_beam.spinFor(reverse, 50, degrees, false);
+        ReverseDir = true;
+        mg_beam.spin(spinBeamUp);
+        wait(0.3, seconds);
+        mg_beam.stop();
     }   
 
 
@@ -206,9 +208,10 @@ int TaskPin() {
                 mg_pin.setStopping(hold);
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.spinFor(reverse, 120 , degrees, false);
-                wait(1, seconds);
-                mg_pin.stop(hold);
+                mg_pin.setTimeout(0.5, seconds);
+                mg_pin.spinFor(reverse, 130 , degrees, true);
+                // wait(1, seconds);
+                // mg_pin.stop(hold);
                 pinPos = mid;
             }
             else{

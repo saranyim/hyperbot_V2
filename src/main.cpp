@@ -90,6 +90,8 @@ void onevent_ControllerButtonR3_pressed_0() {
     pinGuidIn;
     ReleaseBeam;
     ReleasePin;
+    handUp;
+    wait(500, msec);
     Brain.programStop();
 }
 
@@ -130,7 +132,7 @@ int main() {
     vex::task ws1(TaskPin);  
     vex::task ws2(TaskBeam);
     vex::task ws3(TaskControl);
-    //  vex::task wsDebug(TaskDebug);
+     vex::task wsDebug(TaskDebug);
     TaskDriveTrain();
     // TaskAutonomous();
 }
