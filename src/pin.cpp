@@ -65,7 +65,7 @@ void Drop_Pin_Arm() {
     pinGuidIn;
     
     wait(0.3, seconds);
-    while(mg_pin.velocity(percent) > 30.0) {
+    while(mg_pin.velocity(percent) > 20.0) {
         wait(20, msec);
     }
  
@@ -240,28 +240,33 @@ int TaskPin() {
             ReleasePin;
             pinPos = bottom;
         }
-        else if(Controller.AxisC.position() > 80) { // grab
-            
-            GrabPin;
-            mg_pin.setMaxTorque(100.0, percent);
-            mg_pin.setVelocity(100, percent);
-            mg_pin.setStopping(hold);
-            mg_pin.spinFor(reverse, 120 , degrees, false);
-            wait(0.3, seconds);
-            handDown;
-            pinPos = top;
+        else if(Controller.AxisC.position() > 60) { // grab
+            if(pinPos == mid){
+                mg_pin.setMaxTorque(100.0, percent);
+                mg_pin.setVelocity(100.0, percent);
+                GrabPin;
+                mg_pin.setStopping(hold);
+                wait(0.3, seconds);
+                mg_pin.setTimeout(0.5, seconds);
+                mg_pin.spinFor(reverse, 180 , degrees, true);
+                pinPos = top;
+                handDown;
+            }
+           
             while (Controller.AxisC.position() > 10)
             {
                 /* code */
                 wait(20, msec);
             }
         }
-        else if(Controller.AxisC.position() < -80){ // up
-            mg_pin.setMaxTorque(100.0, percent);
-            mg_pin.setVelocity(100, percent);
-            mg_pin.setStopping(hold);
-            mg_pin.spinFor(reverse, 120 , degrees, false);
-            pinPos = mid;
+        else if(Controller.AxisC.position() < -60){ // up
+            if(pinPos == bottom){
+                mg_pin.setMaxTorque(100.0, percent);
+                mg_pin.setVelocity(100, percent);
+                mg_pin.setStopping(hold);
+                mg_pin.spinFor(reverse, 120 , degrees, false);
+                pinPos = mid;
+            }
             while (Controller.AxisC.position() < -10)
             {
                 /* code */
@@ -269,35 +274,37 @@ int TaskPin() {
             }
             
         }
-        else if(Controller.AxisD.position() < -80){// place stack on stand off
-            if(pinPos = bottom){
-                mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.setVelocity(100.0, percent);
-                mg_pin.setStopping(hold);
-                mg_pin.spinFor(reverse, 500 , degrees, false);
-                wait(0.3, seconds);
-                //spin up from bottom
-            }
-            else if(pinPos == mid){
-                //spin up from mid
-                mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.setVelocity(100.0, percent);
-                mg_pin.setStopping(hold);
-                mg_pin.spinFor(reverse, 220 , degrees, false);
-                wait(0.3, seconds);
-            }
-            else if(pinPos == aboveStandoff){
-                //drop down
-                handDown;
-                ReleasePin;
-                Drop_Pin_Arm();
-                pinPos = bottom;
-            }
-            while (Controller.AxisD.position() < -10)
-            {
-                /* code */
-                wait(20, msec);
-            }
+        else if(Controller.AxisD.position() < -60){// place stack on stand off
+            // if(pinPos = bottom){
+            //     mg_pin.setMaxTorque(100.0, percent);
+            //     mg_pin.setVelocity(100.0, percent);
+            //     mg_pin.setStopping(hold);
+            //     mg_pin.spinFor(reverse, 500 , degrees, false);
+            //     wait(0.3, seconds);
+            //     pinPos == aboveStandoff;
+            //     //spin up from bottom
+            // }
+            // else if(pinPos == mid){
+            //     //spin up from mid
+            //     mg_pin.setMaxTorque(100.0, percent);
+            //     mg_pin.setVelocity(100.0, percent);
+            //     mg_pin.setStopping(hold);
+            //     mg_pin.spinFor(reverse, 220 , degrees, false);
+            //     wait(0.3, seconds);
+            //     pinPos == aboveStandoff;
+            // }
+            // else if(pinPos == aboveStandoff){
+            //     //drop down
+            //     handDown;
+            //     ReleasePin;
+            //     Drop_Pin_Arm();
+            //     pinPos = bottom;
+            // }
+            // while (Controller.AxisD.position() < -10)
+            // {
+            //     /* code */
+            //     wait(20, msec);
+            // }
 
         }
 

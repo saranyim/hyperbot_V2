@@ -85,7 +85,7 @@ void Place_Beam_2_Stack() {
     ReverseDir = true;
     mg_beam.stop();
 #if Y91
-    mg_beam.spinFor(spinBeamDown,170,degrees,true);
+    mg_beam.spinFor(spinBeamDown,180,degrees,true);
 #else
     mg_beam.spinFor(spinBeamDown,230,degrees,true);
 #endif
@@ -316,6 +316,7 @@ int TaskBeam() {
             }
             else {
                 GrabBeam;
+                wait(0.5, seconds);
                 mg_beam.setVelocity(100, percent);
                 mg_beam.setMaxTorque(100, percent);
                 mg_beam.setStopping(hold);
