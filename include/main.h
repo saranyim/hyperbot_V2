@@ -53,6 +53,7 @@ extern bool fBtnRupPressed ;
 extern bool fBtnRdownPressed ;
 extern bool fBtnLupPressed ; 
 extern bool fBtnLdownPressed ;
+extern bool fBtnDdownPressed ;
 
 
 #define pneuCBeamGrab cylinder1

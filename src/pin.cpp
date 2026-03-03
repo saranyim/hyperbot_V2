@@ -209,7 +209,7 @@ int TaskPin() {
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 130 , degrees, true);
+                mg_pin.spinFor(reverse, 117 , degrees, true);
                 // wait(1, seconds);
                 // mg_pin.stop(hold);
                 pinPos = mid;
@@ -275,43 +275,52 @@ int TaskPin() {
             
         }
         else if(Controller.AxisD.position() < -60){// place stack on stand off
-            // if(pinPos = bottom){
-            //     mg_pin.setMaxTorque(100.0, percent);
-            //     mg_pin.setVelocity(100.0, percent);
-            //     mg_pin.setStopping(hold);
-            //     mg_pin.spinFor(reverse, 500 , degrees, false);
-            //     wait(0.3, seconds);
-            //     pinPos == aboveStandoff;
-            //     //spin up from bottom
-            // }
-            // else if(pinPos == mid){
-            //     //spin up from mid
-            //     mg_pin.setMaxTorque(100.0, percent);
-            //     mg_pin.setVelocity(100.0, percent);
-            //     mg_pin.setStopping(hold);
-            //     mg_pin.spinFor(reverse, 220 , degrees, false);
-            //     wait(0.3, seconds);
-            //     pinPos == aboveStandoff;
-            // }
-            // else if(pinPos == aboveStandoff){
-            //     //drop down
-            //     handDown;
-            //     ReleasePin;
-            //     Drop_Pin_Arm();
-            //     pinPos = bottom;
-            // }
-            // while (Controller.AxisD.position() < -10)
-            // {
-            //     /* code */
-            //     wait(20, msec);
-            // }
-
+            if(pinPos == bottom){
+                mg_pin.setMaxTorque(100.0, percent);
+                mg_pin.setVelocity(100.0, percent);
+                mg_pin.setStopping(hold);
+                mg_pin.spinFor(reverse,410 , degrees, false);
+                
+               handDown;
+                wait(0.3, seconds);
+                pinPos = top;
+                //spin up from bottom
+            }
+            
+            else if(pinPos == top){
+                //drop down
+                OverRideDriveTrain = true;
+                
+        
+                mot_dtLeft.setVelocity(60, percent);
+            mot_dtRight.setVelocity(60, percent);
+            mot_dtLeft.spin(reverse);
+            mot_dtRight.spin(reverse);
+            wait(0.3, seconds);
+            
+    
+            // wait(0.1, seconds);
+            mg_pin.spinFor(forward,85 , degrees, false);
+            handDown;
+            wait(0.2, seconds);
+            ReleasePin;
+            wait(0.25, seconds);
+            Drop_Pin_Arm();
+            mot_dtLeft.stop();
+            mot_dtRight.stop(); 
+            beamPos = bottom;
+            
+            
+            OverRideDriveTrain = false;
+                
+            }
+            
         }
 
         wait(5, msec);
     }
     return 0;
-   
+    
 } 
 
 // Initial grab sequence at the start position.

@@ -4,7 +4,6 @@
 #include "beam.h"
 using namespace vex;
 
-#define Y91 1
 
 #define beamArmDownTorque 10
 bool f1stLup;
@@ -36,106 +35,57 @@ void Grab_Beam_up() {
    
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
-#if Y91
-    mg_beam.spinFor(spinBeamUp,450,degrees);
-#else
-    mg_beam.spinFor(spinBeamUp,530,degrees);
-#endif
+
+    mg_beam.setVelocity(90, percent);
+    mg_beam.setMaxTorque(100, percent);
+    mg_beam.spin(spinBeamUp);
+    wait(1.8, seconds);
+    mg_beam.stop();
+    
+    
     beamPos = top;
-    fBeamMovingUp = false;
+    fBeamMovingUp = true;
 
     
 }
 
-// Place beam on stack using rear distance alignment.
+// Place beam on stack using rear distance alignment.........................
 void Place_Beam_2_Stack() {
   
-    OverRideDriveTrain = true;
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-    mot_dtRight.setVelocity(20, percent);
-    mot_dtLeft.setVelocity(20, percent);
-    mot_dtRight.setMaxTorque(100, percent);
-    mot_dtLeft.setMaxTorque(100, percent);
-    if((uint16_t)dis_rear.objectDistance(mm) < 135){
-        mot_dtRight.setVelocity(30, percent);
-        mot_dtLeft.setVelocity(30, percent);
-        mot_dtRight.setMaxTorque(100, percent);
-        mot_dtLeft.setMaxTorque(100, percent);
-        mot_dtLeft.spin(reverse);
-        mot_dtRight.spin(reverse);
-        timer rangeTimer;
-        rangeTimer.reset();
-        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 135, 145) == false) {
-            if(rangeTimer.time(msec) > 5000) {
-                break;
-            }
-            wait(2, msec);
-        }
-        mot_dtLeft.stop(brake);
-        mot_dtRight.stop(brake);
-    }
-    wait(0.1, seconds);
     
-    // move beam down
-    printf("beam down\n");
     mg_beam.setMaxTorque(100.0, percent);
     mg_beam.setVelocity(80, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
-#if Y91
+
     mg_beam.spinFor(spinBeamDown,180,degrees,true);
-#else
-    mg_beam.spinFor(spinBeamDown,230,degrees,true);
-#endif
+
     mg_beam.setStopping(hold);
     // mg_beam.stop();
     printf("stop and release beam\n");
     ReleaseBeam;
     wait(0.1,seconds);
+    OverRideDriveTrain = true;
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    mot_dtRight.setVelocity(50, percent);
+    mot_dtLeft.setVelocity(50, percent);
+    mot_dtRight.setMaxTorque(100, percent);
+    mot_dtLeft.setMaxTorque(100, percent);
+    wait(0.3, seconds);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
     Drop_Y_Arm();
 }
 // Place beam on the standoff using rear alignment.
 void Place_Beam_Stand_Off() {
   
-    OverRideDriveTrain = true;
-    if((uint16_t)dis_rear.objectDistance(mm) < 45){
-        mot_dtRight.setVelocity(20, percent);
-        mot_dtLeft.setVelocity(20, percent);
-        mot_dtRight.setMaxTorque(100, percent);
-        mot_dtLeft.setMaxTorque(100, percent);
-        mot_dtLeft.spin(reverse);
-        mot_dtRight.spin(reverse);
-        timer rangeTimer;
-        rangeTimer.reset();
-        while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 40, 50) == false) {
-            if(rangeTimer.time(msec) > 3000) {
-                break;
-            }
-            wait(2, msec);
-        }
-        mot_dtLeft.stop(brake);
-        mot_dtRight.stop(brake);
-    }
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-    wait(0.1, seconds);
-    // move beam down
-    printf("beam down\n");
-    mg_beam.setMaxTorque(100.0, percent);
-    mg_beam.setVelocity(50, percent);
-    mg_beam.setStopping(coast);
-    ReverseDir = true;
-    mg_beam.stop();
+    
 
-    mg_beam.spinFor(spinBeamDown,100,degrees,true); 
-    mg_beam.setStopping(hold);
-    mg_beam.stop();
-    printf("stop and release beam\n");
+   
     ReleaseBeam ;
-    wait(0.1,seconds);
-    OverRideDriveTrain = false;
+    wait(0.2,seconds);
     Drop_Y_Arm();
 }
 
@@ -199,7 +149,7 @@ void Drop_Y_Arm() {
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
     
-    wait(0.4, seconds);
+    wait(0.8, seconds);
     printf("stop moving\n");
 
     // close pneu guide
@@ -269,17 +219,16 @@ int TaskBeam() {
             if ((beamPos == bottom) || (beamPos == mid)) {
                 beamPos = top;               
                 ReverseDir = false;
-                Set_Drop_Pin();
                 printf("grab beam up\n");
                 Grab_Beam_up();
             } 
             else if (beamPos == top) {
                 printf("place beam stand off\n");
-#if Y91
-                Place_Beam_2_Stack();
-#else
+
+
+
                 Place_Beam_Stand_Off();
-#endif
+
                 beamPos = bottom;
             } 
             else {
