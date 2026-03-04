@@ -52,30 +52,30 @@ void Grab_Beam_up() {
 // Place beam on stack using rear distance alignment.........................
 void Place_Beam_2_Stack() {
   
-    
+    OverRideDriveTrain = true;
     mg_beam.setMaxTorque(100.0, percent);
-    mg_beam.setVelocity(80, percent);
+    mg_beam.setVelocity(50, percent);
     mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    mot_dtRight.setVelocity(20, percent);
+    mot_dtLeft.setVelocity(20, percent);
+    mot_dtRight.setMaxTorque(100, percent);
+    mot_dtLeft.setMaxTorque(100, percent);
+    wait(0.3, seconds);
 
-    mg_beam.spinFor(spinBeamDown,180,degrees,true);
-
+    mg_beam.spinFor(spinBeamDown,276,degrees,true);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
     mg_beam.setStopping(hold);
     // mg_beam.stop();
     printf("stop and release beam\n");
     ReleaseBeam;
     wait(0.1,seconds);
-    OverRideDriveTrain = true;
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-    mot_dtRight.setVelocity(50, percent);
-    mot_dtLeft.setVelocity(50, percent);
-    mot_dtRight.setMaxTorque(100, percent);
-    mot_dtLeft.setMaxTorque(100, percent);
-    wait(0.3, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
+   
+    
     Drop_Y_Arm();
 }
 // Place beam on the standoff using rear alignment.
