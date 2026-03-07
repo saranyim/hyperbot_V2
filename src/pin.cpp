@@ -87,7 +87,7 @@ void Grab_then_up() {
     wait(0.3, seconds);
    
     mg_pin.setTimeout(0.5, seconds);
-    mg_pin.spinFor(reverse, pinArmDegree , degrees, true);
+    mg_pin.spinFor(reverse, 240 , degrees, true);
     pinGuidOut;
     handDown;
     // wait(0.3, seconds);
@@ -205,11 +205,12 @@ int TaskPin() {
             Brain.Timer.reset();
             if (bottom == pinPos) {
                 GrabPin;
+                wait(0.3 , seconds); 
                 mg_pin.setStopping(hold);
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 117 , degrees, true);
+                mg_pin.spinFor(reverse, 115 , degrees, true);
                 // wait(1, seconds);
                 // mg_pin.stop(hold);
                 pinPos = mid;
@@ -296,15 +297,15 @@ int TaskPin() {
             mot_dtRight.setVelocity(60, percent);
             mot_dtLeft.spin(reverse);
             mot_dtRight.spin(reverse);
-            wait(0.3, seconds);
+            wait(0.5, seconds);
             
     
             // wait(0.1, seconds);
             mg_pin.spinFor(forward,85 , degrees, false);
             handDown;
-            wait(0.2, seconds);
+            wait(0.3, seconds);
             ReleasePin;
-            wait(0.25, seconds);
+            wait(0.2, seconds);
             Drop_Pin_Arm();
             mot_dtLeft.stop();
             mot_dtRight.stop(); 
