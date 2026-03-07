@@ -30,7 +30,7 @@ void DropDownMakeStack(){
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(80.0, percent);
    
-    mg_pin.spinFor(forward, 120 , degrees, true);
+    mg_pin.spinFor(forward, 80 , degrees, true);
     ReleasePin; 
     wait(0.1, seconds);
     printf("stop mov");
@@ -252,7 +252,6 @@ int TaskPin() {
                 pinPos = top;
                 handDown;
             }
-           
             while (Controller.AxisC.position() > 10)
             {
                 /* code */
