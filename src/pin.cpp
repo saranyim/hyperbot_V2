@@ -4,7 +4,7 @@
 #include "beam.h"
 using namespace vex;
 #define pinGrapSpeed 10
-#define pinArmDegree 300        
+#define pinArmDegree 250        
 
 #define pinGrabSpeed 15
 bool fSetDropPin;
@@ -29,7 +29,7 @@ void DropDownMakeStack(){
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(80.0, percent);
-    pinGuidIn;
+   
     mg_pin.spinFor(forward, 120 , degrees, true);
     ReleasePin; 
     wait(0.1, seconds);
@@ -62,7 +62,7 @@ void Drop_Pin_Arm() {
     mg_pin.setStopping(hold);
     mg_pin.setVelocity(80.0, percent);
     mg_pin.spin(forward);
-    pinGuidIn;
+
     
     wait(0.3, seconds);
     while(mg_pin.velocity(percent) > 20.0) {
@@ -88,7 +88,7 @@ void Grab_then_up() {
    
     mg_pin.setTimeout(0.5, seconds);
     mg_pin.spinFor(reverse, pinArmDegree , degrees, true);
-    pinGuidOut;
+
     handDown;
     // wait(0.3, seconds);
    
@@ -105,7 +105,7 @@ void Flip_Pin_Over() {
     mg_beam.setStopping(coast);
     mg_beam.stop();
 // move pin over
-    pinGuidIn;
+
     handUp;
     mg_beam.spin(forward);
     wait(0.2, seconds);
@@ -183,7 +183,7 @@ int TaskPin() {
     mg_pin.stop();
     ReleasePin;
     handUp;
-    pinGuidIn;
+  
     Drop_Pin_Arm();
     pinPos = bottom;
 
@@ -325,7 +325,7 @@ void Grab_From_Starting() {
     mg_pin.setTimeout(0.5, seconds);
     mg_pin.spinFor(reverse, 100 , degrees, false);
     wait(0.3, seconds);
-    pinGuidOut;
+
 
 }
 

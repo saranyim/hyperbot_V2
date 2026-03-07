@@ -71,8 +71,8 @@ extern bool fBtnLdownPressed ;
 #define handUp pneuVGuide.extend(cylinder2)
 #define handDown pneuVGuide.retract(cylinder2)
 
-#define pinGuidIn pneuVGrabber.retract(pneuCBeamGrab)
-#define pinGuidOut pneuVGrabber.extend(pneuCBeamGrab)
+#define yGuidIn pneuVGrabber.retract(pneuCBeamGrab)
+#define yGuidOut pneuVGrabber.extend(pneuCBeamGrab)
 // #define pinGuidOut pneuVGrabber.retract(pneuCBeamGrab)
 
 

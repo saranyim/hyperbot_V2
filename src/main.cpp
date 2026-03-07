@@ -87,7 +87,7 @@ void onevent_ControllerButtonL3_pressed_0() {
 
 // Handle controller R3 press (emergency stop + release).
 void onevent_ControllerButtonR3_pressed_0() {
-    pinGuidIn;
+    yGuidIn;
     ReleaseBeam;
     ReleasePin;
     handUp;

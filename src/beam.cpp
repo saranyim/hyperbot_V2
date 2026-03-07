@@ -41,6 +41,7 @@ void Grab_Beam_up() {
 #else
     mg_beam.spinFor(spinBeamUp,530,degrees);
 #endif
+    yGuidOut;   
     beamPos = top;
     fBeamMovingUp = false;
 
@@ -182,7 +183,7 @@ void Place_Pin_On_Stand_Off() {
 
 // Lift slightly, back away, and lower the beam arm.
 void Drop_Y_Arm() {
-   
+    yGuidIn;
     // move arm up a little to release any tension
     mg_beam.setMaxTorque(100, percent);   
     mg_beam.spin(spinBeamUp);
@@ -237,7 +238,8 @@ void Drop_Y_Arm() {
 
 // Beam subsystem task for button-driven actions.
 int TaskBeam() {
-
+    yGuidIn;
+    wait(0.5,seconds);
     beamPos = bottom;
     beamGraber = release;
     pinPos = bottom;
@@ -328,6 +330,8 @@ int TaskBeam() {
             fBtnFdownPressed = false;
         }
         else if(Controller.AxisD.position() > 80){
+            yGuidIn;
+            wait(0.5,seconds);;
             mg_beam.setVelocity(100, percent);
             mg_beam.setMaxTorque(10, percent);
             mg_beam.setStopping(brake);
