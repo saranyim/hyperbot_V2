@@ -30,7 +30,7 @@ int TaskDriveTrain() {
             }
             // turnFactor = 0.7 * speedFactor;
             if (ReverseDir) {
-                TouchLED12.setColor(green);
+                TouchLED12.setColor(blue);
                 mot_dtRight.setVelocity((-Controller.AxisA.position() * speedFactor + (stickB * turnFactor)) , percent);
                 mot_dtLeft.setVelocity((-Controller.AxisA.position() * speedFactor - (stickB * turnFactor)) , percent);
             }
@@ -39,8 +39,8 @@ int TaskDriveTrain() {
                 mot_dtRight.setVelocity((Controller.AxisA.position() * speedFactor + (stickB * turnFactor)) , percent);
                 mot_dtLeft.setVelocity((Controller.AxisA.position() * speedFactor - (stickB * turnFactor)) , percent);
             }
-            if(Brain.Battery.capacity() < 70){
-                TouchLED12.setColor(red);
+            if(Brain.Battery.capacity() < 80){
+                TouchLED12.setColor(purple);
             }
    
             mot_dtLeft.spin(forward);

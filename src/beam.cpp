@@ -149,7 +149,7 @@ void Drop_Y_Arm() {
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
     
-    wait(0.8, seconds);
+    wait(0.4, seconds);
     printf("stop moving\n");
 
     // close pneu guide

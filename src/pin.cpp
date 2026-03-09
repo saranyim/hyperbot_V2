@@ -297,7 +297,7 @@ int TaskPin() {
             mot_dtRight.setVelocity(60, percent);
             mot_dtLeft.spin(reverse);
             mot_dtRight.spin(reverse);
-            wait(0.5, seconds);
+            wait(0.35, seconds);
             
     
             // wait(0.1, seconds);
