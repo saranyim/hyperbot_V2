@@ -17,7 +17,6 @@ using namespace vex;
 vex::brain       Brain;
 vex::controller  Controller;
 vex::inertial Inertial;
-bool fBeamGuideOut;
 
 
 motor mot_dtLeft( vex::PORT1);
@@ -50,50 +49,45 @@ timer BrainTimer;
 bool OverRideDriveTrain,ReverseDir;
 int Screen_precision = 0, Console_precision = 0;
 
-bool fBtnFupPressed = false;
-bool fBtnFdownPressed = false;
-bool fBtnEupPressed = false;
-bool fBtnEdownPressed = false;
-bool fBtnRupPressed = false;
-bool fBtnRdownPressed = false;
-bool fBtnLupPressed = false; 
-bool fBtnLdownPressed = false;
-int TaskControl();
+static vex::mutex gYGuidCmdMutex;
+volatile bool gPlaceBeam2StackRunning = false;
+
+// Serialize yGuide retract command so multiple tasks cannot race on the same pneumatic channel.
+void YGuidInSafe() {
+    printf("YGuidInSafe\n");
+    gYGuidCmdMutex.lock();
+    yGuidIn;
+    gYGuidCmdMutex.unlock();
+}
+
+// Block yGuide extend while Place_Beam_2_Stack is running to avoid command fighting.
+void YGuidOutSafe() {
+    printf("YGuidOutSafe\n");
+    timer waitTimeout;
+    waitTimeout.reset();
+    while(gPlaceBeam2StackRunning) {
+        if(waitTimeout.time(msec) >= 1000) {
+            printf("[WARN] YGuidOutSafe timeout waiting Place_Beam_2_Stack\n");
+            return;
+        }
+        wait(5, msec);
+    }
+
+    gYGuidCmdMutex.lock();
+    if(!gPlaceBeam2StackRunning) {
+        yGuidOut;
+    }
+    gYGuidCmdMutex.unlock();
+}
+
 int TaskDebug();
 
 // Handle controller L3 press (debug placeholder).
 void onevent_ControllerButtonL3_pressed_0() {
     printf("L3 Pressed\n");
 
-    // if (beamPos == top) {
-    //     // Beam is at top, allow pneumatic toggle
-    //     if (fBeamGuideOut) {
-    //         beamGuideIn;
-           
-    //         fBeamGuideOut = false;
-            
-    //     } else {
-    //         beamGuideOut;
-            
-    //         fBeamGuideOut = true;
-    //     }
-    // } else {
-    //     // Beam is not at top, do nothing
-    //     beamGuideIn;
-        
-    // }
 }
 
-
-// Handle controller R3 press (emergency stop + release).
-void onevent_ControllerButtonR3_pressed_0() {
-    yGuidIn;
-    ReleaseBeam;
-    ReleasePin;
-    handUp;
-    wait(500, msec);
-    Brain.programStop();
-}
 
 // Toggle drive direction when EUp is pressed.
 void onevent_ControllerButtonEUp_pressed_0() {
@@ -125,14 +119,12 @@ int main() {
     pneuVGrabber.pumpOn();
   // register event handlers
     Controller.ButtonL3.pressed(onevent_ControllerButtonL3_pressed_0);
-    Controller.ButtonR3.pressed(onevent_ControllerButtonR3_pressed_0);
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
 
     wait(15, msec);
     vex::task ws1(TaskPin);  
     vex::task ws2(TaskBeam);
-    vex::task ws3(TaskControl);
-     vex::task wsDebug(TaskDebug);
+    //  vex::task wsDebug(TaskDebug);
     TaskDriveTrain();
     // TaskAutonomous();
 }
@@ -156,205 +148,3 @@ int TaskDebug() {
     }
 }
 
-
-// Poll controller inputs and set action flags.
-int TaskControl() {
-    // timer logTimer;
-    // logTimer.reset();
-    uint32_t logTick = 0; // 10 mS Tick
-    bool btnLUpPressed = false;
-    bool btnLDownPressed = false;
-    bool btnRUpPressed = false;
-    bool btnRDownPressed = false;
-    bool btnEUpPressed = false;
-    bool btnEDownPressed = false;
-    bool btnFUpPressed = false;
-    bool btnFDownPressed = false;
-    bool stickAUp = false;
-    bool stickADown = false;
-    bool stickBLeft = false;
-    bool stickBRight = false;
-     BrainTimer.reset();
-     fBeamGuideOut = false;
-    while (true) {
-        if(TouchLED12.pressing()) {
-            BrainTimer.reset();
-        }
-        if(BrainTimer.value() > 120) {
-            Brain.programStop();
-            
-        }
-        if(Controller.ButtonLUp.pressing()) {
-            if(!btnLUpPressed) {
-                BrainTimer.reset();
-                btnLUpPressed = true;
-                fBtnLupPressed = true;
-                // printf("%u ,L UP Press\n",logTick);
-            }
-        }
-        else {
-            if(btnLUpPressed) {
-                btnLUpPressed = false;
-                // printf("%u ,L UP Release\n",logTick);
-            }
-        }
-        if(Controller.ButtonLDown.pressing()) {
-            if(!btnLDownPressed) {
-                BrainTimer.reset();
-                btnLDownPressed = true;
-                fBtnLdownPressed = true;
-                // printf("%u ,L Down Press\n",logTick);
-            }
-        }
-        else {
-            if(btnLDownPressed) {
-                btnLDownPressed = false;
-                // printf("%u ,L Down Release\n",logTick);
-            }
-        }
-        if(Controller.ButtonRUp.pressing()) {
-            if(!btnRUpPressed) {
-                BrainTimer.reset();
-                btnRUpPressed = true;
-                fBtnRupPressed = true;
-                // printf("%u ,R UP Press\n",logTick);
-            }
-        }
-        else {
-            if(btnRUpPressed) {
-                btnRUpPressed = false;
-                // printf("%u ,R UP Release\n",logTick);
-            }
-        }
-        if(Controller.ButtonRDown.pressing()) {
-            if(!btnRDownPressed) {
-                BrainTimer.reset();
-                btnRDownPressed = true;
-                fBtnRdownPressed = true;
-                // printf("%u ,R Down Press\n",logTick);
-            }
-        }
-        else {
-            if(btnRDownPressed) {
-                btnRDownPressed = false;
-                // printf("%u ,R Down Release\n",logTick);
-            }
-        }
-        if(Controller.ButtonEUp.pressing()) {
-            if(!btnEUpPressed) {
-                BrainTimer.reset();
-                btnEUpPressed = true;
-                fBtnEupPressed = true;
-                // printf("%u ,E UP Press\n",logTick);/
-            }
-        }
-        else {
-            if(btnEUpPressed) {
-                btnEUpPressed = false;
-                // printf("%u ,E UP Release\n",logTick);
-            }
-        }
-        if(Controller.ButtonEDown.pressing()) {
-            if(!btnEDownPressed) {
-                BrainTimer.reset();
-                btnEDownPressed = true;
-                fBtnEdownPressed = true;
-                // printf("%u ,E Down Press\n",logTick);
-            }
-        }
-        else {
-            if(btnEDownPressed) {
-                btnEDownPressed = false;
-                // printf("%u ,E Down Release\n",logTick);
-            }
-        }
-        if(Controller.ButtonFUp.pressing()) {
-            if(!btnFUpPressed) {
-                BrainTimer.reset();
-                btnFUpPressed = true;
-                fBtnFupPressed = true;
-                // printf("%u ,F UP Press\n",logTick);
-            }
-        }
-        else {
-            if(btnFUpPressed) {
-                btnFUpPressed = false;
-                // printf("%u ,F UP Release\n",logTick);
-            }
-        }
-        if(Controller.ButtonFDown.pressing()) {
-            if(!btnFDownPressed) {
-                BrainTimer.reset();
-                btnFDownPressed = true;
-                fBtnFdownPressed = true;
-                // printf("%u ,F Down Press\n",logTick);
-            }
-        }
-        else {
-            if(btnFDownPressed) {
-                btnFDownPressed = false;
-                // printf("%u ,F Down Release\n",logTick);
-            }
-        }
-
-        if(Controller.AxisA.position() > 80) {
-            if(!stickAUp) {
-                BrainTimer.reset();
-                stickAUp = true;
-                // printf("%u ,Stick A Up\n",logTick);
-            }
-        }
-        else {
-            if(stickAUp) {
-                stickAUp = false;
-                // printf("%u ,Stick A Center\n",logTick);
-            }
-        }
-        if(Controller.AxisA.position() < -80) {
-            if(!stickADown) {
-                BrainTimer.reset();
-                stickADown = true;
-                // printf("%u ,Stick A Down\n",logTick);
-            }
-        }
-        else {
-            if(stickADown) {
-                stickADown = false;
-                // printf("%u ,Stick A Center\n",logTick);
-            }
-        }
-        if(Controller.AxisB.position() < -80) {
-            if(!stickBLeft) {
-                BrainTimer.reset();
-                stickBLeft = true;
-                // printf("%u ,Stick B Left\n",logTick);
-            }
-        }
-        else {
-            if(stickBLeft) {
-                stickBLeft = false;
-                // printf("%u ,Stick B Center\n",logTick);
-            }   
-        }
-        if(Controller.AxisB.position() > 80) {
-            if(!stickBRight) {
-                BrainTimer.reset();
-                stickBRight = true;
-                // printf("%u ,Stick B Right\n",logTick);
-            }
-        }
-        else {
-            if(stickBRight) {
-                stickBRight = false;
-                // printf("%u ,Stick B Center\n",logTick);
-            }   
-        }
-        // Brain.Screen.setCursor(1,1);
-        // Brain.Screen.print("Pin Pos: %d  ", mg_pin.position(degrees));
-        // Brain.Screen.setCursor(2,1);
-        // Brain.Screen.print("Beam Pos: %d  ", mg_beam.position(degrees));
-        // logTimer.reset();
-        logTick++;
-        wait(10, msec);
-    }
-}

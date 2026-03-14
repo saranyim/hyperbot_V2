@@ -1,6 +1,11 @@
 #pragma once
 #include "vex.h"
 
+#define redSide 1
+#define blueSide 2
+
+#define side redSide
+
 #define fixHand 0
 using namespace vex;
 
@@ -8,7 +13,8 @@ typedef enum {
   top = 1,
   bottom = 2,
   mid = 3,
-  aboveStandoff = 4
+  aboveStandoff = 4,
+  posFloat = 5
 } position_t;
 
 
@@ -25,6 +31,7 @@ extern graber_t beamGraber;
 extern bool OverRideDriveTrain;
 extern bool ReverseDir;
 extern vex::brain Brain;
+extern vex::timer BrainTimer;
 extern vex::controller Controller;
 extern vex::inertial Inertial;
 
@@ -45,14 +52,9 @@ extern pneumatic pneuVGrabber;
 extern distance dis_rear;
 extern touchled TouchLED12;
 
-extern bool fBtnFupPressed ;
-extern bool fBtnFdownPressed ;
-extern bool fBtnEupPressed ;
-extern bool fBtnEdownPressed ;
-extern bool fBtnRupPressed ;
-extern bool fBtnRdownPressed ;
-extern bool fBtnLupPressed ; 
-extern bool fBtnLdownPressed ;
+extern volatile bool gPlaceBeam2StackRunning;
+void YGuidInSafe();
+void YGuidOutSafe();
 
 
 #define pneuCBeamGrab cylinder1
