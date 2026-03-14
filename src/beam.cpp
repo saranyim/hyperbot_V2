@@ -85,8 +85,9 @@ void Place_Beam_Stand_Off() {
 
    
     ReleaseBeam ;
-    wait(0.2,seconds);
-    Drop_Y_Arm();
+    ReverseDir = true;
+    // wait(0.2,seconds);
+    // Drop_Y_Arm();
 }
 
 
@@ -139,26 +140,14 @@ void Drop_Y_Arm() {
     wait(0.5, seconds);
     printf("Spinupfinished\n");
     mg_beam.stop();
-    OverRideDriveTrain = true;
+
 
     // move robot away
-    mot_dtLeft.setMaxTorque(100.0, percent);
-    mot_dtRight.setMaxTorque(100.0, percent);
-    mot_dtLeft.setVelocity(100.0, percent);
-    mot_dtRight.setVelocity(100.0, percent);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-    
-    wait(0.4, seconds);
-    printf("stop moving\n");
-
-    // close pneu guide
-    // beamGuideIn;
 
     beamGraber = grab;
     mot_dtLeft.stop();
     mot_dtRight.stop();
-    OverRideDriveTrain = false;
+
     // put beam arm down 
     printf("beam down\n");
     mg_beam.setVelocity(100, percent);

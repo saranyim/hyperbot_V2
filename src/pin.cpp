@@ -246,12 +246,14 @@ int TaskPin() {
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setVelocity(100.0, percent);
                 GrabPin;
-                mg_pin.setStopping(hold);
                 wait(0.3, seconds);
+                mg_pin.setStopping(hold);
                 mg_pin.setTimeout(0.5, seconds);
                 mg_pin.spinFor(reverse, 180 , degrees, true);
+                
                 pinPos = top;
                 handDown;
+                Drop_Y_Arm();
             }
            
             while (Controller.AxisC.position() > 10)
@@ -302,17 +304,20 @@ int TaskPin() {
     
             // wait(0.1, seconds);
             mg_pin.spinFor(forward,85 , degrees, false);
-            handDown;
+            // handDown;
             wait(0.3, seconds);
             ReleasePin;
             wait(0.2, seconds);
+            handUp;
+            OverRideDriveTrain = false;
             Drop_Pin_Arm();
-            mot_dtLeft.stop();
-            mot_dtRight.stop(); 
+            // mot_dtLeft.setStopping(hold);
+            // mot_dtRight.setStopping(hold);
+            // mot_dtLeft.stop();
+            // mot_dtRight.stop(); 
             beamPos = bottom;
             
-            
-            OverRideDriveTrain = false;
+    
                 
             }
             

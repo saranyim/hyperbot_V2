@@ -39,7 +39,7 @@ int TaskDriveTrain() {
                 mot_dtRight.setVelocity((Controller.AxisA.position() * speedFactor + (stickB * turnFactor)) , percent);
                 mot_dtLeft.setVelocity((Controller.AxisA.position() * speedFactor - (stickB * turnFactor)) , percent);
             }
-            if(Brain.Battery.capacity() < 80){
+            if(Brain.Battery.capacity() < 75){
                 TouchLED12.setColor(purple);
             }
    
