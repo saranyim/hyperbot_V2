@@ -35,19 +35,12 @@ void DropDownMakeStack(){
     wait(0.1, seconds);
     printf("stop mov");
     printf("\n");
-    OverRideDriveTrain = true;
 
-    mot_dtLeft.setVelocity(100, percent);
-    mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
     // wait(0.3, seconds);
     wait(0.2, seconds);
     handUp;
     // wait(0.1, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop(); 
-    OverRideDriveTrain = false;
+ 
 
     Drop_Pin_Arm();
 
@@ -253,7 +246,7 @@ int TaskPin() {
                 
                 pinPos = top;
                 handDown;
-                Drop_Y_Arm();
+                Drop_Y_Arm();   
             }
            
             while (Controller.AxisC.position() > 10)
@@ -278,7 +271,7 @@ int TaskPin() {
             
         }
         else if(Controller.AxisD.position() < -60){// place stack on stand off
-            if(pinPos == bottom){
+           if(pinPos == bottom){
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setStopping(hold);
