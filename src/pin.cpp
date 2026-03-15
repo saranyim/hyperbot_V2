@@ -40,7 +40,7 @@ void Set_Drop_Pin(){
     fSetDropPin = true;
 }
 
-void WaitLUp() {
+void WaitRup() {
     while(Controller.ButtonRUp.pressing() == false) {
         wait(20, msec);
     }
@@ -51,7 +51,7 @@ void WaitLUp() {
 
 // Drop pin to stack height and back away.
 void DropDownMakeStack(){
-    printf("drop down pin");
+      printf("drop down pin");
     printf("\n");
     
     wait(0.1, seconds);
@@ -63,49 +63,35 @@ void DropDownMakeStack(){
     mg_pin.setVelocity(80.0, percent);
    
     mg_pin.spinFor(forward, 80 , degrees, true);
-    // mg_pin.spinFor(forward, 140 , degrees, true);
-    // WaitLUp();
-
     ReleasePin; 
-    mg_pin.spin(forward);
-    wait(0.15, seconds);
-    // WaitLUp();
+    wait(0.1, seconds);
+    YGuidInSafe();
+    printf("stop mov");
+    printf("\n");
+    OverRideDriveTrain = true;
+
+    mot_dtLeft.setVelocity(100, percent);
+    mot_dtRight.setVelocity(100, percent);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
+    // wait(0.3, seconds);
+    wait(0.2, seconds);
     handUp;
-    if(beamPos != top)
-        YGuidInSafe();
-
-    WaitPinStopOrNoSpeedChange(10.0);
-    // WaitLUp();
-    // mg_pin.spinFor(forward, 90 , degrees, false);
-    // // WaitLUp();
-    
-    // //  WaitLUp();
     // wait(0.1, seconds);
-    // printf("stop mov");
-    // printf("\n");
-    // OverRideDriveTrain = true;
+    mot_dtLeft.stop();
+    mot_dtRight.stop(); 
+    OverRideDriveTrain = false;
 
-    // mot_dtLeft.setVelocity(100, percent);
-    // mot_dtRight.setVelocity(100, percent);
-    // mot_dtLeft.spin(forward);
-    // mot_dtRight.spin(forward);
-    // // wait(0.3, seconds);
-    // wait(0.2, seconds);
-    // handUp;
-    // // wait(0.1, seconds);
-    // mot_dtLeft.stop();
-    // mot_dtRight.stop(); 
-    // OverRideDriveTrain = false;
-
-    // Drop_Pin_Arm();
+    Drop_Pin_Arm();
 
 }
+
 
 // Lower the pin arm to the drop position.
 void Drop_Pin_Arm() {
     printf("drop pin arm");
     printf("\n");
-   
+    YGuidInSafe();
     mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(hold);
     mg_pin.setVelocity(80.0, percent);
@@ -113,8 +99,8 @@ void Drop_Pin_Arm() {
 
     
     wait(0.3, seconds);
-    WaitPinStopOrNoSpeedChange(20.0);
- 
+    WaitPinStopOrNoSpeedChange(10.0);
+    wait(0.1, seconds);
     mg_pin.stop();
     // wait(0.1, seconds);
     printf("done\n");
@@ -307,7 +293,7 @@ int TaskPin() {
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 130 , degrees, true);
+                mg_pin.spinFor(reverse, 110 , degrees, true);
                 // wait(1, seconds);
                 // mg_pin.stop(hold);
                 pinPos = mid;
@@ -335,7 +321,7 @@ int TaskPin() {
             ReleasePin;
             pinPos = bottom;
         }
-        else if(Controller.AxisC.position() > 60) { // grab
+        else if(Controller.AxisC.position() > 60) { // right grab
             if(pinPos == mid){
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setVelocity(100.0, percent);
@@ -344,7 +330,7 @@ int TaskPin() {
                 mg_pin.setStopping(hold);
                 wait(0.3, seconds);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 120 , degrees, true);
+                mg_pin.spinFor(reverse, 140 , degrees, true);
                 pinPos = top;
                 handDown;
                 YGuidOutSafe();

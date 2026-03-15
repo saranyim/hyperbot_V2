@@ -4,6 +4,8 @@
 
 using namespace vex;
 // User defined function
+#define spinPinDown forward
+#define spinPinUp reverse
 
 void Grab_then_up() ;
 void Set_Drop_Pin() ;
