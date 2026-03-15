@@ -71,11 +71,12 @@ void Grab_Beam_up() {
     // }
     wait(1,seconds);
     YGuidOutSafe();
+
 #else
     // mg_beam.spinFor(spinBeamUp,600,degrees);
     mg_beam.spin(spinBeamUp);
     wait(200, msec);
-    WaitBeamStopOrNoSpeedChange(5.0);
+    WaitBeamStopOrNoSpeedChange(1.0);
     mg_beam.stop();
 #endif
  
@@ -321,17 +322,17 @@ int TaskBeam() {
             printf("L UP");
             printf("\n");
             Brain.Timer.reset();
-//             if ((beamPos == bottom) || (beamPos == mid) || (beamPos == posFloat)) {     
-// #if side == blueSide                      
-//                 ReverseDir = false;
-//                 Set_Drop_Pin();
-// #endif
+            if ((beamPos == bottom) || (beamPos == mid) || (beamPos == posFloat)) {     
+#if side == blueSide                      
+                ReverseDir = false;
+                Set_Drop_Pin();
+#endif
                 
-//                 printf("grab beam up\n");
-//                 Grab_Beam_up();
-//                 beamPos = top;   
-//             } 
-//             else 
+                printf("grab beam up\n");
+                Grab_Beam_up();
+                beamPos = top;   
+            } 
+            else 
             if (beamPos == top) {
                 printf("place beam stand off\n");
 #if side == redSide

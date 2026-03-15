@@ -65,7 +65,8 @@ void DropDownMakeStack(){
     mg_pin.spinFor(forward, 80 , degrees, true);
     ReleasePin; 
     wait(0.1, seconds);
-    YGuidInSafe();
+    if(beamPos != top)
+        YGuidInSafe();
     printf("stop mov");
     printf("\n");
     OverRideDriveTrain = true;
@@ -91,7 +92,8 @@ void DropDownMakeStack(){
 void Drop_Pin_Arm() {
     printf("drop pin arm");
     printf("\n");
-    YGuidInSafe();
+    if(beamPos != top)
+        YGuidInSafe();
     mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(hold);
     mg_pin.setVelocity(80.0, percent);
@@ -293,7 +295,7 @@ int TaskPin() {
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 110 , degrees, true);
+                mg_pin.spinFor(reverse, 120 , degrees, true);
                 // wait(1, seconds);
                 // mg_pin.stop(hold);
                 pinPos = mid;

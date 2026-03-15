@@ -4,7 +4,7 @@
 #define redSide 1
 #define blueSide 2
 
-#define side redSide
+#define side blueSide
 
 #define fixHand 0
 using namespace vex;
