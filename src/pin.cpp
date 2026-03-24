@@ -40,14 +40,7 @@ void Set_Drop_Pin(){
     fSetDropPin = true;
 }
 
-void WaitRup() {
-    while(Controller.ButtonRUp.pressing() == false) {
-        wait(20, msec);
-    }
-    while(Controller.ButtonRUp.pressing() == true) {
-        wait(20, msec);
-    }
-}
+
 
 // Drop pin to stack height and back away.
 void DropDownMakeStack(){
@@ -217,11 +210,6 @@ void Grab_Release_Pin() {
    
 // Pin subsystem task for button-driven actions.
 int TaskPin() {
-    bool btnRUpPressed = false;
-    bool btnRDownPressed = false;
-    bool btnEDownPressed = false;
-    bool btnFUpPressed = false;
-
   //  pin
     mg_pin.setVelocity(100.0, percent);
     mg_pin.setMaxTorque(100.0, percent);
@@ -235,22 +223,7 @@ int TaskPin() {
     pinPos = bottom;
 
     while (true) {
-        const bool rUpNow = Controller.ButtonRUp.pressing();
-        const bool rDownNow = Controller.ButtonRDown.pressing();
-        const bool eDownNow = Controller.ButtonEDown.pressing();
-        const bool fUpNow = Controller.ButtonFUp.pressing();
-
-        const bool rUpEvent = rUpNow && !btnRUpPressed;
-        const bool rDownEvent = rDownNow && !btnRDownPressed;
-        const bool eDownEvent = eDownNow && !btnEDownPressed;
-        const bool fUpEvent = fUpNow && !btnFUpPressed;
-
-        btnRUpPressed = rUpNow;
-        btnRDownPressed = rDownNow;
-        btnEDownPressed = eDownNow;
-        btnFUpPressed = fUpNow;
-
-        if (rUpEvent) {
+        if (fBtnRupPressed) {
             printf("R UP\n");
             Brain.Timer.reset();
             if (bottom == pinPos) {
@@ -262,8 +235,9 @@ int TaskPin() {
                 DropDownMakeStack();
                 pinPos = bottom;
             }
+            fBtnRupPressed = false;
         }
-        else if (rDownEvent) {
+        else if (fBtnRdownPressed) {
             Brain.Timer.reset();
             if(beamPos != top)
                 fPinGuideOut = false;
@@ -297,14 +271,16 @@ int TaskPin() {
                 ReleasePin;
                 pinPos = bottom;
             }
+            fBtnRdownPressed = false;
         }   
-        else if (eDownEvent) {
+        else if (fBtnEdownPressed) {
             Brain.Timer.reset();
             if (pinPos == bottom){
                 Flip_Pin_Over();
             }
+            fBtnEdownPressed = false;
         }
-        else if(fUpEvent) {
+        else if(fBtnFupPressed) {
             // check flip only if pin is at bottom
             if(pinPos == mid){
                 mg_pin.spin(spinPinDown);
@@ -317,6 +293,7 @@ int TaskPin() {
             else{
                 Grab_Release_Pin();     
             }
+            fBtnFupPressed = false;
         }
         else if(fSetDropPin == true) {
             Drop_Pin_Arm();

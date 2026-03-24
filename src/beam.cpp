@@ -285,10 +285,6 @@ void Drop_Y_Arm() {
 
 // Beam subsystem task for button-driven actions.
 int TaskBeam() {
-    bool btnLUpPressed = false;
-    bool btnLDownPressed = false;
-    bool btnFDownPressed = false;
-
     fBeamGuideOut = false;
     wait(1,seconds);
     beamPos = bottom;
@@ -314,19 +310,7 @@ int TaskBeam() {
     printf("\n");
     // f1stLup=true;
     while (true) {
-        const bool lUpNow = Controller.ButtonLUp.pressing();
-        const bool lDownNow = Controller.ButtonLDown.pressing();
-        const bool fDownNow = Controller.ButtonFDown.pressing();
-
-        const bool lUpEvent = lUpNow && !btnLUpPressed;
-        const bool lDownEvent = lDownNow && !btnLDownPressed;
-        const bool fDownEvent = fDownNow && !btnFDownPressed;
-
-        btnLUpPressed = lUpNow;
-        btnLDownPressed = lDownNow;
-        btnFDownPressed = fDownNow;
-
-        if (lUpEvent) {
+        if (fBtnLupPressed) {
             printf("L UP");
             printf("\n");
             Brain.Timer.reset();
@@ -353,8 +337,9 @@ int TaskBeam() {
             else {
                 mg_beam.stop();
             }
+            fBtnLupPressed = false;
         }
-        else if (lDownEvent) {
+        else if (fBtnLdownPressed) {
             if(beamPos == top ){
                 printf("L Down");
                 printf("\n");
@@ -364,8 +349,9 @@ int TaskBeam() {
                 beamPos = bottom;
                 ReverseDir = true;
             }
+            fBtnLdownPressed = false;
         }
-        else if(fDownEvent) {
+        else if(fBtnFdownPressed) {
             if (grab == beamGraber) {
                beamPos = bottom;
 // #if side == redSide
@@ -397,6 +383,7 @@ int TaskBeam() {
                 mg_beam.stop();
                 
             }
+            fBtnFdownPressed = false;
         }
         else if((Controller.AxisD.position() > 80) &&
              (abs(Controller.AxisC.position()) < 20)) { // grab from ground

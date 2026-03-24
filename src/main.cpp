@@ -18,6 +18,14 @@ vex::brain       Brain;
 vex::controller  Controller;
 vex::inertial Inertial;
 
+bool fBtnFupPressed = false;
+bool fBtnFdownPressed = false;
+bool fBtnEupPressed = false;
+bool fBtnEdownPressed = false;
+bool fBtnRupPressed = false;
+bool fBtnRdownPressed = false;
+bool fBtnLupPressed = false; 
+bool fBtnLdownPressed = false;
 
 motor mot_dtLeft( vex::PORT1);
 motor mot_dtRight( vex::PORT2, true);
@@ -59,6 +67,21 @@ volatile bool gPlaceBeam2StackRunning = false;
 
 
 int TaskDebug();
+
+template <typename ButtonT>
+static bool DebounceControllerButton(ButtonT &button, bool &flag) {
+    if(!button.pressing()) {
+        return false;
+    }
+
+    BrainTimer.reset();
+    flag = true;
+    while(button.pressing()) {
+        wait(20, msec);
+    }
+    wait(20, msec);
+    return true;
+}
 
 // Handle controller L3 press (debug placeholder).
 void onevent_ControllerButtonL3_pressed_0() {
@@ -110,6 +133,31 @@ int TaskPinGrabber(){
 
 }
 
+// Poll controller inputs and set action flags.
+int TaskController() {
+
+
+     BrainTimer.reset();
+     fBeamGuideOut = false;
+    while (true) {
+        if(TouchLED12.pressing()) {
+            BrainTimer.reset();
+        }
+        if(BrainTimer.value() > 120) {
+            Brain.programStop();
+            
+        }
+        DebounceControllerButton(Controller.ButtonLUp, fBtnLupPressed);
+        DebounceControllerButton(Controller.ButtonLDown, fBtnLdownPressed);
+        DebounceControllerButton(Controller.ButtonRUp, fBtnRupPressed);
+        DebounceControllerButton(Controller.ButtonRDown, fBtnRdownPressed);
+        DebounceControllerButton(Controller.ButtonEUp, fBtnEupPressed);
+        DebounceControllerButton(Controller.ButtonEDown, fBtnEdownPressed);
+        DebounceControllerButton(Controller.ButtonFUp, fBtnFupPressed);
+        DebounceControllerButton(Controller.ButtonFDown, fBtnFdownPressed);
+        wait(10, msec);
+    }
+}
 
 // Initialize devices and start tasks.
 int main() {
@@ -127,12 +175,13 @@ int main() {
   // register event handlers
     Controller.ButtonL3.pressed(onevent_ControllerButtonL3_pressed_0);
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
-
+  
     wait(15, msec);
     vex::task ws1(TaskPin);  
     vex::task ws2(TaskBeam);
     vex::task ws3(TaskGuide);
     vex::task ws4(TaskPinGrabber);
+    vex::task ws5(TaskController);
     //  vex::task wsDebug(TaskDebug);
     TaskDriveTrain();
     // TaskAutonomous();

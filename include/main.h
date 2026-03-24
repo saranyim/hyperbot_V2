@@ -54,6 +54,14 @@ extern touchled TouchLED12;
 
 extern volatile bool gPlaceBeam2StackRunning;
 
+extern bool fBtnFupPressed ;
+extern bool fBtnFdownPressed ;
+extern bool fBtnEupPressed ;
+extern bool fBtnEdownPressed ;
+extern bool fBtnRupPressed ;
+extern bool fBtnRdownPressed ;
+extern bool fBtnLupPressed ; 
+extern bool fBtnLdownPressed ;
 
 
 extern bool fBeamGuideOut;
@@ -67,8 +75,8 @@ extern bool fRetractGuide;
 #define pneuCBeamGuide cylinder2
 
 
-#define ReleasePin  pneuVGrabber.retract(pneuCPinGrab); pinGraber = release
-#define GrabPin  pneuVGrabber.extend(pneuCPinGrab); pinGraber = grab
+#define ReleasePin pinGraber = release
+#define GrabPin  pinGraber = grab
 
 #define ReleaseBeam  pneuVGuide.retract(cylinder1); beamGraber = release
 #define GrabBeam  pneuVGuide.extend(cylinder1); beamGraber = grab
