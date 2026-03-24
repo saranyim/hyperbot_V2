@@ -45,6 +45,9 @@ graber_t beamGraber;
 
 timer BrainTimer;
 
+bool fBeamGuideOut;
+bool fPinGuideOut;
+bool fRetractGuide;
 
 bool OverRideDriveTrain,ReverseDir;
 int Screen_precision = 0, Console_precision = 0;
@@ -53,32 +56,7 @@ static vex::mutex gYGuidCmdMutex;
 volatile bool gPlaceBeam2StackRunning = false;
 
 // Serialize yGuide retract command so multiple tasks cannot race on the same pneumatic channel.
-void YGuidInSafe() {
-    printf("YGuidInSafe\n");
-    gYGuidCmdMutex.lock();
-    yGuidIn;
-    gYGuidCmdMutex.unlock();
-}
 
-// Block yGuide extend while Place_Beam_2_Stack is running to avoid command fighting.
-void YGuidOutSafe() {
-    printf("YGuidOutSafe\n");
-    timer waitTimeout;
-    waitTimeout.reset();
-    while(gPlaceBeam2StackRunning) {
-        if(waitTimeout.time(msec) >= 1000) {
-            printf("[WARN] YGuidOutSafe timeout waiting Place_Beam_2_Stack\n");
-            return;
-        }
-        wait(5, msec);
-    }
-
-    gYGuidCmdMutex.lock();
-    if(!gPlaceBeam2StackRunning) {
-        yGuidOut;
-    }
-    gYGuidCmdMutex.unlock();
-}
 
 int TaskDebug();
 
@@ -101,7 +79,36 @@ void onevent_ControllerButtonEUp_pressed_0() {
     }
 }
 
+int TaskGuide(){
+    while(1){
+        if(fRetractGuide == true){
+            yGuidIn;
+        }
+        else if(fBeamGuideOut || fPinGuideOut){
+            yGuidOut;
+        }
+        else{
+            yGuidIn;
+        }
+        wait(50, msec);
+    }
 
+}
+
+int TaskPinGrabber(){
+    while(1){
+        if(pinGraber == release){
+            pneuVGrabber.retract(pneuCPinGrab);
+        }
+        else{
+            pneuVGrabber.extend(pneuCPinGrab);
+        }
+        wait(20, msec);
+
+    }
+
+
+}
 
 
 // Initialize devices and start tasks.
@@ -124,6 +131,8 @@ int main() {
     wait(15, msec);
     vex::task ws1(TaskPin);  
     vex::task ws2(TaskBeam);
+    vex::task ws3(TaskGuide);
+    vex::task ws4(TaskPinGrabber);
     //  vex::task wsDebug(TaskDebug);
     TaskDriveTrain();
     // TaskAutonomous();

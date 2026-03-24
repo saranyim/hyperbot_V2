@@ -53,9 +53,12 @@ extern distance dis_rear;
 extern touchled TouchLED12;
 
 extern volatile bool gPlaceBeam2StackRunning;
-void YGuidInSafe();
-void YGuidOutSafe();
 
+
+
+extern bool fBeamGuideOut;
+extern bool fPinGuideOut;
+extern bool fRetractGuide;
 
 #define pneuCBeamGrab cylinder1
 #define pneuCPinGrab cylinder2

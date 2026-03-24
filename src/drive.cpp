@@ -21,7 +21,8 @@ int TaskDriveTrain() {
         // Emergency-stop sequence triggered from drivetrain task on R3 edge.
         const bool r3Now = Controller.ButtonR3.pressing();
         if (r3Now && !btnR3Pressed) {
-            YGuidInSafe();
+            fBeamGuideOut = false;
+            fPinGuideOut = false;
             ReleaseBeam;
             ReleasePin;
             handUp;
