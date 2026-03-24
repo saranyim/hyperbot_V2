@@ -137,12 +137,12 @@ int main() {
     // GrabPin;
 
     wait(15, msec);
-    vex::task ws1(TaskPin);  
-    vex::task ws2(TaskBeam);
-    vex::task ws3(TaskControl);
+    // vex::task ws1(TaskPin);  
+    // vex::task ws2(TaskBeam);
+    // vex::task ws3(TaskControl);
      vex::task wsDebug(TaskDebug);
-    TaskDriveTrain();
-    // TaskAutonomous();
+    // TaskDriveTrain();
+    TaskAutonomous();
 }
 
 void PrintDistance(){

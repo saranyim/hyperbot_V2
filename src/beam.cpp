@@ -31,7 +31,6 @@ void Grab_Beam_up() {
     // mg_beam.stop();
     GrabBeam;
     wait(0.2, seconds);
-   
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
     mg_beam.spinFor(spinBeamUp,530,degrees);
@@ -263,7 +262,7 @@ int TaskBeam() {
                     f1stLup=false;
                     mg_beam.spinFor(spinBeamUp,300,degrees,false);
                     wait(2,seconds);
-                    mg_beam.stop(hold);
+                    mg_beam.stop(hold); 
                 
                     
                 }
@@ -373,6 +372,4 @@ void mini_Y() {
     ReleaseBeam;
     wait(0.1,seconds);
     Drop_Y_Arm();
-}
-
-
+}C
