@@ -56,7 +56,7 @@ int TaskDriveTrain() {
             // turnFactor = 0.7 * speedFactor;
             if (ReverseDir) {
 #if side == redSide
-                TouchLED12.setColor(red);
+                TouchLED12.setColor(blue);
 #else
                 TouchLED12.setColor(blue);
 #endif
@@ -68,7 +68,7 @@ int TaskDriveTrain() {
                 mot_dtRight.setVelocity((axisA * speedFactor + (stickB * turnFactor)) , percent);
                 mot_dtLeft.setVelocity((axisA * speedFactor - (stickB * turnFactor)) , percent);
             }
-            if(Brain.Battery.capacity() < 70){
+            if(Brain.Battery.capacity() < 85){
                 TouchLED12.setColor(purple);
             }
    

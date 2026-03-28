@@ -295,8 +295,9 @@ int TaskPin() {
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 130 , degrees, true);
-                // wait(1, seconds);
+                mg_pin.spinFor(reverse, 130 , degrees, false);
+                wait(0.75, seconds);
+                mg_pin.stop();
                 // mg_pin.stop(hold);
                 pinPos = mid;
             }
