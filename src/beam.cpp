@@ -61,14 +61,6 @@ void Grab_Beam_up() {
     mg_beam.setStopping(hold);
 #if side == redSide
     mg_beam.spinFor(spinBeamUp,330,degrees,false);
-    // if(beamPos == posFloat){
-    //     printf("beam float");
-    //     mg_beam.spinFor(spinBeamUp,330,degrees,false);
-    // }
-    // else{
-    //     printf("beam down");
-    //     mg_beam.spinFor(spinBeamUp,430,degrees,false);
-    // }
     wait(1,seconds);
     fBeamGuideOut = true;
 #else
@@ -235,8 +227,8 @@ void Drop_Y_Arm() {
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
     
-    wait(0.4, seconds);
-    
+    wait(0.5, seconds);
+    mg_pin.spinFor(spinPinDown, 130 , degrees, false);
     printf("stop moving\n");
     // close pneu guide
     // beamGuideIn;
@@ -244,6 +236,7 @@ void Drop_Y_Arm() {
     mot_dtLeft.stop();
     mot_dtRight.stop();
     OverRideDriveTrain = false;
+    
     // put beam arm down 
     
     // // Re-assert guide retract right before lowering in case another task toggled it.
@@ -259,11 +252,13 @@ void Drop_Y_Arm() {
     // mg_beam.setMaxTorque(10, percent);
     // mg_beam.setStopping(brake);
     // ReverseDir = true;
+    // wait(2.0, seconds);
+    wait(0.8, seconds);
     mg_beam.spin(spinBeamDown);
     wait(0.5, seconds);
-    if(pinPos == bottom) {
-        mg_pin.spinFor(spinPinDown, 130 , degrees, false);
-    }
+  
+        
+
     fRetractGuide = false;
 
     WaitBeamStopOrNoSpeedChange(5.0);
@@ -299,7 +294,7 @@ int TaskBeam() {
     mg_beam.spin(spinBeamDown);
     wait(0.2, seconds);
     WaitBeamStopOrNoSpeedChange(0.5);
-     mg_beam.setStopping(coast);
+    mg_beam.setStopping(coast);
     mg_beam.stop();
     
     wait(0.5,seconds);
@@ -401,6 +396,7 @@ int TaskBeam() {
             wait(0.5, seconds);
 
             fRetractGuide = false;
+            fBeamGuideOut = false;
             WaitBeamStopOrNoSpeedChange(5.0);
             mg_beam.stop();
             printf("up vel: %d\n", (uint16_t)mg_beam.velocity(percent) );

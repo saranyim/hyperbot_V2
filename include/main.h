@@ -14,7 +14,8 @@ typedef enum {
   bottom = 2,
   mid = 3,
   aboveStandoff = 4,
-  posFloat = 5
+  posFloat = 5,
+  getStartingPin = 6
 } position_t;
 
 
