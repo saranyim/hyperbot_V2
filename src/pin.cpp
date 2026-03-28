@@ -332,7 +332,7 @@ int TaskPin() {
                 mg_pin.setStopping(hold);
                 wait(0.3, seconds);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 120 , degrees, true);
+                mg_pin.spinFor(reverse, 120.0 , degrees, true);
                 pinPos = top;
                 handDown;
                 YGuidOutSafe();

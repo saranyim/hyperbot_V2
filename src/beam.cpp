@@ -111,10 +111,6 @@ void Place_Beam_Stand_Off() {
     ReverseDir = true;
 
                 wait(0.8, seconds);
-                mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.setVelocity(100, percent);
-                mg_pin.setStopping(hold);
-                mg_pin.spinFor(reverse, 120 , degrees, false);
                 pinPos = mid;
                 Drop_Y_Arm();
   
