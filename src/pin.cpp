@@ -290,8 +290,8 @@ int TaskPin() {
                 YGuidInSafe();
             if (bottom == pinPos) {
                 GrabPin;
-                wait(0.2, seconds);
                 mg_pin.setStopping(hold);
+<<<<<<< Updated upstream
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setTimeout(0.5, seconds);
@@ -300,6 +300,21 @@ int TaskPin() {
                 mg_pin.stop();
                 // mg_pin.stop(hold);
                 pinPos = mid;
+=======
+                mg_pin.spin(spinBeamDown);
+                wait(0.2, seconds);
+                mg_pin.stop();
+
+                mg_pin.setPosition(0, degrees);
+                printf("pin Pos %d\n",(int16_t)mg_pin.position(degrees));
+                mg_pin.setVelocity(100.0, percent);
+                mg_pin.setMaxTorque(100.0, percent);
+                mg_pin.spinFor(spinPinUp, 130 , degrees, false);
+                wait(0.5, seconds);
+                mg_pin.stop();
+                pinPos = mid; 
+
+>>>>>>> Stashed changes
             }
             else{
                 handUp;
