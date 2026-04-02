@@ -121,7 +121,7 @@ void Grab_then_up() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
    
-    mg_pin.setTimeout(0.5, seconds);
+    mg_pin.setTimeout(500, msec);
     mg_pin.spinFor(reverse, pinArmDegree , degrees, false);
     wait(0.2, seconds);
 
@@ -291,18 +291,8 @@ int TaskPin() {
             if (bottom == pinPos) {
                 GrabPin;
                 mg_pin.setStopping(hold);
-<<<<<<< Updated upstream
-                mg_pin.setVelocity(100.0, percent);
-                mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 130 , degrees, false);
-                wait(0.75, seconds);
-                mg_pin.stop();
-                // mg_pin.stop(hold);
-                pinPos = mid;
-=======
-                mg_pin.spin(spinBeamDown);
-                wait(0.2, seconds);
+                mg_pin.spin(spinPinDown);
+                wait(0.16, seconds);
                 mg_pin.stop();
 
                 mg_pin.setPosition(0, degrees);
@@ -310,11 +300,10 @@ int TaskPin() {
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.spinFor(spinPinUp, 130 , degrees, false);
-                wait(0.5, seconds);
+                wait(0.35, seconds);
                 mg_pin.stop();
                 pinPos = mid; 
 
->>>>>>> Stashed changes
             }
             else{
                 handUp;
@@ -347,7 +336,7 @@ int TaskPin() {
                 YGuidOutSafe();
                 mg_pin.setStopping(hold);
                 wait(0.3, seconds);
-                mg_pin.setTimeout(0.5, seconds);
+                mg_pin.setTimeout(500, msec);
                 mg_pin.spinFor(reverse, 120.0 , degrees, true);
                 pinPos = top;
                 handDown;
@@ -441,7 +430,7 @@ void Grab_From_Starting() {
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     GrabPin;
-    mg_pin.setTimeout(0.5, seconds);
+    mg_pin.setTimeout(500, msec);
     mg_pin.spinFor(reverse, 100 , degrees, false);
     wait(0.3, seconds);
 

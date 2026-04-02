@@ -107,11 +107,18 @@ void Place_Beam_2_Stack() {
 }
 // Place beam on the standoff using rear alignment.
 void Place_Beam_Stand_Off() {
+    printf("place beam on stand off\n");
+    mg_beam.setMaxTorque(100.0, percent);
+    mg_beam.setVelocity(80, percent);
+    mg_beam.setStopping(coast);
+    mg_beam.stop();
+    mg_beam.spin(spinBeamDown);
+    wait(0.17, seconds);
+        mg_beam.setStopping(hold); 
     ReleaseBeam;
     ReverseDir = true;
 
                 wait(0.8, seconds);
-                pinPos = mid;
                 Drop_Y_Arm();
   
     // OverRideDriveTrain = true;
