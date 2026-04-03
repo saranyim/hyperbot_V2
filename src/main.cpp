@@ -122,11 +122,11 @@ int main() {
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
 
     wait(15, msec);
-    vex::task ws1(TaskPin);  
-    vex::task ws2(TaskBeam);
-    //  vex::task wsDebug(TaskDebug);
-    TaskDriveTrain();
-    // TaskAutonomous();
+    // vex::task ws1(TaskPin);  
+    // vex::task ws2(TaskBeam);
+     vex::task wsDebug(TaskDebug);
+    // TaskDriveTrain();
+    TaskAutonomous();
 }
 
 // Print rear distance sensor reading.

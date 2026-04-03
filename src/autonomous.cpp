@@ -54,6 +54,13 @@ void WaitTouchDebug(){
 // 1 wheel rotation = 8 inches
 // Main autonomous routine sequence.
 int TaskAutonomous() {
+    OverRideDriveTrain = true;
+    mot_dtLeft.setVelocity(driveSpeed, percent);
+    mot_dtRight.setVelocity(driveSpeed, percent);
+    distanceToGo = 900;
+    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
+    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
+        OverRideDriveTrain = false;
     int ledBlinkCount;
     pneuVGuide.retract(pneuCPinGuide);
    
@@ -358,7 +365,7 @@ void go_reverse_to_stand_off(){
 
 // Convert travel distance in mm to wheel degrees.
 double Distance_MM_to_Degrees(double distance_mm){
-    return distance_mm / (8.0* 25.4) * 360.0;
+    return distance_mm / (12.0* 25.4) * 360.0;
 }
 
 // Drop the pin and return arm to the up position.
