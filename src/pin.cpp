@@ -221,13 +221,18 @@ void Grab_Release_Pin() {
         }
         else {
             GrabPin;
+
         }
     }
     else if(mid == pinPos) {
+        mg_pin.setStopping(coast);
+        mg_pin.stop();
+        wait(0.1, seconds);
         ReleasePin;
     }
     else {
         GrabPin;
+        
     }
 }
 
@@ -292,16 +297,17 @@ int TaskPin() {
                 GrabPin;
                 mg_pin.setStopping(hold);
                 mg_pin.spin(spinPinDown);
-                wait(0.16, seconds);
+                wait(0.2, seconds);
                 mg_pin.stop();
 
                 mg_pin.setPosition(0, degrees);
-                printf("pin Pos %d\n",(int16_t)mg_pin.position(degrees));
+                printf("start pin Pos %d\n",(int16_t)mg_pin.position(degrees));
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.spinFor(spinPinUp, 130 , degrees, false);
-                wait(0.35, seconds);
+                mg_pin.spinFor(spinPinUp, 127 , degrees, false);
+                wait(0.5, seconds);
                 mg_pin.stop();
+                printf("stop pin Pos %d\n",(int16_t)mg_pin.position(degrees));
                 pinPos = mid; 
 
             }

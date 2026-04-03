@@ -110,14 +110,20 @@ void Place_Beam_Stand_Off() {
     printf("place beam on stand off\n");
     mg_beam.setMaxTorque(100.0, percent);
     mg_beam.setVelocity(80, percent);
-    mg_beam.setStopping(coast);
-    mg_beam.stop();
     mg_beam.spin(spinBeamDown);
-    wait(0.17, seconds);
-        mg_beam.setStopping(hold); 
+    OverRideDriveTrain = true;
+    mot_dtLeft.setVelocity(0, percent);
+    mot_dtRight.setVelocity(0, percent);
+    wait(0.15, seconds);
+    mg_beam.setStopping(hold); 
     ReleaseBeam;
     ReverseDir = true;
-
+    mg_beam.setMaxTorque(100.0, percent);
+    mg_beam.setVelocity(100, percent);
+    mg_beam.spin(spinBeamUp);
+    mg_beam.stop();
+    wait(0.1, seconds);
+    OverRideDriveTrain = false;
                 wait(0.8, seconds);
                 Drop_Y_Arm();
   
