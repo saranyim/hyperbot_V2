@@ -105,6 +105,7 @@ void Drop_Pin_Arm() {
     mg_pin.spin(forward); 
     wait(0.2, seconds);
     WaitPinStopOrNoSpeedChange(10.0);
+    mg_pin.setStopping(brake);
     mg_pin.stop();
     printf("done\n");
 }
