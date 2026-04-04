@@ -190,7 +190,7 @@ void Flip_Pin_Over() {
     wait(0.5, seconds);
 #if side == redSide
     // wait(1,seconds);
-    Grab_Beam_up();
+    // Grab_Beam_up();
 #else
     if(fBeamMovingUp == false){
         mg_beam.setMaxTorque(100, percent);
@@ -304,7 +304,7 @@ int TaskPin() {
                 printf("start pin Pos %d\n",(int16_t)mg_pin.position(degrees));
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.spinFor(spinPinUp, 127 , degrees, false);
+                mg_pin.spinFor(spinPinUp, 123 , degrees, false);
                 wait(0.5, seconds);
                 mg_pin.stop();
                 printf("stop pin Pos %d\n",(int16_t)mg_pin.position(degrees));

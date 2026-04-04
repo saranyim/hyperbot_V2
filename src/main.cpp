@@ -178,7 +178,7 @@ int main() {
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
   
     wait(15, msec);
-    vex::task ws1(TaskPin);  
+    vex::task ws1(TaskPin);
     vex::task ws2(TaskBeam);
     vex::task ws3(TaskGuide);
     vex::task ws4(TaskPinGrabber);
@@ -216,9 +216,9 @@ int TaskDebug() {
     while(1){
         // printf("Dis Left: %u ", (uint16_t)dis_rear.objectDistance(mm));
         // printf(" Dis Right: %u", (uint16_t)dis_right.objectDistance(mm));
-        // printf(" heading: %u\n", (uint16_t)Inertial.angle());
+        printf(" heading: %u\n", (uint16_t)Inertial.angle());
         // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
-        // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
+        // printf(" mot_    right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
         PrintDistance();
         wait(500, msec);
     }

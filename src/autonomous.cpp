@@ -8,7 +8,7 @@ using namespace vex;
 
 
 uint16_t driveSpeed = 70;
-uint16_t turnSpeed = 15;
+uint16_t turnSpeed = 100;
 uint16_t adjustTurnSpeed = 6;
 double distanceToGo;
 void Auto_Drop_Down_Pin_Grab_Up();
@@ -25,6 +25,7 @@ void go_forward_to_spin_to_stand_off();
 void go_reverse_to_stand_off();
 void reverse_to_set_distance();
 void spin_to_get_to_standoff();
+
 void trim_heading(uint16_t heading);
 double Distance_MM_to_Degrees(double distance_mm);
 
@@ -36,6 +37,7 @@ void driveRamped(directionType dir, double distance_mm, uint16_t maxSpeed = 80, 
 void driveForward(double distance_mm, uint16_t maxSpeed = 0);
 void driveReverse(double distance_mm, uint16_t maxSpeed = 0);
 void driveNudge(directionType dir = forward, double distance_mm = 80, uint16_t speed = 20);
+void driveToWallDistance(double targetDist_mm, uint16_t maxSpeed = 80, uint16_t minSpeed = 20, double rampFrac = 0.25);
 
 // Safety timer to stop auton after 60 seconds.
 int TaskAutoCnt(){
@@ -58,12 +60,16 @@ void WaitTouchDebug(){
 // 1 wheel rotation = 8 inches
 // Main autonomous routine sequence.
 int TaskAutonomous() {
-   
+    fBeamGuideOut = false;
+    wait(1, seconds);
+    handUp;
+    ReleasePin;
+ 
+    
     int ledBlinkCount;
    
     Brain.Screen.setCursor(2, 1);
     TouchLED12.setColor(red);
-
     while(TouchLED12.pressing() == false){
         wait(0.02, seconds);
     }
@@ -74,20 +80,13 @@ int TaskAutonomous() {
     
     }
 
-    Inertial.calibrate();
-    ledBlinkCount = 5;
-    while(ledBlinkCount--){
-        TouchLED12.setColor(yellow);
-        wait(0.5,seconds);
-        TouchLED12.setColor(red);
-        wait(0.5,seconds);
-    }
+    
 
-    Inertial.setHeading(90, degrees);
-    mg_beam.setMaxTorque (100,percent);
-    mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,540,degrees,true);
-    beamPos=mid;
+    
+    TouchLED12.setColor(green);
+wait(5, seconds);
+    Inertial.setHeading(0, degrees);    
+    // WaitTouchDebug();
  
     while(true){
         
@@ -123,7 +122,7 @@ int TaskAutonomous() {
     mot_dtLeft.setVelocity(driveSpeed, percent);
     mot_dtLeft.setPosition(0.0, degrees);
     mot_dtRight.setPosition(0.0, degrees);
-    Grab_then_up();
+
    
 
     TouchLED12.setBlink(red_violet, 0.1, 0.1);
@@ -146,22 +145,24 @@ int TaskAutonomous() {
 
 
     reverse_to_get_Blue();
+WaitTouchDebug();
     // wait(0.5, seconds);
-    Grab_Beam_up();
+    // Grab_Beam_up();
     // WaitTouchDebug();
     printf("touch\n");
     spin_to_get_blue();
+    WaitTouchDebug();
     // wait(0.5, seconds);
     // WaitTouchDebug();
 
     go_forward_to_make_stack();
-   
+   WaitTouchDebug();
     Auto_Drop_Down_Pin_Grab_Up();
 
 
     driveReverse(200, 100);
     // wait(0.5, seconds);
-    // WaitTouchDebug();
+    WaitTouchDebug();
 
 
     reverse_to_set_distance();
@@ -210,29 +211,48 @@ int TaskAutonomous() {
 }
 // Drive from start to the yellow goal and grab.
 void from_Start_to_Yellow(){
-    driveForward(1050);
+    driveToWallDistance(100, 100);
+    mg_beam.setStopping(hold);
+    mg_beam.spin(spinBeamUp);
+    wait(0.3, seconds);
+    mg_beam.stop();
+    wait(0.3, seconds);
+    pneuVGrabber.pumpOn();
+    pneuVGuide.pumpOn();
+    mg_pin.setStopping(hold);
+    mg_pin.spin(spinPinDown);
+    wait(0.3, seconds);
+    mg_pin.stop();
+    handUp;
+    ReleasePin;
+   driveToWallDistance(1500, 100);
+    
 
-    // Slow nudge forward to seat against the goal before grabbing.
-    mot_dtLeft.setVelocity(turnSpeed, percent);
-    mot_dtRight.setVelocity(turnSpeed, percent);
-    mot_dtLeft.spinFor(forward, 220, degrees, false);
-    mot_dtRight.spinFor(forward, 220, degrees, false);
-    wait(0.5, seconds);
+    driveNudge(reverse, 50, 15);
+    
+    GrabPin;
     Grab_then_up();
+    
+    
+    
 }
 
 
 
-// Reverse to reach the blue goal position.
+// Reverse to reach the blue goal position
 void reverse_to_get_Blue(){
-    driveReverse(480, 100);
+    turnTo(110);
+    turnTo(110);
+   WaitTouchDebug();
 }
+
 
 // Turn toward the blue target.
 void spin_to_get_blue(){
-    turnTo(155);
-//    SpinRight(156);
-//    WaitTouchDebug();
+    driveToWallDistance(975, 100);
+    driveNudge(reverse, 67, 15);
+   
+
 }
 
 // Drive forward to stack position.
@@ -274,9 +294,9 @@ void go_backwards_to_place_pin_on_stand_off(){
     mot_dtLeft.spin(reverse);
     mot_dtRight.spin(reverse);
     wait(1.0, seconds);
+    mot_dtLeft.stop();
     mot_dtRight.stop();
-    mot_dtRight.stop(); 
-    wait(0.5, seconds);      
+    wait(0.5, seconds);
     Place_Pin_On_Stand_Off();
 }
 
@@ -352,8 +372,8 @@ void driveRamped(directionType dir,
     double rampDnStart = totalDeg * (1.0 - rampFrac);
 
     // Reset encoders so position starts at 0.
-    mot_dtLeft.resetPosition();
-    mot_dtRight.resetPosition();
+    mot_dtLeft.setPosition(0.0, degrees);
+    mot_dtRight.setPosition(0.0, degrees);
 
     while (true) {
         double pos = (fabs(mot_dtLeft.position(degrees)) +
@@ -398,8 +418,8 @@ void driveReverse(double distance_mm, uint16_t maxSpeed) {
 void driveNudge(directionType dir, double distance_mm, uint16_t speed) {
     double totalDeg = Distance_MM_to_Degrees(distance_mm);
 
-    mot_dtLeft.resetPosition();
-    mot_dtRight.resetPosition();
+    mot_dtLeft.setPosition(0.0, degrees);
+    mot_dtRight.setPosition(0.0, degrees);
 
     mot_dtLeft.spin(dir, speed, pct);
     mot_dtRight.spin(dir, speed, pct);
@@ -488,10 +508,10 @@ mot_dtLeft.setVelocity(turnSpeed, percent);
 // Spin right to a target inertial heading.
 void SpinRight(uint16_t heading){
 
-    mot_dtRight.setVelocity(30, percent);
-    mot_dtLeft.setVelocity(30, percent);
-    mot_dtRight.spin(reverse);
-    mot_dtLeft.spin(forward);
+    mot_dtRight.setVelocity(100, percent);
+    mot_dtLeft.setVelocity(100, percent);
+    mot_dtRight.spin(forward);
+    mot_dtLeft.spin(reverse);
 
     while(1){  
         if(IS_IN_RANGE((uint16_t)Inertial.angle(),heading - 1, heading + 3))
@@ -612,13 +632,32 @@ void trim_heading(uint16_t heading){
 
 }
 
+// Drive forward or reverse until the rear distance sensor reads targetDist_mm.
+// Reads the sensor once, computes the distance and direction needed, then
+// delegates to driveRamped for a smooth ramp-up / ramp-down profile.
+// Because the sensor faces the wall behind the bot:
+//   current < target  →  drive forward  (bot moves away, reading grows)
+//   current > target  →  drive reverse  (bot moves toward wall, reading shrinks)
+void driveToWallDistance(double targetDist_mm,
+                         uint16_t maxSpeed,
+                         uint16_t minSpeed,
+                         double   rampFrac) {
+    double current  = dis_rear.objectDistance(mm);
+    double error    = targetDist_mm - current;  // positive = need more distance
+
+    if (fabs(error) <= 20) return;  // already close enough, nothing to do
+
+    directionType dir = (error > 0) ? reverse: forward;  // reverse to get more distance, forward to get closer
+    driveRamped(dir, fabs(error), maxSpeed, minSpeed, rampFrac);
+}
+
 // PD turn controller to a target heading.
 void turnTo(double targetDeg) {
 
     double Kp = 1.4;       // ค่าปกติเริ่มต้น
     double Kd = 0.12;      // ลด overshoot
     double maxPower = 70;  // จำกัดเพื่อความ smooth
-    double minPower = 10;  // ป้องกัน stall
+    double minPower = 5;   // ป้องกัน stall
     
     double error, prevError = 0;
     double derivative;
@@ -632,7 +671,7 @@ void turnTo(double targetDeg) {
         if (error > 180) error -= 360;
         if (error < -180) error += 360;
 
-        if (fabs(error) < 0.5) break; // deadband
+        if (fabs(error) < 0.3) break; // deadband
 
         derivative = error - prevError;
         power = Kp * error + Kd * derivative;
@@ -642,8 +681,8 @@ void turnTo(double targetDeg) {
         if (fabs(power) < minPower) power = copysign(minPower, power);
 
         // turn
-        mot_dtLeft.spin(fwd,  power, pct);
-        mot_dtRight.spin(fwd, -power, pct);
+        mot_dtRight.spin(fwd,  power, pct);
+        mot_dtLeft.spin(fwd, -power, pct);
 
         prevError = error;
         wait(10, msec);

@@ -61,7 +61,8 @@ void Grab_Beam_up() {
  
     beamPos = top;
     fBeamMovingUp = false;
-
+    fBeamGuideOut = false;
+    YGuidInSafe();
     
 }
 

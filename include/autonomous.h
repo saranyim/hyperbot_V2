@@ -20,3 +20,16 @@ void driveReverse(double distance_mm, uint16_t maxSpeed = 0);
 // Small nudge drive to confirm a pin/game-piece is seated in the claw.
 // Returns the average actual wheel velocity (%) — use it to verify movement.
 void driveNudge(directionType dir = forward, double distance_mm = 80, uint16_t speed = 20);
+
+// Adjust position using the rear distance sensor until it reads targetDist_mm.
+// Sensor faces the wall behind the bot.
+//   reading < target  →  drive forward  (moves away from wall, distance increases)
+//   reading > target  →  drive reverse  (moves toward  wall, distance decreases)
+// Stops when within tolerance_mm of target.
+//   targetDist_mm – desired rear distance to wall in mm  (e.g. 1500)
+//   speed         – drive speed in percent               (default 50)
+//   tolerance_mm  – dead-band around the target          (default 20)
+void driveToWallDistance(double targetDist_mm,
+                         uint16_t maxSpeed = 80,
+                         uint16_t minSpeed = 20,
+                         double   rampFrac = 0.25);

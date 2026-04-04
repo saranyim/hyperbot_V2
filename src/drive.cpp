@@ -57,7 +57,7 @@ int TaskDriveTrain() {
             // turnFactor = 0.7 * speedFactor;
             if (ReverseDir) {
 #if side == redSide
-                TouchLED12.setColor(red);
+                TouchLED12.setColor(blue);
 #else
                 TouchLED12.setColor(blue);
 #endif
