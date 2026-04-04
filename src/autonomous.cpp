@@ -31,7 +31,11 @@ double Distance_MM_to_Degrees(double distance_mm);
 void SpinLeft(uint16_t heading);
 void SpinRight(uint16_t heading);
 
-void turnTo(double targetDeg) ;
+void turnTo(double targetDeg);
+void driveRamped(directionType dir, double distance_mm, uint16_t maxSpeed = 80, uint16_t minSpeed = 20, double rampFrac = 0.25);
+void driveForward(double distance_mm, uint16_t maxSpeed = 0);
+void driveReverse(double distance_mm, uint16_t maxSpeed = 0);
+void driveNudge(directionType dir = forward, double distance_mm = 80, uint16_t speed = 20);
 
 // Safety timer to stop auton after 60 seconds.
 int TaskAutoCnt(){
@@ -54,15 +58,8 @@ void WaitTouchDebug(){
 // 1 wheel rotation = 8 inches
 // Main autonomous routine sequence.
 int TaskAutonomous() {
-    OverRideDriveTrain = true;
-    mot_dtLeft.setVelocity(driveSpeed, percent);
-    mot_dtRight.setVelocity(driveSpeed, percent);
-    distanceToGo = 900;
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-        OverRideDriveTrain = false;
+   
     int ledBlinkCount;
-    pneuVGuide.retract(pneuCPinGuide);
    
     Brain.Screen.setCursor(2, 1);
     TouchLED12.setColor(red);
@@ -91,7 +88,7 @@ int TaskAutonomous() {
     mg_beam.setVelocity (100,percent);
     mg_beam.spinFor (spinBeamUp,540,degrees,true);
     beamPos=mid;
-    pneuVGrabber.retract(pneuCBeamGrab);
+ 
     while(true){
         
         TouchLED12.setColor(green);
@@ -108,7 +105,7 @@ int TaskAutonomous() {
             break;
         }
     }
-    pneuVGrabber.extend(pneuCBeamGrab);
+   
     while(true){
         if((uint16_t)Inertial.heading() ==119){
             TouchLED12.setColor(green);
@@ -162,13 +159,7 @@ int TaskAutonomous() {
     Auto_Drop_Down_Pin_Grab_Up();
 
 
-    distanceToGo = 200;
-    mot_dtLeft.setVelocity(100, percent);
-    mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtLeft.stop();
+    driveReverse(200, 100);
     // wait(0.5, seconds);
     // WaitTouchDebug();
 
@@ -219,36 +210,22 @@ int TaskAutonomous() {
 }
 // Drive from start to the yellow goal and grab.
 void from_Start_to_Yellow(){
-    distanceToGo = 1050;
-    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-   
+    driveForward(1050);
+
+    // Slow nudge forward to seat against the goal before grabbing.
     mot_dtLeft.setVelocity(turnSpeed, percent);
     mot_dtRight.setVelocity(turnSpeed, percent);
-    mot_dtLeft.spinFor(forward,220,degrees,false);
-    mot_dtRight.spinFor(forward,220,degrees,false);
-    wait(0.5,seconds);
+    mot_dtLeft.spinFor(forward, 220, degrees, false);
+    mot_dtRight.spinFor(forward, 220, degrees, false);
+    wait(0.5, seconds);
     Grab_then_up();
-    // WaitTouchDebug();
-    
 }
 
 
 
 // Reverse to reach the blue goal position.
 void reverse_to_get_Blue(){
-    mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.setVelocity(100, percent);
-    distanceToGo = 480;
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtRight.stop();
-    // WaitTouchDebug();
-
-      
+    driveReverse(480, 100);
 }
 
 // Turn toward the blue target.
@@ -260,14 +237,8 @@ void spin_to_get_blue(){
 
 // Drive forward to stack position.
 void go_forward_to_make_stack(){
-    // WaitTouchDebug();
-    mot_dtLeft.setVelocity(driveSpeed, percent);
-    mot_dtRight.setVelocity(driveSpeed, percent);
-    distanceToGo = 850;
-    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtLeft.stop();
+    driveForward(850);
+    // Slow creep to press into the stack.
     mot_dtLeft.setVelocity(30, percent);
     mot_dtRight.setVelocity(30, percent);
     mot_dtLeft.spin(forward);
@@ -288,14 +259,7 @@ void reverse_to_set_distance(){
     if(distanceToGo < 0) {
         distanceToGo = 0;
     }
-    mot_dtLeft.setVelocity(40, percent);
-    mot_dtRight.setVelocity(40, percent);
-    
-    
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtRight.stop();
+    driveReverse(distanceToGo, 40);
     wait(0.5, seconds);
     SpinLeft(90);
     // WaitTouchDebug();
@@ -366,6 +330,89 @@ void go_reverse_to_stand_off(){
 // Convert travel distance in mm to wheel degrees.
 double Distance_MM_to_Degrees(double distance_mm){
     return distance_mm / (12.0* 25.4) * 360.0;
+}
+
+// Drive forward or reverse with a speed ramp-up at the start and ramp-down at
+// the end so the bot doesn't bounce back from a hard stop.
+//
+//   dir        – forward or reverse
+//   distance_mm – how far to travel in millimeters
+//   maxSpeed   – peak speed in percent (e.g. 80)
+//   minSpeed   – starting / ending speed in percent (e.g. 20)
+//   rampFrac   – fraction of total distance used for each ramp (0.0–0.5)
+//                default 0.25 means 25 % ramp-up, 25 % ramp-down
+void driveRamped(directionType dir,
+                 double   distance_mm,
+                 uint16_t maxSpeed,
+                 uint16_t minSpeed,
+                 double   rampFrac) {
+
+    double totalDeg    = Distance_MM_to_Degrees(distance_mm);
+    double rampUpEnd   = totalDeg * rampFrac;
+    double rampDnStart = totalDeg * (1.0 - rampFrac);
+
+    // Reset encoders so position starts at 0.
+    mot_dtLeft.resetPosition();
+    mot_dtRight.resetPosition();
+
+    while (true) {
+        double pos = (fabs(mot_dtLeft.position(degrees)) +
+                      fabs(mot_dtRight.position(degrees))) / 2.0;
+
+        if (pos >= totalDeg) break;
+
+        double speed;
+        if (pos < rampUpEnd) {
+            speed = minSpeed + (maxSpeed - minSpeed) * (pos / rampUpEnd);
+        } else if (pos > rampDnStart) {
+            double fraction = (pos - rampDnStart) / (totalDeg - rampDnStart);
+            speed = maxSpeed - (maxSpeed - minSpeed) * fraction;
+        } else {
+            speed = maxSpeed;
+        }
+
+        // spin(dir, speed, pct) sets direction and velocity every tick.
+        mot_dtLeft.spin(dir, speed, pct);
+        mot_dtRight.spin(dir, speed, pct);
+
+        wait(10, msec);
+    }
+
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
+}
+
+// Easy wrappers – no need to specify directionType.
+// Pass a speed (%) or leave blank to use the global driveSpeed variable.
+void driveForward(double distance_mm, uint16_t maxSpeed) {
+    driveRamped(forward, distance_mm, maxSpeed == 0 ? driveSpeed : maxSpeed);
+}
+void driveReverse(double distance_mm, uint16_t maxSpeed) {
+    driveRamped(reverse, distance_mm, maxSpeed == 0 ? driveSpeed : maxSpeed);
+}
+
+// Slow approach drive to creep up to a pin before grabbing.
+// dir         – forward or reverse (default forward)
+// distance_mm – how far to creep   (default 80 mm)
+// speed       – velocity in %      (default 20 %)
+void driveNudge(directionType dir, double distance_mm, uint16_t speed) {
+    double totalDeg = Distance_MM_to_Degrees(distance_mm);
+
+    mot_dtLeft.resetPosition();
+    mot_dtRight.resetPosition();
+
+    mot_dtLeft.spin(dir, speed, pct);
+    mot_dtRight.spin(dir, speed, pct);
+
+    while (true) {
+        double pos = (fabs(mot_dtLeft.position(degrees)) +
+                      fabs(mot_dtRight.position(degrees))) / 2.0;
+        if (pos >= totalDeg) break;
+        wait(10, msec);
+    }
+
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
 }
 
 // Drop the pin and return arm to the up position.
@@ -484,7 +531,7 @@ void Auto_Flip_Pin_Over() {
     mg_beam.setStopping(coast);
     mg_beam.stop();
 // move pin over
-    pneuVGuide.retract(cylinder1);
+    YGuidInSafe();
     mg_beam.spin(forward);
     wait(0.2, seconds);
     mg_beam.stop();

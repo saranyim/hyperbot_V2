@@ -18,6 +18,14 @@ vex::brain       Brain;
 vex::controller  Controller;
 vex::inertial Inertial;
 
+bool fBtnFupPressed = false;
+bool fBtnFdownPressed = false;
+bool fBtnEupPressed = false;
+bool fBtnEdownPressed = false;
+bool fBtnRupPressed = false;
+bool fBtnRdownPressed = false;
+bool fBtnLupPressed = false; 
+bool fBtnLdownPressed = false;
 
 motor mot_dtLeft( vex::PORT1);
 motor mot_dtRight( vex::PORT2, true);
@@ -45,6 +53,9 @@ graber_t beamGraber;
 
 timer BrainTimer;
 
+bool fBeamGuideOut;
+bool fPinGuideOut;
+bool fRetractGuide;
 
 bool OverRideDriveTrain,ReverseDir;
 int Screen_precision = 0, Console_precision = 0;
@@ -53,39 +64,29 @@ static vex::mutex gYGuidCmdMutex;
 volatile bool gPlaceBeam2StackRunning = false;
 
 // Serialize yGuide retract command so multiple tasks cannot race on the same pneumatic channel.
-void YGuidInSafe() {
-    printf("YGuidInSafe\n");
-    gYGuidCmdMutex.lock();
-    yGuidIn;
-    gYGuidCmdMutex.unlock();
-}
 
-// Block yGuide extend while Place_Beam_2_Stack is running to avoid command fighting.
-void YGuidOutSafe() {
-    printf("YGuidOutSafe\n");
-    timer waitTimeout;
-    waitTimeout.reset();
-    while(gPlaceBeam2StackRunning) {
-        if(waitTimeout.time(msec) >= 1000) {
-            printf("[WARN] YGuidOutSafe timeout waiting Place_Beam_2_Stack\n");
-            return;
-        }
-        wait(5, msec);
-    }
-
-    gYGuidCmdMutex.lock();
-    if(!gPlaceBeam2StackRunning) {
-        yGuidOut;
-    }
-    gYGuidCmdMutex.unlock();
-}
 
 int TaskDebug();
+
+template <typename ButtonT>
+static bool DebounceControllerButton(ButtonT &button, bool &flag) {
+    if(!button.pressing()) {
+        return false;
+    }
+
+    BrainTimer.reset();
+    flag = true;
+    while(button.pressing()) {
+        wait(20, msec);
+    }
+    wait(20, msec);
+    return true;
+}
 
 // Handle controller L3 press (debug placeholder).
 void onevent_ControllerButtonL3_pressed_0() {
     printf("L3 Pressed\n");
-
+    
 }
 
 
@@ -101,8 +102,63 @@ void onevent_ControllerButtonEUp_pressed_0() {
     }
 }
 
+int TaskGuide(){
+    while(1){
+        if(fRetractGuide == true){
+            yGuidIn;
+        }
+        else if(fBeamGuideOut || fPinGuideOut){
+            yGuidOut;
+        }
+        else{
+            yGuidIn;
+        }
+
+        wait(50, msec);
+    }
+
+}
+
+int TaskPinGrabber(){
+    while(1){
+        if(pinGraber == release){
+            pneuVGrabber.retract(pneuCPinGrab);
+        }
+        else{
+            pneuVGrabber.extend(pneuCPinGrab);
+        }
+        wait(20, msec);
+
+    }
 
 
+}
+
+// Poll controller inputs and set action flags.
+int TaskController() {
+
+
+     BrainTimer.reset();
+     fBeamGuideOut = false;
+    while (true) {
+        if(TouchLED12.pressing()) {
+            BrainTimer.reset();
+        }
+        if(BrainTimer.value() > 120) {
+            Brain.programStop();
+            
+        }
+        DebounceControllerButton(Controller.ButtonLUp, fBtnLupPressed);
+        DebounceControllerButton(Controller.ButtonLDown, fBtnLdownPressed);
+        DebounceControllerButton(Controller.ButtonRUp, fBtnRupPressed);
+        DebounceControllerButton(Controller.ButtonRDown, fBtnRdownPressed);
+        DebounceControllerButton(Controller.ButtonEUp, fBtnEupPressed);
+        DebounceControllerButton(Controller.ButtonEDown, fBtnEdownPressed);
+        DebounceControllerButton(Controller.ButtonFUp, fBtnFupPressed);
+        DebounceControllerButton(Controller.ButtonFDown, fBtnFdownPressed);
+        wait(10, msec);
+    }
+}
 
 // Initialize devices and start tasks.
 int main() {
@@ -120,19 +176,39 @@ int main() {
   // register event handlers
     Controller.ButtonL3.pressed(onevent_ControllerButtonL3_pressed_0);
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
-
+  
     wait(15, msec);
-    // vex::task ws1(TaskPin);  
-    // vex::task ws2(TaskBeam);
-     vex::task wsDebug(TaskDebug);
-    // TaskDriveTrain();
-    TaskAutonomous();
+    vex::task ws1(TaskPin);  
+    vex::task ws2(TaskBeam);
+    vex::task ws3(TaskGuide);
+    vex::task ws4(TaskPinGrabber);
+    vex::task ws5(TaskController);
+    //  vex::task wsDebug(TaskDebug);
+    TaskDriveTrain();
+    // TaskAutonomous();
 }
 
 // Print rear distance sensor reading.
 void PrintDistance(){
     printf("Distance : %u\n", (uint16_t)dis_rear.objectDistance(mm));
-    
+}
+
+// Retract the Y-guide safely: clear both out-flags and fire the pneumatic directly.
+// Using the mutex prevents multiple tasks from racing on the same channel.
+void YGuidInSafe() {
+    gYGuidCmdMutex.lock();
+    fBeamGuideOut = false;
+    fPinGuideOut  = false;
+    yGuidIn;
+    gYGuidCmdMutex.unlock();
+}
+
+// Extend the Y-guide safely: set the beam-out flag and fire the pneumatic directly.
+void YGuidOutSafe() {
+    gYGuidCmdMutex.lock();
+    fBeamGuideOut = true;
+    yGuidOut;
+    gYGuidCmdMutex.unlock();
 }
 
 // Periodic debug output task.

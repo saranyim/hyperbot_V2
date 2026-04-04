@@ -21,7 +21,8 @@ int TaskDriveTrain() {
         // Emergency-stop sequence triggered from drivetrain task on R3 edge.
         const bool r3Now = Controller.ButtonR3.pressing();
         if (r3Now && !btnR3Pressed) {
-            YGuidInSafe();
+            fBeamGuideOut = false;
+            fPinGuideOut = false;
             ReleaseBeam;
             ReleasePin;
             handUp;
@@ -56,7 +57,7 @@ int TaskDriveTrain() {
             // turnFactor = 0.7 * speedFactor;
             if (ReverseDir) {
 #if side == redSide
-                TouchLED12.setColor(blue);
+                TouchLED12.setColor(red);
 #else
                 TouchLED12.setColor(blue);
 #endif
@@ -68,7 +69,7 @@ int TaskDriveTrain() {
                 mot_dtRight.setVelocity((axisA * speedFactor + (stickB * turnFactor)) , percent);
                 mot_dtLeft.setVelocity((axisA * speedFactor - (stickB * turnFactor)) , percent);
             }
-            if(Brain.Battery.capacity() < 85){
+            if(Brain.Battery.capacity() < 70){
                 TouchLED12.setColor(purple);
             }
    

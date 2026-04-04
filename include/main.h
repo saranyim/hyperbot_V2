@@ -4,7 +4,7 @@
 #define redSide 1
 #define blueSide 2
 
-#define side blueSide
+#define side redSide
 
 #define fixHand 0
 using namespace vex;
@@ -14,7 +14,8 @@ typedef enum {
   bottom = 2,
   mid = 3,
   aboveStandoff = 4,
-  posFloat = 5
+  posFloat = 5,
+  getStartingPin = 6
 } position_t;
 
 
@@ -53,9 +54,20 @@ extern distance dis_rear;
 extern touchled TouchLED12;
 
 extern volatile bool gPlaceBeam2StackRunning;
-void YGuidInSafe();
-void YGuidOutSafe();
 
+extern bool fBtnFupPressed ;
+extern bool fBtnFdownPressed ;
+extern bool fBtnEupPressed ;
+extern bool fBtnEdownPressed ;
+extern bool fBtnRupPressed ;
+extern bool fBtnRdownPressed ;
+extern bool fBtnLupPressed ; 
+extern bool fBtnLdownPressed ;
+
+
+extern bool fBeamGuideOut;
+extern bool fPinGuideOut;
+extern bool fRetractGuide;
 
 #define pneuCBeamGrab cylinder1
 #define pneuCPinGrab cylinder2
@@ -64,8 +76,8 @@ void YGuidOutSafe();
 #define pneuCBeamGuide cylinder2
 
 
-#define ReleasePin  pneuVGrabber.retract(pneuCPinGrab); pinGraber = release
-#define GrabPin  pneuVGrabber.extend(pneuCPinGrab); pinGraber = grab
+#define ReleasePin pinGraber = release
+#define GrabPin  pinGraber = grab
 
 #define ReleaseBeam  pneuVGuide.retract(cylinder1); beamGraber = release
 #define GrabBeam  pneuVGuide.extend(cylinder1); beamGraber = grab
@@ -80,5 +92,7 @@ void YGuidOutSafe();
 
 
 void PrintDistance();
+void YGuidInSafe();
+void YGuidOutSafe();
 
 #define IS_IN_RANGE(value, min, max) ((value >= min) && (value <= max))
