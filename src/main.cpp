@@ -172,20 +172,23 @@ int main() {
     
     mot_dtLeft.setStopping(brake);
     mot_dtRight.setStopping(brake);
-    pneuVGrabber.pumpOn();
+    
   // register event handlers
     Controller.ButtonL3.pressed(onevent_ControllerButtonL3_pressed_0);
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
-  
+
     wait(15, msec);
+
     vex::task ws1(TaskPin);  
     vex::task ws2(TaskBeam);
     vex::task ws3(TaskGuide);
     vex::task ws4(TaskPinGrabber);
     vex::task ws5(TaskController);
-    //  vex::task wsDebug(TaskDebug);
-    TaskDriveTrain();
-    // TaskAutonomous();
+    vex::task wsDebug(TaskDebug);
+    TaskAutonomous();
+    pneuVGrabber.pumpOn();
+    // TaskDriveTrain();
+    
 }
 
 // Print rear distance sensor reading.
@@ -197,12 +200,11 @@ void PrintDistance(){
 // Periodic debug output task.
 int TaskDebug() {
     while(1){
-        // printf("Dis Left: %u ", (uint16_t)dis_rear.objectDistance(mm));
-        // printf(" Dis Right: %u", (uint16_t)dis_right.objectDistance(mm));
-        // printf(" heading: %u\n", (uint16_t)Inertial.angle());
+        printf(" Dis: %u", (uint16_t)dis_rear.objectDistance(mm));
+        printf(" heading: %u\n", (uint16_t)Inertial.angle());
         // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
         // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
-        PrintDistance();
+        // PrintDistance();
         wait(500, msec);
     }
 }

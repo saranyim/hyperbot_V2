@@ -105,6 +105,7 @@ void Drop_Pin_Arm() {
     mg_pin.spin(forward); 
     wait(0.2, seconds);
     WaitPinStopOrNoSpeedChange(10.0);
+    mg_pin.setStopping(brake);
     mg_pin.stop();
     printf("done\n");
 }
@@ -253,9 +254,14 @@ int TaskPin() {
                 mg_pin.setPosition(0, degrees);
                 printf("pin Pos %d\n",(int16_t)mg_pin.position(degrees));
                 mg_pin.setVelocity(100.0, percent);
-                mg_pin.setMaxTorque(100.0, percent);     
+                mg_pin.setMaxTorque(100.0, percent);   
+#if robot_number == 1  
+                mg_pin.spinFor(spinPinUp, 115 , degrees, false);
+                wait(0.5, seconds);
+#elif robot_number == 6
                 mg_pin.spinFor(spinPinUp, 130 , degrees, false);
                 wait(0.5, seconds);
+#endif
                 mg_pin.stop();
                 // mg_pin.setVelocity(30, percent);
                 // mg_pin.spin(spinPinDown);
@@ -285,6 +291,8 @@ int TaskPin() {
         else if(fBtnFupPressed) {
             // check flip only if pin is at bottom
             if(pinPos == mid){
+                mg_pin.setStopping(coast);
+                mg_pin.stop();
                 // mg_pin.spin(spinPinDown);
                 // wait(0.2, seconds);
                 ReleasePin;

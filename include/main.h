@@ -1,6 +1,7 @@
 #pragma once
 #include "vex.h"
 
+#define robot_number 1
 #define redSide 1
 #define blueSide 2
 

@@ -11,27 +11,16 @@ uint16_t driveSpeed = 70;
 uint16_t turnSpeed = 15;
 uint16_t adjustTurnSpeed = 6;
 double distanceToGo;
-void Auto_Drop_Down_Pin_Grab_Up();
-void Auto_Flip_Pin_Over();
-void from_Start_to_Yellow();
-void reverse_to_get_Blue();
-void spin_to_get_blue();
-void spin_to_get_to_position();
-void go_forward_to_make_stack();
-void go_backwards_to_place_pin_on_stand_off();
-void spin_to_get_beam();
-void go_backwards_to_get_beam();
-void go_forward_to_spin_to_stand_off(); 
-void go_reverse_to_stand_off();
-void reverse_to_set_distance();
-void spin_to_get_to_standoff();
+
 void trim_heading(uint16_t heading);
 double Distance_MM_to_Degrees(double distance_mm);
+void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct);
 
 void SpinLeft(uint16_t heading);
 void SpinRight(uint16_t heading);
 
 void turnTo(double targetDeg) ;
+void turnBy(double deltaDeg);
 
 // Safety timer to stop auton after 60 seconds.
 int TaskAutoCnt(){
@@ -51,6 +40,104 @@ void WaitTouchDebug(){
     }
 }
 
+
+void GotoDistance(uint16_t distance_mm){
+    const double maxSpeedPct = 75.0;
+    const double minDriveSpeedPct = 14.0;
+    const double maxTrimSpeedPct = 22.0;
+    const double slowDownDistanceMm = 400.0;
+    const double coarseToleranceMm = 25.0;
+    const double fineToleranceMm = 6.0;
+    const double accelStepPct = 3.0;
+    const double decelStepPct = 5.0;
+    const double moveTimeoutSec = 4.0;
+    const double trimTimeoutSec = 1.2;
+
+    auto setDrive = [](double signedSpeedPct) {
+        mot_dtLeft.spin(fwd, signedSpeedPct, pct);
+        mot_dtRight.spin(fwd, signedSpeedPct, pct);
+    };
+
+    auto clampSpeed = [](double value, double low, double high) {
+        if(value < low){
+            return low;
+        }
+        if(value > high){
+            return high;
+        }
+        return value;
+    };
+
+    printf("Goto distance %d\n", distance_mm);
+    printf("current distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
+
+    mot_dtLeft.setStopping(brake);
+    mot_dtRight.setStopping(brake);
+    mot_dtLeft.setPosition(0, degrees);
+    mot_dtRight.setPosition(0, degrees);
+
+    timer moveTimer;
+    moveTimer.reset();
+    double commandedSpeedPct = 0.0;
+
+    while(moveTimer.time(seconds) < moveTimeoutSec){
+        const double currentDistanceMm = dis_rear.objectDistance(mm);
+        const double errorMm = distance_mm - currentDistanceMm;
+        const double absErrorMm = fabs(errorMm);
+
+        if(absErrorMm <= coarseToleranceMm){
+            break;
+        }
+
+        double targetSpeedPct = minDriveSpeedPct +
+            ((maxSpeedPct - minDriveSpeedPct) * absErrorMm / slowDownDistanceMm);
+        targetSpeedPct = clampSpeed(targetSpeedPct, minDriveSpeedPct, maxSpeedPct);
+
+        if(commandedSpeedPct < targetSpeedPct){
+            commandedSpeedPct += accelStepPct;
+            if(commandedSpeedPct > targetSpeedPct){
+                commandedSpeedPct = targetSpeedPct;
+            }
+        }
+        else{
+            commandedSpeedPct -= decelStepPct;
+            if(commandedSpeedPct < targetSpeedPct){
+                commandedSpeedPct = targetSpeedPct;
+            }
+        }
+
+        const double signedSpeedPct = errorMm > 0.0 ? -commandedSpeedPct : commandedSpeedPct;
+        setDrive(signedSpeedPct);
+        wait(20, msec);
+    }
+
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
+    wait(100, msec);
+
+    timer trimTimer;
+    trimTimer.reset();
+    while(trimTimer.time(seconds) < trimTimeoutSec){
+        const double currentDistanceMm = dis_rear.objectDistance(mm);
+        const double errorMm = distance_mm - currentDistanceMm;
+        const double absErrorMm = fabs(errorMm);
+
+        if(absErrorMm <= fineToleranceMm){
+            break;
+        }
+
+        double trimSpeedPct = minDriveSpeedPct + (absErrorMm * 0.15);
+        trimSpeedPct = clampSpeed(trimSpeedPct, minDriveSpeedPct, maxTrimSpeedPct);
+        const double signedTrimSpeedPct = errorMm > 0.0 ? -trimSpeedPct : trimSpeedPct;
+        setDrive(signedTrimSpeedPct);
+        wait(15, msec);
+    }
+
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
+    printf("final distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
+    printf("left/right deg %u %u\n", (uint16_t)fabs(mot_dtLeft.position(degrees)), (uint16_t)fabs(mot_dtRight.position(degrees)));
+}
 // 1 wheel rotation = 8 inches
 // Main autonomous routine sequence.
 int TaskAutonomous() {
@@ -59,6 +146,9 @@ int TaskAutonomous() {
    
     Brain.Screen.setCursor(2, 1);
     TouchLED12.setColor(red);
+
+   pneuVGrabber.pumpOff();
+
 
     while(TouchLED12.pressing() == false){
         wait(0.02, seconds);
@@ -70,295 +160,74 @@ int TaskAutonomous() {
     
     }
 
-    Inertial.calibrate();
-    ledBlinkCount = 5;
-    while(ledBlinkCount--){
+    // Inertial.calibrate();
+    // ledBlinkCount = 5;
+    Inertial.startCalibration();
+    while(Inertial.isCalibrating()){
+      
         TouchLED12.setColor(yellow);
         wait(0.5,seconds);
         TouchLED12.setColor(red);
         wait(0.5,seconds);
     }
-
     Inertial.setHeading(90, degrees);
+    pneuVGrabber.pumpOn();
+    TouchLED12.setColor(green);
+
+    WaitTouchDebug();
+    mg_beam.setStopping(hold);
+    MoveForDistance(reverse, 300, 50);
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,540,degrees,true);
-    beamPos=mid;
-    pneuVGrabber.retract(pneuCBeamGrab);
-    while(true){
-        
-        TouchLED12.setColor(green);
-        wait(0.1, seconds);
-        TouchLED12.setColor(blue_green);
-        wait(0.1, seconds);
-        if(TouchLED12.pressing()){
-            // debouce
-            while(TouchLED12.pressing() == true){
-
-                wait(0.02, seconds);
-            
-            }
-            break;
-        }
-    }
-    pneuVGrabber.extend(pneuCBeamGrab);
-    while(true){
-        if((uint16_t)Inertial.heading() ==119){
-            TouchLED12.setColor(green);
-        }
-        else{
-            TouchLED12.setColor(yellow);
-        }
-        wait(0.02, seconds);
-        if(TouchLED12.pressing()){
-            break;
-        }
-    }
-    OverRideDriveTrain = false;
-    mot_dtRight.setVelocity(driveSpeed, percent);
-    mot_dtLeft.setVelocity(driveSpeed, percent);
-    mot_dtLeft.setPosition(0.0, degrees);
-    mot_dtRight.setPosition(0.0, degrees);
+    mg_beam.spinFor (spinBeamUp,120,degrees,true);
+    GrabPin;
+    
+    GotoDistance(1320);
+    turnTo(180);
+    wait(0.5, seconds);
+    turnTo(180);
+    wait(0.5, seconds);
+    // mot_dtLeft.setVelocity(70, percent);
+    // mot_dtRight.setVelocity(70, percent);
+    // mot_dtLeft.spin(forward);
+    // mot_dtRight.spin(forward);
+    // wait(1.5, seconds);
+    // mot_dtLeft.stop();
+    // mot_dtRight.stop();
+    ReleasePin;
+    GotoDistance(630);
+    GrabPin;
     Grab_then_up();
-   
-
-    TouchLED12.setBlink(red_violet, 0.1, 0.1);
-    while(TouchLED12.pressing() == false){
-    
-        wait(0.02, seconds);
-        }
-    vex::task wsAuto(TaskAutoCnt);
-    
-    TouchLED12.setColor(yellow_green);
-    printf("touch\n");
-    mot_dtRight.setVelocity(driveSpeed, percent);
-    mot_dtLeft.setVelocity(driveSpeed, percent);
-    distanceToGo = dis_rear.objectDistance(mm);
-    Set_Drop_Pin();
-    from_Start_to_Yellow();
-    // wait(0.5, seconds);
+    GotoDistance(950);
+    turnTo(200);
+    wait(0.2, seconds);
+    turnTo(200);
     // WaitTouchDebug();
-
-
-
-    reverse_to_get_Blue();
-    // wait(0.5, seconds);
-    Grab_Beam_up();
-    // WaitTouchDebug();
-    printf("touch\n");
-    spin_to_get_blue();
-    // wait(0.5, seconds);
-    // WaitTouchDebug();
-
-    go_forward_to_make_stack();
-   
-    Auto_Drop_Down_Pin_Grab_Up();
-
-
-    distanceToGo = 200;
-    mot_dtLeft.setVelocity(100, percent);
-    mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtLeft.stop();
-    // wait(0.5, seconds);
-    // WaitTouchDebug();
-
-
-    reverse_to_set_distance();
-    //  wait(0.5, seconds);
-
-
-
-    
-
-    go_backwards_to_place_pin_on_stand_off();
-    // wait(0.3, seconds);
-    // WaitTouchDebug();
-
-
-
-    spin_to_get_beam();
-    // wait(0.5, seconds);
-    // WaitTouchDebug();
-
-    go_backwards_to_get_beam();
-    // wait(0.5, seconds);
-    // WaitTouchDebug();
-
-    Auto_Flip_Pin_Over();
-    // wait(0.5, seconds);
-    go_forward_to_spin_to_stand_off();
-    // WaitTouchDebug();
-
-
-    Grab_Beam_up();
-    // wait(0.5, seconds);
-    // WaitTouchDebug();
-    spin_to_get_to_standoff();
-    // wait(0.5, seconds);
-
-    go_reverse_to_stand_off();
-    // wait(0.5, seconds);
-    // WaitTouchDebug();
-    Place_Beam_Stand_Off();
-    // wait(0.5, seconds);
-
-
-    
+    GotoDistance(750);
+    DropDownMakeStack();
+    WaitTouchDebug();
     return 0;
     
 }
-// Drive from start to the yellow goal and grab.
-void from_Start_to_Yellow(){
-    distanceToGo = 1050;
-    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-   
-    mot_dtLeft.setVelocity(turnSpeed, percent);
-    mot_dtRight.setVelocity(turnSpeed, percent);
-    mot_dtLeft.spinFor(forward,220,degrees,false);
-    mot_dtRight.spinFor(forward,220,degrees,false);
-    wait(0.5,seconds);
-    Grab_then_up();
-    // WaitTouchDebug();
-    
-}
 
+void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct){
+    mot_dtLeft.setVelocity(speed_pct, percent);
+    mot_dtRight.setVelocity(speed_pct, percent);
+    mot_dtLeft.spin(dir);
+    mot_dtRight.spin(dir);
 
-
-// Reverse to reach the blue goal position.
-void reverse_to_get_Blue(){
-    mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.setVelocity(100, percent);
-    distanceToGo = 480;
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtRight.stop();
-    // WaitTouchDebug();
-
-      
-}
-
-// Turn toward the blue target.
-void spin_to_get_blue(){
-    turnTo(155);
-//    SpinRight(156);
-//    WaitTouchDebug();
-}
-
-// Drive forward to stack position.
-void go_forward_to_make_stack(){
-    // WaitTouchDebug();
-    mot_dtLeft.setVelocity(driveSpeed, percent);
-    mot_dtRight.setVelocity(driveSpeed, percent);
-    distanceToGo = 850;
-    mot_dtLeft.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(forward, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtLeft.stop();
-    mot_dtLeft.setVelocity(30, percent);
-    mot_dtRight.setVelocity(30, percent);
-    mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
-    wait(0.6, seconds);
-    mot_dtRight.stop();
-    mot_dtLeft.stop();
-}
-
-// Reverse to a target distance using the rear sensor.
-void reverse_to_set_distance(){
-// SpinRight(180);
-    turnTo(180);
-
-// WaitTouchDebug();
-
-    distanceToGo = dis_rear.objectDistance(mm) - 1080;
-    if(distanceToGo < 0) {
-        distanceToGo = 0;
+    const double targetDegrees = Distance_MM_to_Degrees(distance_mm);
+    while(fabs(mot_dtLeft.position(degrees)) < targetDegrees && fabs(mot_dtRight.position(degrees)) < targetDegrees){
+        wait(20, msec);
     }
-    mot_dtLeft.setVelocity(40, percent);
-    mot_dtRight.setVelocity(40, percent);
-    
-    
-    mot_dtLeft.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, false);
-    mot_dtRight.spinFor(reverse, Distance_MM_to_Degrees(distanceToGo), degrees, true);
-    mot_dtRight.stop();
-    mot_dtRight.stop();
-    wait(0.5, seconds);
-    SpinLeft(90);
-    // WaitTouchDebug();
-      
-}
-
-
-// Back into place and drop the pin on the standoff.
-void go_backwards_to_place_pin_on_stand_off(){
-    mot_dtRight.setVelocity(85, percent);
-    mot_dtLeft.setVelocity(85, percent);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-    wait(1.0, seconds);
-    mot_dtRight.stop();
-    mot_dtRight.stop(); 
-    wait(0.5, seconds);      
-    Place_Pin_On_Stand_Off();
-}
-
-// Turn to face the beam target.
-    void spin_to_get_beam(){
-        turnTo(270);
-    }
-
-
-
-// Reverse to pick up the beam.
-    void go_backwards_to_get_beam(){
-    mot_dtLeft.setVelocity(100, percent);
-    mot_dtRight.setVelocity(100, percent);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-    wait(1.8, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-    wait(0.2, seconds);
-    pneuVGrabber.extend(cylinder1);
-    
-}
-
-// Drive forward before turning to the standoff.
-void go_forward_to_spin_to_stand_off(){
-    mot_dtLeft.spin(forward);
-    mot_dtRight.spin(forward);
-    wait(0.6, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
-}
-
-// Turn to face the standoff.
-void spin_to_get_to_standoff(){
-    turnTo(90);
-}
-
-// Reverse into the standoff placement zone.
-void go_reverse_to_stand_off(){
-    mot_dtLeft.setVelocity(driveSpeed, percent);
-    mot_dtRight.setVelocity(driveSpeed, percent);
-    mot_dtLeft.spin(reverse);
-    mot_dtRight.spin(reverse);
-    wait(1.5, seconds);
-    mot_dtLeft.stop();
-    mot_dtRight.stop();
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
 }
 
 
 // Convert travel distance in mm to wheel degrees.
 double Distance_MM_to_Degrees(double distance_mm){
-    return distance_mm / (8.0* 25.4) * 360.0;
+    return distance_mm / (12.0* 25.4) * 360.0;
 }
 
 // Drop the pin and return arm to the up position.
@@ -393,6 +262,7 @@ void Auto_Drop_Down_Pin_Grab_Up() {
 }
 
 
+
 // Spin left to a target inertial heading.
 void SpinLeft(uint16_t heading){
 mot_dtLeft.setVelocity(turnSpeed, percent);
@@ -413,8 +283,8 @@ mot_dtLeft.setVelocity(turnSpeed, percent);
     mot_dtLeft.setVelocity(adjustTurnSpeed,percent);
     mot_dtRight.setVelocity(adjustTurnSpeed,percent);
     
-    mot_dtRight.spin(reverse);
-    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
+    mot_dtLeft.spin(reverse);
     while(1){
         if((uint16_t)Inertial.angle()>=heading)
         {
@@ -453,8 +323,8 @@ void SpinRight(uint16_t heading){
     mot_dtLeft.setVelocity(adjustTurnSpeed,percent);
     mot_dtRight.setVelocity(adjustTurnSpeed,percent);
     
-    mot_dtRight.spin(forward);
-    mot_dtLeft.spin(reverse);
+    mot_dtRight.spin(reverse);
+    mot_dtLeft.spin(forward);
 
     while(1){  
         if((uint16_t)Inertial.angle()<=heading)
@@ -561,10 +431,10 @@ void trim_heading(uint16_t heading){
 // PD turn controller to a target heading.
 void turnTo(double targetDeg) {
 
-    double Kp = 1.4;       // ค่าปกติเริ่มต้น
-    double Kd = 0.12;      // ลด overshoot
-    double maxPower = 70;  // จำกัดเพื่อความ smooth
-    double minPower = 10;  // ป้องกัน stall
+    double Kp = 1.0;       // ค่าปกติเริ่มต้น
+    double Kd = 0.08;      // ลด overshoot
+    double maxPower = 35;  // จำกัดเพื่อความ smooth
+    double minPower = 5;  // ป้องกัน stall
     
     double error, prevError = 0;
     double derivative;
@@ -588,8 +458,8 @@ void turnTo(double targetDeg) {
         if (fabs(power) < minPower) power = copysign(minPower, power);
 
         // turn
-        mot_dtLeft.spin(fwd,  power, pct);
-        mot_dtRight.spin(fwd, -power, pct);
+        mot_dtLeft.spin(fwd,  -power, pct);
+        mot_dtRight.spin(fwd, power, pct);
 
         prevError = error;
         wait(10, msec);
@@ -597,4 +467,17 @@ void turnTo(double targetDeg) {
 
     mot_dtLeft.stop(brake);
     mot_dtRight.stop(brake);
+}
+
+void turnBy(double deltaDeg) {
+    double targetDeg = Inertial.angle() + deltaDeg;
+
+    while(targetDeg >= 360.0) {
+        targetDeg -= 360.0;
+    }
+    while(targetDeg < 0.0) {
+        targetDeg += 360.0;
+    }
+
+    turnTo(targetDeg);
 }
