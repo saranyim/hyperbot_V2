@@ -140,6 +140,8 @@ void GotoDistance(uint16_t distance_mm){
 }
 // 1 wheel rotation = 8 inches
 // Main autonomous routine sequence.
+
+
 int TaskAutonomous() {
     int ledBlinkCount;
     pneuVGuide.retract(pneuCPinGuide);
@@ -200,10 +202,11 @@ int TaskAutonomous() {
     Grab_then_up();
     GotoDistance(950);
     turnTo(200);
-    wait(0.2, seconds);
+    wait(0.5, seconds);
     turnTo(200);
+    wait(0.5, seconds);
     // WaitTouchDebug();
-    GotoDistance(750);
+    MoveForDistance(reverse, 350, 50);
     DropDownMakeStack();
     WaitTouchDebug();
     return 0;
