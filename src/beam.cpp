@@ -401,14 +401,15 @@ int TaskBeam() {
             else {
                 beamPos = posFloat;
                 GrabBeam;
-                wait(0.5, seconds);
-                mg_beam.setVelocity(100, percent);
-                mg_beam.setMaxTorque(100, percent);
-                mg_beam.setStopping(hold);
                 ReverseDir = true;
-                mg_beam.spinFor(spinBeamUp,100,degrees,false);
-                wait(0.3, seconds);
-                mg_beam.stop();
+                // wait(0.5, seconds);
+                // mg_beam.setVelocity(100, percent);
+                // mg_beam.setMaxTorque(100, percent);
+                // mg_beam.setStopping(hold);
+                
+                // mg_beam.spinFor(spinBeamUp,100,degrees,false);
+                // wait(0.3, seconds);
+                // mg_beam.stop();
                 
             }
             fBtnFdownPressed = false;
