@@ -300,12 +300,16 @@ int TaskPin() {
         else if(fBtnFupPressed) {
             // check flip only if pin is at bottom
             if(pinPos == mid){
+                OverRideDriveTrain = true;
+                mot_dtLeft.setVelocity(0, percent);
+                mot_dtRight.setVelocity(0, percent);
                 // mg_pin.spin(spinPinDown);
-                // wait(0.2, seconds);
+                wait(0.2, seconds);
                 ReleasePin;
                 // mg_pin.spin(spinBeamUp);
-                // wait(0.3, seconds);
+                wait(0.5, seconds);
                 // mg_pin.stop();
+                OverRideDriveTrain = false;
             }
             else{
                 Grab_Release_Pin();     
