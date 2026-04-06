@@ -95,7 +95,7 @@ void Drop_Pin_Arm() {
     if(beamPos != top)
         YGuidInSafe();
     mg_pin.setMaxTorque(10.0, percent);
-    mg_pin.setStopping(hold);
+    mg_pin.setStopping(brake);
     mg_pin.setVelocity(80.0, percent);
     mg_pin.spin(forward);
 
