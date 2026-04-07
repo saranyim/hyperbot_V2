@@ -88,16 +88,15 @@ void Grab_Beam_up_91() {
    
     // mg_beam.setTimeout(2.5, seconds);
     mg_beam.setStopping(hold);
-#if side == redSide
+#if robot_number == 1
+    mg_beam.spinFor(spinBeamUp,350,degrees,false);
+    wait(1,seconds);
+    fBeamGuideOut = true;
+#elif robot_number == 6
+
     mg_beam.spinFor(spinBeamUp,330,degrees,false);
     wait(1,seconds);
     fBeamGuideOut = true;
-#else
-    // mg_beam.spinFor(spinBeamUp,600,degrees);
-    mg_beam.spin(spinBeamUp);
-    wait(200, msec);
-    WaitBeamStopOrNoSpeedChange(5.0);
-    mg_beam.stop();
 #endif
  
     beamPos = top;
@@ -148,43 +147,30 @@ void Place_Beam_2_Stack() {
 }
 // Place beam on the standoff using rear alignment.
 void Place_Beam_Stand_Off() {
-  
-    // OverRideDriveTrain = true;
-    // if((uint16_t)dis_rear.objectDistance(mm) < 45){
-    //     mot_dtRight.setVelocity(20, percent);
-    //     mot_dtLeft.setVelocity(20, percent);
-    //     mot_dtRight.setMaxTorque(100, percent);
-    //     mot_dtLeft.setMaxTorque(100, percent);
-    //     mot_dtLeft.spin(reverse);
-    //     mot_dtRight.spin(reverse);
-    //     timer rangeTimer;
-    //     rangeTimer.reset();
-    //     while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 40, 50) == false) {
-    //         if(rangeTimer.time(msec) > 3000) {
-    //             break;
-    //         }
-    //         wait(2, msec);
-    //     }
-    //     mot_dtLeft.stop(brake);
-    //     mot_dtRight.stop(brake);
-    // }
-    // mot_dtLeft.stop();
-    // mot_dtRight.stop();
-    // wait(0.1, seconds);
-    // move beam down
     printf("beam down\n");
+    OverRideDriveTrain = true;
+    mot_dtLeft.setVelocity(0,percent);
+    mot_dtRight.setVelocity(0,percent);
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
+    wait(0.2,seconds);
     mg_beam.setMaxTorque(100.0, percent);
     mg_beam.setVelocity(50, percent);
-    mg_beam.setStopping(coast);
+    // mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
-
+#if robot_number == 1
+    mg_beam.spinFor(spinBeamDown,50,degrees,true); 
+#elif robot_number == 6
     mg_beam.spinFor(spinBeamDown,40,degrees,true); 
+#endif
+
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
-    ReleaseBeam ;
     wait(0.1,seconds);
+    ReleaseBeam ;
+  
     OverRideDriveTrain = false;
     Drop_Y_Arm();
 }
