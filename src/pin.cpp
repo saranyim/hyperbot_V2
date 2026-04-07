@@ -277,9 +277,9 @@ int TaskPin() {
         }   
         else if (fBtnEdownPressed) {
             Brain.Timer.reset();
-            if (pinPos == bottom){
+            // if (pinPos == bottom){
                 Flip_Pin_Over();
-            }
+            // }
             fBtnEdownPressed = false;
         }
         else if(fBtnFupPressed) {
@@ -312,12 +312,14 @@ int TaskPin() {
                 mg_pin.setStopping(hold);
                 wait(0.3, seconds);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 120.0 , degrees, true);
+                mg_pin.spinFor(reverse, 120.0 , degrees, false);
+                wait(0.5,seconds);
+                mg_pin.stop();
                 pinPos = top;
                 handDown;
                 
             }
-            while (Controller.AxisC.position() > 10)
+            while (Controller.AxisC.position() > 20)
             {
                 /* code */
                 wait(20, msec);
@@ -332,7 +334,7 @@ int TaskPin() {
                 mg_pin.spinFor(reverse, 120 , degrees, false);
                 pinPos = mid;
             }
-            while (Controller.AxisC.position() < -10)
+            while (Controller.AxisC.position() < -20)
             {
                 /* code */
                 wait(20, msec);
