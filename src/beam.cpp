@@ -179,7 +179,7 @@ void Place_Beam_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
 
-    mg_beam.spinFor(spinBeamDown,100,degrees,true); 
+    mg_beam.spinFor(spinBeamDown,40,degrees,true); 
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
