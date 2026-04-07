@@ -41,9 +41,38 @@ degree height
 400 25cm
 */
 
+void Grab_Beam_up_121() {
+    // printf("beam up");
+    fBeamMovingUp = true;
+    mg_beam.setVelocity(100.0, percent);
+    mg_beam.setMaxTorque(100.0, percent);
+    // mg_beam.spin(spinBeamDown);
+    // wait(20, msec);
+    // while(mg_beam.velocity(percent) > 0) {
+    //     wait(20, msec);
+    // }
+    // mg_beam.stop();
+    GrabBeam;
+    wait(0.2, seconds);
+   
+    // mg_beam.setTimeout(2.5, seconds);
+    mg_beam.setStopping(hold);
+
+    // mg_beam.spinFor(spinBeamUp,600,degrees);
+    mg_beam.spin(spinBeamUp);
+    wait(200, msec);
+    WaitBeamStopOrNoSpeedChange(5.0);
+    mg_beam.stop();
+
+ 
+    beamPos = top;
+    fBeamMovingUp = false;
+
+    
+}
 
 // Raise beam arm and grab the beam.
-void Grab_Beam_up() {
+void Grab_Beam_up_91() {
     // printf("beam up");
     fBeamMovingUp = true;
     mg_beam.setVelocity(100.0, percent);
@@ -284,7 +313,7 @@ int TaskBeam() {
     wait(1,seconds);
     beamPos = bottom;
     beamGraber = release;
-    pinPos = bottom;
+  
     pinGraber = release;
 
     ReleaseBeam;
@@ -309,24 +338,20 @@ int TaskBeam() {
             printf("L UP");
             printf("\n");
             Brain.Timer.reset();
-//             if ((beamPos == bottom) || (beamPos == mid) || (beamPos == posFloat)) {     
-// #if side == blueSide                      
-//                 ReverseDir = false;
-//                 Set_Drop_Pin();
-// #endif
-                
-//                 printf("grab beam up\n");
-//                 Grab_Beam_up();
-//                 beamPos = top;   
-//             } 
-//             else 
-            if (beamPos == top) {
-                printf("place beam stand off\n");
-#if side == redSide
-                Place_Beam_2_Stack();
-#else
-                Place_Beam_Stand_Off();
+            if ((beamPos == bottom) || (beamPos == mid) || (beamPos == posFloat)) {     
+#if side == blueSide                      
+                ReverseDir = false;
+                Set_Drop_Pin();
 #endif
+                
+                printf("grab beam up\n");
+                Grab_Beam_up_121();
+                beamPos = top;   
+            } 
+            else 
+                if (beamPos == top) {
+                printf("place beam stand off\n");
+                Place_Beam_Stand_Off();
                 beamPos = bottom;
             } 
             else {
@@ -335,14 +360,22 @@ int TaskBeam() {
             fBtnLupPressed = false;
         }
         else if (fBtnLdownPressed) {
-            if(beamPos == top ){
-                printf("L Down");
-                printf("\n");
-                Brain.Timer.reset();
+            printf("L UP");
+            printf("\n");
+            Brain.Timer.reset();
+            if ((beamPos == bottom) || (beamPos == mid) || (beamPos == posFloat)) {     
+                printf("grab beam up\n");
+                Grab_Beam_up_91();
+                beamPos = top;   
+            } 
+            else 
+                if (beamPos == top) {
+                printf("place beam stand off\n");
                 Place_Beam_2_Stack();
-                
                 beamPos = bottom;
-                ReverseDir = true;
+            } 
+            else {
+                mg_beam.stop();
             }
             fBtnLdownPressed = false;
         }
@@ -368,14 +401,15 @@ int TaskBeam() {
             else {
                 beamPos = posFloat;
                 GrabBeam;
-                wait(0.5, seconds);
-                mg_beam.setVelocity(100, percent);
-                mg_beam.setMaxTorque(100, percent);
-                mg_beam.setStopping(hold);
                 ReverseDir = true;
-                mg_beam.spinFor(spinBeamUp,100,degrees,false);
-                wait(0.3, seconds);
-                mg_beam.stop();
+                // wait(0.5, seconds);
+                // mg_beam.setVelocity(100, percent);
+                // mg_beam.setMaxTorque(100, percent);
+                // mg_beam.setStopping(hold);
+                
+                // mg_beam.spinFor(spinBeamUp,100,degrees,false);
+                // wait(0.3, seconds);
+                // mg_beam.stop();
                 
             }
             fBtnFdownPressed = false;
