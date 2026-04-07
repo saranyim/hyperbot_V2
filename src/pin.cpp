@@ -254,8 +254,13 @@ int TaskPin() {
                 printf("pin Pos %d\n",(int16_t)mg_pin.position(degrees));
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);     
+#if robot_number == 1  
+                mg_pin.spinFor(spinPinUp, 115 , degrees, false);
+                wait(0.5, seconds);
+#elif robot_number == 6
                 mg_pin.spinFor(spinPinUp, 130 , degrees, false);
                 wait(0.5, seconds);
+#endif 
                 mg_pin.stop();
                 // mg_pin.setVelocity(30, percent);
                 // mg_pin.spin(spinPinDown);
@@ -277,9 +282,9 @@ int TaskPin() {
         }   
         else if (fBtnEdownPressed) {
             Brain.Timer.reset();
-            if (pinPos == bottom){
+            // if (pinPos == bottom){
                 Flip_Pin_Over();
-            }
+            // }
             fBtnEdownPressed = false;
         }
         else if(fBtnFupPressed) {
@@ -312,12 +317,14 @@ int TaskPin() {
                 mg_pin.setStopping(hold);
                 wait(0.3, seconds);
                 mg_pin.setTimeout(0.5, seconds);
-                mg_pin.spinFor(reverse, 120.0 , degrees, true);
+                mg_pin.spinFor(reverse, 120.0 , degrees, false);
+                wait(0.5,seconds);
+                mg_pin.stop();
                 pinPos = top;
                 handDown;
                 
             }
-            while (Controller.AxisC.position() > 10)
+            while (Controller.AxisC.position() > 20)
             {
                 /* code */
                 wait(20, msec);
@@ -332,7 +339,7 @@ int TaskPin() {
                 mg_pin.spinFor(reverse, 120 , degrees, false);
                 pinPos = mid;
             }
-            while (Controller.AxisC.position() < -10)
+            while (Controller.AxisC.position() < -20)
             {
                 /* code */
                 wait(20, msec);
