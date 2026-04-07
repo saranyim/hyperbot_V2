@@ -313,7 +313,7 @@ int TaskBeam() {
     wait(1,seconds);
     beamPos = bottom;
     beamGraber = release;
-    pinPos = bottom;
+  
     pinGraber = release;
 
     ReleaseBeam;
