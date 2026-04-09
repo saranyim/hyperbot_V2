@@ -183,7 +183,7 @@ int main() {
     vex::task ws3(TaskGuide);
     vex::task ws4(TaskPinGrabber);
     vex::task ws5(TaskController);
-    //  vex::task wsDebug(TaskDebug);
+     vex::task wsDebug(TaskDebug);
     TaskDriveTrain();
     // TaskAutonomous();
 }
@@ -202,7 +202,8 @@ int TaskDebug() {
         // printf(" heading: %u\n", (uint16_t)Inertial.angle());
         // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
         // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
-        PrintDistance();
+        // PrintDistance();
+        printf("mg pin Pos: %d \n", (uint16_t)mg_pin.position(degrees));
         wait(500, msec);
     }
 }
