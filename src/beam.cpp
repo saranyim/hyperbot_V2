@@ -5,7 +5,8 @@
 using namespace vex;
 
 
-
+timer beamTimer;
+bool fLiftBeamFloat = false;
 #define beamArmDownTorque 10
 bool f1stLup;
 bool fBeamMovingUp;
@@ -318,8 +319,18 @@ int TaskBeam() {
     wait(1,seconds);
     printf("Task Beam Start");
     printf("\n");
+    
     // f1stLup=true;
     while (true) {
+        if((fLiftBeamFloat == true) && (beamTimer.time(seconds) > 0.5)){
+            mg_beam.setVelocity(100, percent);
+            mg_beam.setMaxTorque(100, percent);
+            mg_beam.setStopping(hold);
+
+            mg_beam.spinFor(spinBeamUp,100,degrees,false);
+
+            fLiftBeamFloat = false;
+        }
         if (fBtnLupPressed) {
             printf("L UP");
             printf("\n");
@@ -383,11 +394,14 @@ int TaskBeam() {
                 WaitBeamStopOrNoSpeedChange(5.0);
                 mg_beam.stop();
                 ReleaseBeam;
+                fLiftBeamFloat = false;
             }
             else {
                 beamPos = posFloat;
                 GrabBeam;
                 ReverseDir = true;
+                fLiftBeamFloat = true;
+                beamTimer.reset();
                 // wait(0.5, seconds);
                 // mg_beam.setVelocity(100, percent);
                 // mg_beam.setMaxTorque(100, percent);
