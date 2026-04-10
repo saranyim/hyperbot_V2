@@ -102,10 +102,12 @@ void Drop_Pin_Arm() {
     mg_pin.setMaxTorque(10.0, percent);
     mg_pin.setStopping(hold);
     mg_pin.setVelocity(80.0, percent);
-    mg_pin.spin(forward); 
-    wait(0.2, seconds);
-    WaitPinStopOrNoSpeedChange(10.0);
-    mg_pin.stop();
+    mg_pin.setTimeout(1.0, seconds);
+    
+    mg_pin.spinFor(forward,200 , degrees, false); 
+    // wait(0., seconds);
+    // WaitPinStopOrNoSpeedChange(10.0);
+    // mg_pin.stop();
     printf("done\n");
 }
 
