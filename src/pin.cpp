@@ -224,6 +224,7 @@ int TaskPin() {
 
     while (true) {
         if (fBtnRupPressed) {
+            fBtnRupPressed = false;
             printf("R UP\n");
             Brain.Timer.reset();
             if (bottom == pinPos) {
@@ -232,13 +233,13 @@ int TaskPin() {
                 fPinGuideOut = true;
             }
             else {
-            
                 DropDownMakeStack();
                 pinPos = bottom;
             }
-            fBtnRupPressed = false;
         }
+            
         else if (fBtnRdownPressed) {
+            fBtnRdownPressed = false;
             printf("R Down\n");
             Brain.Timer.reset();
             if(beamPos != top)
@@ -278,7 +279,7 @@ int TaskPin() {
                 ReleasePin;
                 pinPos = bottom;
             }
-            fBtnRdownPressed = false;
+            
         }   
         else if (fBtnEdownPressed) {
             Brain.Timer.reset();
