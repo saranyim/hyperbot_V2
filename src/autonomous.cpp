@@ -4,7 +4,7 @@
 #include "beam.h"
 using namespace vex;
 
-
+ int ledBlinkCount;
 
 
 uint16_t driveSpeed = 70;
@@ -21,6 +21,8 @@ void SpinRight(uint16_t heading);
 
 void turnTo(double targetDeg) ;
 void turnBy(double deltaDeg);
+void PinArmUP();
+void PlaceStackOnStandoff();
 
 // Safety timer to stop auton after 60 seconds.
 int TaskAutoCnt(){
@@ -40,18 +42,38 @@ void WaitTouchDebug(){
     }
 }
 
-
+// Wait for a touch LED press and release.
+void WaitEUp(){
+    while(fBtnEupPressed == false){
+        wait(0.5, seconds);
+        printf("heading %u.%u\n", (uint16_t)Inertial.angle(), (uint16_t)(Inertial.angle() * 10) % 10);  
+        printf("distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
+    }
+    
+    fBtnEupPressed = false;
+}
 void GotoDistance(uint16_t distance_mm){
-    const double maxSpeedPct = 75.0;
-    const double minDriveSpeedPct = 14.0;
-    const double maxTrimSpeedPct = 22.0;
-    const double slowDownDistanceMm = 400.0;
-    const double coarseToleranceMm = 25.0;
-    const double fineToleranceMm = 6.0;
-    const double accelStepPct = 3.0;
-    const double decelStepPct = 5.0;
-    const double moveTimeoutSec = 4.0;
-    const double trimTimeoutSec = 1.2;
+    const double maxApproachSpeedPctMin = 45.0;
+    const double maxApproachSpeedPctMax = 80.0;
+    const double minApproachSpeedPct = 16.0;
+    const double creepSpeedPct = 7.0;
+    const double correctionSpeedPct = 6.0;
+    const double slowDownDistanceMmMin = 250.0;
+    const double slowDownDistanceMmMax = 600.0;
+    const double creepStartBandMmMin = 35.0;
+    const double creepStartBandMmMax = 80.0;
+    const double finalToleranceMm = 5.0;
+    const double approachTimeoutBaseSec = 1.6;
+    const double approachTimeoutMaxSec = 6.0;
+    const double creepTimeoutBaseSec = 1.2;
+    const double creepTimeoutMaxSec = 3.0;
+    const int settleMs = 100;
+    const int finalSettleMs = 150;
+    const int stableSamplesRequired = 2;
+    const int maxCorrectionAttempts = 2;
+    const int correctionPulseBaseMs = 45;
+    const int correctionPulseGainMsPerMm = 4;
+    const int correctionPulseMaxMs = 120;
 
     auto setDrive = [](double signedSpeedPct) {
         mot_dtLeft.spin(fwd, signedSpeedPct, pct);
@@ -68,88 +90,191 @@ void GotoDistance(uint16_t distance_mm){
         return value;
     };
 
+    auto roundToInt = [](double value) {
+        return (int)(value >= 0.0 ? value + 0.5 : value - 0.5);
+    };
+
+    auto commandForError = [](double errorMm, double speedPct) {
+        return errorMm > 0.0 ? -speedPct : speedPct;
+    };
+
+    auto readSettledDistance = [&]() {
+        mot_dtLeft.stop(hold);
+        mot_dtRight.stop(hold);
+        wait(settleMs, msec);
+        return dis_rear.objectDistance(mm);
+    };
+
     printf("Goto distance %d\n", distance_mm);
     printf("current distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
 
-    mot_dtLeft.setStopping(brake);
-    mot_dtRight.setStopping(brake);
+    mot_dtLeft.setStopping(hold);
+    mot_dtRight.setStopping(hold);
     mot_dtLeft.setPosition(0, degrees);
     mot_dtRight.setPosition(0, degrees);
 
-    timer moveTimer;
-    moveTimer.reset();
-    double commandedSpeedPct = 0.0;
+    const double startingDistanceMm = dis_rear.objectDistance(mm);
+    const double startingErrorMm = distance_mm - startingDistanceMm;
+    const double startingAbsErrorMm = fabs(startingErrorMm);
+    const double longMoveScale = clampSpeed(startingAbsErrorMm / 1200.0, 0.0, 1.0);
+    const double maxApproachSpeedPct = maxApproachSpeedPctMin +
+        ((maxApproachSpeedPctMax - maxApproachSpeedPctMin) * longMoveScale);
+    const double slowDownDistanceMm = slowDownDistanceMmMin +
+        ((slowDownDistanceMmMax - slowDownDistanceMmMin) * longMoveScale);
+    const double creepStartBandMm = creepStartBandMmMin +
+        ((creepStartBandMmMax - creepStartBandMmMin) * longMoveScale);
+    const double approachTimeoutSec = clampSpeed(
+        approachTimeoutBaseSec + (startingAbsErrorMm / 320.0),
+        approachTimeoutBaseSec,
+        approachTimeoutMaxSec);
+    const double creepTimeoutSec = clampSpeed(
+        creepTimeoutBaseSec + (startingAbsErrorMm / 1400.0),
+        creepTimeoutBaseSec,
+        creepTimeoutMaxSec);
+    printf("[GotoDistance] start=%d target=%d\n",
+        roundToInt(startingDistanceMm),
+        distance_mm);
+    printf("[GotoDistance] profile vmax=%d slowdown=%d handoff=%d approach_to=%d creep_to=%d\n",
+        roundToInt(maxApproachSpeedPct),
+        roundToInt(slowDownDistanceMm),
+        roundToInt(creepStartBandMm),
+        roundToInt(approachTimeoutSec * 1000.0),
+        roundToInt(creepTimeoutSec * 1000.0));
 
-    while(moveTimer.time(seconds) < moveTimeoutSec){
+    timer approachTimer;
+    approachTimer.reset();
+    int approachLoopCount = 0;
+
+    while(approachTimer.time(seconds) < approachTimeoutSec){
+        approachLoopCount++;
         const double currentDistanceMm = dis_rear.objectDistance(mm);
         const double errorMm = distance_mm - currentDistanceMm;
         const double absErrorMm = fabs(errorMm);
 
-        if(absErrorMm <= coarseToleranceMm){
+        if(absErrorMm <= creepStartBandMm){
             break;
         }
 
-        double targetSpeedPct = minDriveSpeedPct +
-            ((maxSpeedPct - minDriveSpeedPct) * absErrorMm / slowDownDistanceMm);
-        targetSpeedPct = clampSpeed(targetSpeedPct, minDriveSpeedPct, maxSpeedPct);
-
-        if(commandedSpeedPct < targetSpeedPct){
-            commandedSpeedPct += accelStepPct;
-            if(commandedSpeedPct > targetSpeedPct){
-                commandedSpeedPct = targetSpeedPct;
-            }
-        }
-        else{
-            commandedSpeedPct -= decelStepPct;
-            if(commandedSpeedPct < targetSpeedPct){
-                commandedSpeedPct = targetSpeedPct;
-            }
-        }
-
-        const double signedSpeedPct = errorMm > 0.0 ? -commandedSpeedPct : commandedSpeedPct;
-        setDrive(signedSpeedPct);
+        double approachSpeedPct = minApproachSpeedPct +
+            ((maxApproachSpeedPct - minApproachSpeedPct) * absErrorMm / slowDownDistanceMm);
+        approachSpeedPct = clampSpeed(approachSpeedPct, minApproachSpeedPct, maxApproachSpeedPct);
+        const double signedApproachSpeedPct = commandForError(errorMm, approachSpeedPct);
+        // printf("[GotoDistance][approach %d] dist=%d err=%d cmd=%d\n",
+        //     approachLoopCount,
+        //     roundToInt(currentDistanceMm),
+        //     roundToInt(errorMm),
+        //     roundToInt(signedApproachSpeedPct));
+        setDrive(signedApproachSpeedPct);
         wait(20, msec);
     }
 
-    mot_dtLeft.stop(brake);
-    mot_dtRight.stop(brake);
-    wait(100, msec);
+    double settledDistanceMm = readSettledDistance();
+    double settledErrorMm = distance_mm - settledDistanceMm;
+    // printf("[GotoDistance] approach done loops=%d elapsed_ms=%d dist=%d err=%d\n",
+    //     approachLoopCount,
+    //     roundToInt(approachTimer.time(msec)),
+    //     roundToInt(settledDistanceMm),
+    //     roundToInt(settledErrorMm));
 
-    timer trimTimer;
-    trimTimer.reset();
-    while(trimTimer.time(seconds) < trimTimeoutSec){
+    timer creepTimer;
+    creepTimer.reset();
+    int creepLoopCount = 0;
+    int stableCount = 0;
+
+    while(creepTimer.time(seconds) < creepTimeoutSec){
+        creepLoopCount++;
         const double currentDistanceMm = dis_rear.objectDistance(mm);
         const double errorMm = distance_mm - currentDistanceMm;
         const double absErrorMm = fabs(errorMm);
 
-        if(absErrorMm <= fineToleranceMm){
-            break;
+        if(absErrorMm <= finalToleranceMm){
+            settledDistanceMm = readSettledDistance();
+            settledErrorMm = distance_mm - settledDistanceMm;
+            if(fabs(settledErrorMm) <= finalToleranceMm){
+                stableCount++;
+                // printf("[GotoDistance][creep %d] stable dist=%d err=%d count=%d/%d\n",
+                //     creepLoopCount,
+                //     roundToInt(settledDistanceMm),
+                //     roundToInt(settledErrorMm),
+                //     stableCount,
+                //     stableSamplesRequired);
+                if(stableCount >= stableSamplesRequired){
+                    break;
+                }
+            }
+            else{
+                stableCount = 0;
+                // printf("[GotoDistance][creep %d] settle-miss dist=%d err=%d\n",
+                //     creepLoopCount,
+                //     roundToInt(settledDistanceMm),
+                //     roundToInt(settledErrorMm));
+            }
+            continue;
         }
 
-        double trimSpeedPct = minDriveSpeedPct + (absErrorMm * 0.15);
-        trimSpeedPct = clampSpeed(trimSpeedPct, minDriveSpeedPct, maxTrimSpeedPct);
-        const double signedTrimSpeedPct = errorMm > 0.0 ? -trimSpeedPct : trimSpeedPct;
-        setDrive(signedTrimSpeedPct);
-        wait(15, msec);
+        stableCount = 0;
+        const double signedCreepSpeedPct = commandForError(errorMm, creepSpeedPct);
+        // printf("[GotoDistance][creep %d] dist=%d err=%d cmd=%d\n",
+        //     creepLoopCount,
+        //     roundToInt(currentDistanceMm),
+        //     roundToInt(errorMm),
+        //     roundToInt(signedCreepSpeedPct));
+        setDrive(signedCreepSpeedPct);
+        wait(20, msec);
     }
 
-    mot_dtLeft.stop(brake);
-    mot_dtRight.stop(brake);
-    printf("final distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
-    printf("left/right deg %u %u\n", (uint16_t)fabs(mot_dtLeft.position(degrees)), (uint16_t)fabs(mot_dtRight.position(degrees)));
+    settledDistanceMm = readSettledDistance();
+    settledErrorMm = distance_mm - settledDistanceMm;
+    // printf("[GotoDistance] creep done loops=%d elapsed_ms=%d dist=%d err=%d\n",
+    //     creepLoopCount,
+    //     roundToInt(creepTimer.time(msec)),
+    //     roundToInt(settledDistanceMm),
+    //     roundToInt(settledErrorMm));
+
+    int correctionAttempt = 0;
+    while(fabs(settledErrorMm) > finalToleranceMm && correctionAttempt < maxCorrectionAttempts){
+        correctionAttempt++;
+        int correctionPulseMs = correctionPulseBaseMs + (roundToInt(fabs(settledErrorMm)) * correctionPulseGainMsPerMm);
+        correctionPulseMs = (int)clampSpeed(correctionPulseMs, correctionPulseBaseMs, correctionPulseMaxMs);
+        const double signedCorrectionSpeedPct = commandForError(settledErrorMm, correctionSpeedPct);
+        // printf("[GotoDistance][trim %d] start dist=%d err=%d cmd=%d pulse_ms=%d\n",
+        //     correctionAttempt,
+        //     roundToInt(settledDistanceMm),
+        //     roundToInt(settledErrorMm),
+        //     roundToInt(signedCorrectionSpeedPct),
+        //     correctionPulseMs);
+        setDrive(signedCorrectionSpeedPct);
+        wait(correctionPulseMs, msec);
+        settledDistanceMm = readSettledDistance();
+        settledErrorMm = distance_mm - settledDistanceMm;
+        // printf("[GotoDistance][trim %d] result dist=%d err=%d\n",
+        //     correctionAttempt,
+        //     roundToInt(settledDistanceMm),
+        //     roundToInt(settledErrorMm));
+    }
+
+    mot_dtLeft.stop(hold);
+    mot_dtRight.stop(hold);
+    wait(finalSettleMs, msec);
+    settledDistanceMm = dis_rear.objectDistance(mm);
+    settledErrorMm = distance_mm - settledDistanceMm;
+    printf("[GotoDistance] final dist=%d err=%d trims=%d\n",
+        roundToInt(settledDistanceMm),
+        roundToInt(settledErrorMm),
+        correctionAttempt);
+    // printf("final distance %d\n", (uint16_t)settledDistanceMm);
+    // printf("left/right deg %u %u\n", (uint16_t)fabs(mot_dtLeft.position(degrees)), (uint16_t)fabs(mot_dtRight.position(degrees)));
 }
 // 1 wheel rotation = 8 inches
 // Main autonomous routine sequence.
+void InitAutonomous() {
 
-
-int TaskAutonomous() {
-    int ledBlinkCount;
     pneuVGuide.retract(pneuCPinGuide);
    
     Brain.Screen.setCursor(2, 1);
     TouchLED12.setColor(red);
 
-   pneuVGrabber.pumpOff();
+    pneuVGrabber.pumpOff();
 
 
     while(TouchLED12.pressing() == false){
@@ -172,59 +297,276 @@ int TaskAutonomous() {
         TouchLED12.setColor(red);
         wait(0.5,seconds);
     }
-    Inertial.setHeading(90, degrees);
+    Inertial.setHeading(0, degrees);
     pneuVGrabber.pumpOn();
     TouchLED12.setColor(green);
 
     WaitTouchDebug();
-    mg_beam.setStopping(hold);
-    MoveForDistance(reverse, 300, 50);
+     mg_beam.setStopping(hold);
+    // MoveForDistance(reverse,200,50);
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,120,degrees,true);
-    GrabPin;
+    mg_beam.spinFor (spinBeamUp,140,degrees,true);
     
-    GotoDistance(1320);
-    turnTo(180);
-    wait(0.5, seconds);
-    turnTo(180);
-    wait(0.5, seconds);
-    // mot_dtLeft.setVelocity(70, percent);
-    // mot_dtRight.setVelocity(70, percent);
-    // mot_dtLeft.spin(forward);
-    // mot_dtRight.spin(forward);
-    // wait(1.5, seconds);
-    // mot_dtLeft.stop();
-    // mot_dtRight.stop();
-    ReleasePin;
-    GotoDistance(630);
+}
+void FromStartToMakeU(){
+// move forward to lift beam
+   
+     // go to get 1st blue
+     printf("Go get 1st blue\n");
+    GotoDistance(1555);
     GrabPin;
+    // WaitEUp();
+    // turn to get red yellow to makesstaick
+    printf("Turn to get red/yellow\n");
+    turnTo(114);
+    wait(0.5, seconds);
+    turnTo(114);
     Grab_then_up();
-    GotoDistance(950);
-    turnTo(200);
-    wait(0.5, seconds);
-    turnTo(200);
-    wait(0.5, seconds);
-    // WaitTouchDebug();
-    MoveForDistance(reverse, 350, 50);
+    // got get red and yellow
+    MoveForDistance(forward, 700, 60);
+    // WaitEUp();
     DropDownMakeStack();
-    WaitTouchDebug();
+    MoveForDistance(forward, 100, 50);
+    GrabPin;
+    // set position to get beam
+    turnTo(90);
+    wait(0.5, seconds);
+    turnTo(90);
+    // WaitEUp();
+    GotoDistance(1100);
+
+    mg_pin.setMaxTorque(100.0, percent);
+    mg_pin.setVelocity(100.0, percent);
+    mg_pin.spinFor(spinPinUp, 140 , degrees, false);
+    // WaitEUp();
+    // turn to get beam
+    turnTo(180);
+    wait(0.5, seconds);
+    turnTo(180);
+    // WaitEUp();
+    mg_beam.spinFor (spinBeamDown,120,degrees,true);
+    
+    mot_dtLeft.setVelocity(50, percent);
+    mot_dtRight.setVelocity(50, percent);
+    mot_dtLeft.spin(forward);
+    mot_dtRight.spin(forward);
+    wait(1.5, seconds);
+    mot_dtLeft.stop();
+    mot_dtRight.stop();
+    GrabBeam;
+    printf("flip pin over\n");
+    Flip_Pin_Over();
+}
+
+void FromUToBaseStack(){
+    //  printf("start debug from U\n");
+    // GrabBeam;
+    // wait(0.5, seconds);
+    // Inertial.setHeading(180, degrees); // debug
+
+    printf("\n\nforward to get statck\n");
+    MoveForDistance(forward,50,70);
+    mg_beam.spinFor (spinBeamUp,180,degrees,false);
+    turnTo(180);
+    wait(0.5, seconds);
+    GotoDistance(470);
+    wait(0.5, seconds);
+    // WaitEUp();
+    printf("turn to get stack\n");
+    turnTo(220);
+    wait(0.5, seconds);
+
+  
+    
+    printf("move to blue\n");
+    MoveForDistance(forward,300,70);
+    Grab_then_up();
+    // printf("heding %u.%u\n", (uint16_t)Inertial.angle(), (uint16_t)(Inertial.angle() * 10) % 10);
+    // WaitEUp();
+    turnTo(220);
+    wait(0.5, seconds);
+    // WaitEUp();
+    printf("get next yellow\n");
+    MoveForDistance(forward,300,70);
+    DropDownMakeStack();
+    MoveForDistance(forward, 100, 70);
+    GrabPin;
+    MoveForDistance(reverse,300,70);
+    turnTo(180);
+    wait(0.5, seconds);
+    turnTo(180);
+    // WaitEUp();
+   
+}
+
+void PlaceOnStandoff(){
+
+    printf("\n\nset position to stand off\n");
+    GotoDistance(600);
+    mg_beam.spinFor (spinBeamDown,160,degrees,false);
+    // WaitEUp();
+    PinArmUP();
+    turnTo(140);
+    // WaitEUp();
+    MoveForDistance(forward, 450, 70);
+    // WaitEUp();
+    PlaceStackOnStandoff();
+    MoveForDistance(reverse, 200, 70);
+    Drop_Pin_Arm();
+    Grab_Beam_up_121();
+    turnBy(165);
+    MoveForDistance(reverse, 250, 70);
+    Place_Beam_Stand_Off();
+}
+
+int TaskAutonomous() {
+    InitAutonomous();
+    // MoveForDistance(reverse, 500, 50);
+
+    FromStartToMakeU();
+    FromUToBaseStack();
+    PlaceOnStandoff();
     return 0;
     
 }
 
-void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct){
-    mot_dtLeft.setVelocity(speed_pct, percent);
-    mot_dtRight.setVelocity(speed_pct, percent);
-    mot_dtLeft.spin(dir);
-    mot_dtRight.spin(dir);
+void PinArmUP(){
 
+    GrabPin;
+    mg_pin.setMaxTorque(100.0, percent);
+    mg_pin.setVelocity(100.0, percent);
+    mg_pin.setStopping(hold);
+    mg_pin.spinFor(reverse,380 , degrees, false);
+    
+    
+    wait(0.3, seconds);
+    handDown;
+}
+
+void PlaceStackOnStandoff(){
+                
+    mot_dtLeft.setStopping(hold);
+    mot_dtRight.setStopping(hold);
+    mot_dtLeft.stop();
+    mot_dtRight.stop(); 
+
+    mg_pin.spinFor(forward,100 , degrees, false);
+    // handDown;
+    wait(0.3, seconds);
+    ReleasePin;
+    // handUp;
+
+    wait(0.0, seconds);
+    handUp;
+    wait(0.2, seconds);
+    
+                
+}
+
+void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct){
+    const double drivetrainForwardSign = -1.0;
+    const double startupSpeedPct = 6.0;
+    const double startupMaxTorquePct = 30.0;
+    const int startupRampMs = 160;
+    const double stallVelocityPct = 2.0;
+    const double minProgressDegrees = 3.0;
+    const int startupGraceMs = 350;
+    const int stallDetectMs = 450;
+
+    auto clampSpeed = [](double value, double low, double high) {
+        if(value < low){
+            return low;
+        }
+        if(value > high){
+            return high;
+        }
+        return value;
+    };
+
+    auto commandDrive = [](double signedSpeedPct) {
+        mot_dtLeft.spin(fwd, signedSpeedPct, pct);
+        mot_dtRight.spin(fwd, signedSpeedPct, pct);
+    };
+
+    printf("MoveForDistance %d mm\n", distance_mm);
     const double targetDegrees = Distance_MM_to_Degrees(distance_mm);
-    while(fabs(mot_dtLeft.position(degrees)) < targetDegrees && fabs(mot_dtRight.position(degrees)) < targetDegrees){
+    printf("target degrees %u\n", (uint16_t)targetDegrees);
+
+    mot_dtLeft.setPosition(0, degrees);
+    mot_dtRight.setPosition(0, degrees);
+    mot_dtLeft.setStopping(brake);
+    mot_dtRight.setStopping(brake);
+    mot_dtLeft.setTimeout(0.5, seconds);
+    mot_dtRight.setTimeout(0.5, seconds);
+    mot_dtLeft.setMaxTorque(startupMaxTorquePct, percent);
+    mot_dtRight.setMaxTorque(startupMaxTorquePct, percent);
+
+    const double commandedTopSpeedPct = fmax((double)speed_pct, startupSpeedPct);
+    const double requestedDirectionSign = (dir == forward) ? 1.0 : -1.0;
+
+    timer moveTimer;
+    timer stallTimer;
+    moveTimer.reset();
+    stallTimer.reset();
+
+    double prevLeftDegrees = 0.0;
+    double prevRightDegrees = 0.0;
+    bool stuckDetected = false;
+
+    while(true){
+        const double leftDegrees = fabs(mot_dtLeft.position(degrees));
+        const double rightDegrees = fabs(mot_dtRight.position(degrees));
+        const double averageDegrees = (leftDegrees + rightDegrees) * 0.5;
+
+        double rampRatio = (double)moveTimer.time(msec) / startupRampMs;
+        rampRatio = clampSpeed(rampRatio, 0.0, 1.0);
+        const double baseSpeedPct = startupSpeedPct + ((commandedTopSpeedPct - startupSpeedPct) * rampRatio);
+        const double signedDriveSpeedPct = drivetrainForwardSign * requestedDirectionSign * baseSpeedPct;
+        commandDrive(signedDriveSpeedPct);
+
+        if(moveTimer.time(msec) >= startupRampMs){
+            mot_dtLeft.setMaxTorque(100.0, percent);
+            mot_dtRight.setMaxTorque(100.0, percent);
+        }
+
+        if(averageDegrees >= targetDegrees){
+            break;
+        }
+
+        const double leftVelocityPct = fabs(mot_dtLeft.velocity(percent));
+        const double rightVelocityPct = fabs(mot_dtRight.velocity(percent));
+        const double progressDegrees = averageDegrees - ((prevLeftDegrees + prevRightDegrees) * 0.5);
+        const bool lowSpeed = (leftVelocityPct < stallVelocityPct) && (rightVelocityPct < stallVelocityPct);
+
+        if((moveTimer.time(msec) >= startupGraceMs) && lowSpeed && (progressDegrees < minProgressDegrees)){
+            if(stallTimer.time(msec) >= stallDetectMs){
+                printf("[WARN] MoveForDistance stalled at %u/%u deg avg\n",
+                    (uint16_t)averageDegrees,
+                    (uint16_t)targetDegrees);
+                stuckDetected = true;
+                break;
+            }
+        }
+        else{
+            stallTimer.reset();
+        }
+
+        prevLeftDegrees = leftDegrees;
+        prevRightDegrees = rightDegrees;
         wait(20, msec);
     }
+
+    mot_dtLeft.setMaxTorque(100.0, percent);
+    mot_dtRight.setMaxTorque(100.0, percent);
     mot_dtLeft.stop(brake);
     mot_dtRight.stop(brake);
+
+    // printf("final left/right deg %u %u\n", (uint16_t)fabs(mot_dtLeft.position(degrees)), (uint16_t)fabs(mot_dtRight.position(degrees)));
+    printf("final distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
+    if(stuckDetected){
+        printf("[WARN] MoveForDistance stopped before target\n");
+    }
 }
 
 
@@ -434,15 +776,15 @@ void trim_heading(uint16_t heading){
 // PD turn controller to a target heading.
 void turnTo(double targetDeg) {
 
-    double Kp = 1.0;       // ค่าปกติเริ่มต้น
-    double Kd = 0.08;      // ลด overshoot
-    double maxPower = 35;  // จำกัดเพื่อความ smooth
+    double Kp = 0.8;       // ค่าปกติเริ่มต้น
+    double Kd = 0.05;      // ลด overshoot
+    double maxPower = 30;  // จำกัดเพื่อความ smooth
     double minPower = 5;  // ป้องกัน stall
     
     double error, prevError = 0;
     double derivative;
     double power;
-
+    printf("turnTo target %u.%1u\n", (uint16_t)targetDeg, (uint16_t)(targetDeg * 10) % 10);
     while(true) {
         double angle = Inertial.angle();
         error = targetDeg - angle;
@@ -465,11 +807,12 @@ void turnTo(double targetDeg) {
         mot_dtRight.spin(fwd, power, pct);
 
         prevError = error;
-        wait(10, msec);
+        wait(50, msec);
     }
 
     mot_dtLeft.stop(brake);
     mot_dtRight.stop(brake);
+    printf("final heading %u.%1u\n", (uint16_t)Inertial.angle(), (uint16_t)(Inertial.angle() * 10) % 10);
 }
 
 void turnBy(double deltaDeg) {

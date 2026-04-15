@@ -184,7 +184,7 @@ int main() {
     vex::task ws3(TaskGuide);
     vex::task ws4(TaskPinGrabber);
     vex::task ws5(TaskController);
-    vex::task wsDebug(TaskDebug);
+    // vex::task wsDebug(TaskDebug);
     TaskAutonomous();
     pneuVGrabber.pumpOn();
     // TaskDriveTrain();
@@ -201,7 +201,7 @@ void PrintDistance(){
 int TaskDebug() {
     while(1){
         printf(" Dis: %u", (uint16_t)dis_rear.objectDistance(mm));
-        printf(" heading: %u\n", (uint16_t)Inertial.angle());
+        printf(" heading: %u.%1u\n", (uint16_t)Inertial.angle(), (uint16_t)(Inertial.angle() * 10) % 10);
         // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
         // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
         // PrintDistance();

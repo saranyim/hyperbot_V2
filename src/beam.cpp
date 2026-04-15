@@ -149,29 +149,7 @@ void Place_Beam_2_Stack() {
 // Place beam on the standoff using rear alignment.
 void Place_Beam_Stand_Off() {
   
-    // OverRideDriveTrain = true;
-    // if((uint16_t)dis_rear.objectDistance(mm) < 45){
-    //     mot_dtRight.setVelocity(20, percent);
-    //     mot_dtLeft.setVelocity(20, percent);
-    //     mot_dtRight.setMaxTorque(100, percent);
-    //     mot_dtLeft.setMaxTorque(100, percent);
-    //     mot_dtLeft.spin(reverse);
-    //     mot_dtRight.spin(reverse);
-    //     timer rangeTimer;
-    //     rangeTimer.reset();
-    //     while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 40, 50) == false) {
-    //         if(rangeTimer.time(msec) > 3000) {
-    //             break;
-    //         }
-    //         wait(2, msec);
-    //     }
-    //     mot_dtLeft.stop(brake);
-    //     mot_dtRight.stop(brake);
-    // }
-    // mot_dtLeft.stop();
-    // mot_dtRight.stop();
-    // wait(0.1, seconds);
-    // move beam down
+    
     printf("beam down\n");
     mg_beam.setMaxTorque(100.0, percent);
     mg_beam.setVelocity(50, percent);
@@ -179,13 +157,13 @@ void Place_Beam_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
 
-    mg_beam.spinFor(spinBeamDown,100,degrees,true); 
+    mg_beam.spinFor(spinBeamDown,50,degrees,true); 
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
     ReleaseBeam ;
     wait(0.1,seconds);
-    OverRideDriveTrain = false;
+
     Drop_Y_Arm();
 }
 
