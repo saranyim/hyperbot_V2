@@ -306,7 +306,7 @@ int TaskBeam() {
     printf("\n");
     // f1stLup=true;
     while (true) {
-        if((fLiftBeamFloat == true) && (beamTimer.time(seconds) > 0.5)){
+        if((fLiftBeamFloat == true) && (beamTimer.time(seconds) > 1.0)){
             mg_beam.setVelocity(100, percent);
             mg_beam.setMaxTorque(100, percent);
             mg_beam.setStopping(hold);
