@@ -322,15 +322,15 @@ int TaskBeam() {
     
     // f1stLup=true;
     while (true) {
-        if((fLiftBeamFloat == true) && (beamTimer.time(seconds) > 0.5)){
-            mg_beam.setVelocity(100, percent);
-            mg_beam.setMaxTorque(100, percent);
-            mg_beam.setStopping(hold);
+        // if((fLiftBeamFloat == true) && (beamTimer.time(seconds) > 0.5)){
+        //     mg_beam.setVelocity(100, percent);
+        //     mg_beam.setMaxTorque(100, percent);
+        //     mg_beam.setStopping(hold);
 
-            mg_beam.spinFor(spinBeamUp,100,degrees,false);
+        //     mg_beam.spinFor(spinBeamUp,100,degrees,false);
 
-            fLiftBeamFloat = false;
-        }
+        //     fLiftBeamFloat = false;
+        // }
         if (fBtnLupPressed) {
             printf("L UP");
             printf("\n");
@@ -384,15 +384,15 @@ int TaskBeam() {
 //                 wait(0.5,seconds);
 // #endif
 
-                mg_beam.setVelocity(100, percent);
-                mg_beam.setMaxTorque(10, percent);
-                mg_beam.setStopping(brake);
-                ReverseDir = true;
-                mg_beam.spin(spinBeamDown);
-                wait(0.2, seconds);
+                // mg_beam.setVelocity(100, percent);
+                // mg_beam.setMaxTorque(10, percent);
+                // mg_beam.setStopping(brake);
+                // ReverseDir = true;
+                // mg_beam.spin(spinBeamDown);
+                // wait(0.2, seconds);
 
-                WaitBeamStopOrNoSpeedChange(5.0);
-                mg_beam.stop();
+                // WaitBeamStopOrNoSpeedChange(5.0);
+                // mg_beam.stop();
                 ReleaseBeam;
                 fLiftBeamFloat = false;
             }
