@@ -14,8 +14,13 @@ double distanceToGo;
 
 void trim_heading(uint16_t heading);
 double Distance_MM_to_Degrees(double distance_mm);
-void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct);
+static double NormalizeHeadingError(double targetDeg, double currentDeg);
+void GotoDistance(uint16_t distance_mm, double targetHeadingDeg);
 
+void MoveForDistance(directionType dir,
+    uint16_t distance_mm,
+    uint16_t speed_pct,
+    double targetHeadingDeg);
 void SpinLeft(uint16_t heading);
 void SpinRight(uint16_t heading);
 
@@ -52,12 +57,15 @@ void WaitEUp(){
     
     fBtnEupPressed = false;
 }
-void GotoDistance(uint16_t distance_mm){
+void GotoDistance(uint16_t distance_mm, double targetHeadingDeg){
     const double maxApproachSpeedPctMin = 45.0;
     const double maxApproachSpeedPctMax = 80.0;
     const double minApproachSpeedPct = 16.0;
     const double creepSpeedPct = 7.0;
     const double correctionSpeedPct = 6.0;
+    const double headingKp = 0.35;
+    const double minHeadingAdjustPct = 2.0;
+    const double maxHeadingAdjustPct = 10.0;
     const double slowDownDistanceMmMin = 250.0;
     const double slowDownDistanceMmMax = 600.0;
     const double creepStartBandMmMin = 35.0;
@@ -74,11 +82,6 @@ void GotoDistance(uint16_t distance_mm){
     const int correctionPulseBaseMs = 45;
     const int correctionPulseGainMsPerMm = 4;
     const int correctionPulseMaxMs = 120;
-
-    auto setDrive = [](double signedSpeedPct) {
-        mot_dtLeft.spin(fwd, signedSpeedPct, pct);
-        mot_dtRight.spin(fwd, signedSpeedPct, pct);
-    };
 
     auto clampSpeed = [](double value, double low, double high) {
         if(value < low){
@@ -98,6 +101,20 @@ void GotoDistance(uint16_t distance_mm){
         return errorMm > 0.0 ? -speedPct : speedPct;
     };
 
+    auto setDrive = [&](double signedSpeedPct) {
+        const double headingErrorDeg = NormalizeHeadingError(targetHeadingDeg, Inertial.angle());
+        const double headingAdjustLimitPct = clampSpeed(fabs(signedSpeedPct) * 0.25,
+            minHeadingAdjustPct,
+            maxHeadingAdjustPct);
+        const double headingAdjustPct = clampSpeed(headingErrorDeg * headingKp,
+            -headingAdjustLimitPct,
+            headingAdjustLimitPct);
+        const double leftSpeedPct = clampSpeed(signedSpeedPct - headingAdjustPct, -100.0, 100.0);
+        const double rightSpeedPct = clampSpeed(signedSpeedPct + headingAdjustPct, -100.0, 100.0);
+        mot_dtLeft.spin(fwd, leftSpeedPct, pct);
+        mot_dtRight.spin(fwd, rightSpeedPct, pct);
+    };
+
     auto readSettledDistance = [&]() {
         mot_dtLeft.stop(hold);
         mot_dtRight.stop(hold);
@@ -106,6 +123,9 @@ void GotoDistance(uint16_t distance_mm){
     };
 
     printf("Goto distance %d\n", distance_mm);
+    printf("Goto heading %u.%1u\n",
+        (uint16_t)targetHeadingDeg,
+        (uint16_t)(targetHeadingDeg * 10) % 10);
     printf("current distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
 
     mot_dtLeft.setStopping(hold);
@@ -306,7 +326,7 @@ void InitAutonomous() {
     // MoveForDistance(reverse,200,50);
     mg_beam.setMaxTorque (100,percent);
     mg_beam.setVelocity (100,percent);
-    mg_beam.spinFor (spinBeamUp,140,degrees,true);
+
     
 }
 void FromStartToMakeU(){
@@ -314,7 +334,8 @@ void FromStartToMakeU(){
    
      // go to get 1st blue
      printf("Go get 1st blue\n");
-    GotoDistance(1555);
+    mg_beam.spinFor (spinBeamUp,140,degrees,true);
+    GotoDistance(1555, 0.0);
     GrabPin;
     // WaitEUp();
     // turn to get red yellow to makesstaick
@@ -324,17 +345,17 @@ void FromStartToMakeU(){
     turnTo(114);
     Grab_then_up();
     // got get red and yellow
-    MoveForDistance(forward, 700, 60);
+    MoveForDistance(forward, 700, 60, 114);
     // WaitEUp();
     DropDownMakeStack();
-    MoveForDistance(forward, 100, 50);
+    MoveForDistance(forward, 100, 50, 114);
     GrabPin;
     // set position to get beam
     turnTo(90);
     wait(0.5, seconds);
     turnTo(90);
     // WaitEUp();
-    GotoDistance(1100);
+    GotoDistance(1100, 90.0);
 
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setVelocity(100.0, percent);
@@ -361,16 +382,14 @@ void FromStartToMakeU(){
 
 void FromUToBaseStack(){
     //  printf("start debug from U\n");
-    // GrabBeam;
-    // wait(0.5, seconds);
-    // Inertial.setHeading(180, degrees); // debug
+
 
     printf("\n\nforward to get statck\n");
-    MoveForDistance(forward,50,70);
+    MoveForDistance(forward,50,70, 180);
     mg_beam.spinFor (spinBeamUp,180,degrees,false);
     turnTo(180);
     wait(0.5, seconds);
-    GotoDistance(470);
+    GotoDistance(470, 180.0);
     wait(0.5, seconds);
     // WaitEUp();
     printf("turn to get stack\n");
@@ -380,19 +399,19 @@ void FromUToBaseStack(){
   
     
     printf("move to blue\n");
-    MoveForDistance(forward,300,70);
+    MoveForDistance(forward,250,70,220);
     Grab_then_up();
     // printf("heding %u.%u\n", (uint16_t)Inertial.angle(), (uint16_t)(Inertial.angle() * 10) % 10);
     // WaitEUp();
-    turnTo(220);
-    wait(0.5, seconds);
+    // turnTo(220);
+    // wait(0.5, seconds);
     // WaitEUp();
     printf("get next yellow\n");
-    MoveForDistance(forward,300,70);
+    MoveForDistance(forward,350,70,225);
     DropDownMakeStack();
-    MoveForDistance(forward, 100, 70);
+    MoveForDistance(forward, 100, 70,220);
     GrabPin;
-    MoveForDistance(reverse,300,70);
+    MoveForDistance(reverse,300,70,220);
     turnTo(180);
     wait(0.5, seconds);
     turnTo(180);
@@ -403,28 +422,32 @@ void FromUToBaseStack(){
 void PlaceOnStandoff(){
 
     printf("\n\nset position to stand off\n");
-    GotoDistance(600);
+    GotoDistance(550, 180.0);
     mg_beam.spinFor (spinBeamDown,160,degrees,false);
     // WaitEUp();
     PinArmUP();
-    turnTo(140);
+    turnTo(155);
     // WaitEUp();
-    MoveForDistance(forward, 450, 70);
+    MoveForDistance(forward, 450, 70,155);
     // WaitEUp();
     PlaceStackOnStandoff();
-    MoveForDistance(reverse, 200, 70);
+    MoveForDistance(reverse, 200, 70,155);
     Drop_Pin_Arm();
     Grab_Beam_up_121();
     turnBy(165);
-    MoveForDistance(reverse, 250, 70);
+    MoveForDistance(reverse, 250, 70,300);
     Place_Beam_Stand_Off();
 }
 
 int TaskAutonomous() {
     InitAutonomous();
+    // GotoDistance(1500,0);
     // MoveForDistance(reverse, 500, 50);
 
     FromStartToMakeU();
+    // GrabBeam;
+    // wait(1.5, seconds);
+    // Inertial.setHeading(180, degrees); // debug
     FromUToBaseStack();
     PlaceOnStandoff();
     return 0;
@@ -464,17 +487,35 @@ void PlaceStackOnStandoff(){
                 
 }
 
-void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct){
-    const double drivetrainForwardSign = -1.0;
-    const double startupSpeedPct = 6.0;
-    const double startupMaxTorquePct = 30.0;
-    const int startupRampMs = 160;
-    const double stallVelocityPct = 2.0;
-    const double minProgressDegrees = 3.0;
-    const int startupGraceMs = 350;
-    const int stallDetectMs = 450;
+static double NormalizeHeadingError(double targetDeg, double currentDeg){
+    double errorDeg = targetDeg - currentDeg;
 
-    auto clampSpeed = [](double value, double low, double high) {
+    while(errorDeg > 180.0){
+        errorDeg -= 360.0;
+    }
+    while(errorDeg < -180.0){
+        errorDeg += 360.0;
+    }
+
+    return errorDeg;
+}
+
+void MoveForDistance(directionType dir,
+    uint16_t distance_mm,
+    uint16_t speed_pct,
+    double targetHeadingDeg){
+    const double drivetrainForwardSign = -1.0;
+    const double minDriveSpeedPct = 8.0;
+    const double headingKp = 0.35;
+    const double minHeadingAdjustPct = 3.0;
+    const double maxHeadingAdjustPct = 12.0;
+    const int rampTimeMs = 180;
+    const int loopDelayMs = 20;
+    const int stallDetectMs = 500;
+    const double stallVelocityPct = 2.0;
+    const double minProgressDegrees = 2.0;
+
+    auto clampValue = [](double value, double low, double high) {
         if(value < low){
             return low;
         }
@@ -484,14 +525,19 @@ void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct
         return value;
     };
 
-    auto commandDrive = [](double signedSpeedPct) {
-        mot_dtLeft.spin(fwd, signedSpeedPct, pct);
-        mot_dtRight.spin(fwd, signedSpeedPct, pct);
+    auto commandDrive = [](double leftSpeedPct, double rightSpeedPct) {
+        mot_dtLeft.spin(fwd, leftSpeedPct, pct);
+        mot_dtRight.spin(fwd, rightSpeedPct, pct);
     };
 
     printf("MoveForDistance %d mm\n", distance_mm);
     const double targetDegrees = Distance_MM_to_Degrees(distance_mm);
     printf("target degrees %u\n", (uint16_t)targetDegrees);
+   
+    printf("keep heading %u.%1u\n",
+        (uint16_t)targetHeadingDeg,
+        (uint16_t)(targetHeadingDeg * 10) % 10);
+    
 
     mot_dtLeft.setPosition(0, degrees);
     mot_dtRight.setPosition(0, degrees);
@@ -499,19 +545,21 @@ void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct
     mot_dtRight.setStopping(brake);
     mot_dtLeft.setTimeout(0.5, seconds);
     mot_dtRight.setTimeout(0.5, seconds);
-    mot_dtLeft.setMaxTorque(startupMaxTorquePct, percent);
-    mot_dtRight.setMaxTorque(startupMaxTorquePct, percent);
+    mot_dtLeft.setMaxTorque(100.0, percent);
+    mot_dtRight.setMaxTorque(100.0, percent);
 
-    const double commandedTopSpeedPct = fmax((double)speed_pct, startupSpeedPct);
-    const double requestedDirectionSign = (dir == forward) ? 1.0 : -1.0;
+    const double topSpeedPct = fmax((double)speed_pct, minDriveSpeedPct);
+    const double directionSign = (dir == forward) ? 1.0 : -1.0;
+    const double headingAdjustLimitPct = clampValue(topSpeedPct * 0.25,
+        minHeadingAdjustPct,
+        maxHeadingAdjustPct);
 
     timer moveTimer;
     timer stallTimer;
     moveTimer.reset();
     stallTimer.reset();
 
-    double prevLeftDegrees = 0.0;
-    double prevRightDegrees = 0.0;
+    double previousAverageDegrees = 0.0;
     bool stuckDetected = false;
 
     while(true){
@@ -519,27 +567,39 @@ void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct
         const double rightDegrees = fabs(mot_dtRight.position(degrees));
         const double averageDegrees = (leftDegrees + rightDegrees) * 0.5;
 
-        double rampRatio = (double)moveTimer.time(msec) / startupRampMs;
-        rampRatio = clampSpeed(rampRatio, 0.0, 1.0);
-        const double baseSpeedPct = startupSpeedPct + ((commandedTopSpeedPct - startupSpeedPct) * rampRatio);
-        const double signedDriveSpeedPct = drivetrainForwardSign * requestedDirectionSign * baseSpeedPct;
-        commandDrive(signedDriveSpeedPct);
-
-        if(moveTimer.time(msec) >= startupRampMs){
-            mot_dtLeft.setMaxTorque(100.0, percent);
-            mot_dtRight.setMaxTorque(100.0, percent);
-        }
-
         if(averageDegrees >= targetDegrees){
             break;
         }
 
+        double rampRatio = (double)moveTimer.time(msec) / rampTimeMs;
+        rampRatio = clampValue(rampRatio, 0.0, 1.0);
+        const double rampedSpeedPct = minDriveSpeedPct + ((topSpeedPct - minDriveSpeedPct) * rampRatio);
+        const double signedBaseSpeedPct = drivetrainForwardSign * directionSign * rampedSpeedPct;
+
+        double headingAdjustPct = 0.0;
+        
+        const double headingErrorDeg = NormalizeHeadingError(targetHeadingDeg, Inertial.angle());
+        headingAdjustPct = clampValue(headingErrorDeg * headingKp,
+            -headingAdjustLimitPct,
+            headingAdjustLimitPct);
+        
+
+        const double leftCommandPct = clampValue(signedBaseSpeedPct - headingAdjustPct,
+            -100.0,
+            100.0);
+        const double rightCommandPct = clampValue(signedBaseSpeedPct + headingAdjustPct,
+            -100.0,
+            100.0);
+        commandDrive(leftCommandPct, rightCommandPct);
+
         const double leftVelocityPct = fabs(mot_dtLeft.velocity(percent));
         const double rightVelocityPct = fabs(mot_dtRight.velocity(percent));
-        const double progressDegrees = averageDegrees - ((prevLeftDegrees + prevRightDegrees) * 0.5);
-        const bool lowSpeed = (leftVelocityPct < stallVelocityPct) && (rightVelocityPct < stallVelocityPct);
+        const double progressDegrees = averageDegrees - previousAverageDegrees;
+        const bool stalled = (leftVelocityPct < stallVelocityPct) &&
+            (rightVelocityPct < stallVelocityPct) &&
+            (progressDegrees < minProgressDegrees);
 
-        if((moveTimer.time(msec) >= startupGraceMs) && lowSpeed && (progressDegrees < minProgressDegrees)){
+        if((moveTimer.time(msec) > rampTimeMs) && stalled){
             if(stallTimer.time(msec) >= stallDetectMs){
                 printf("[WARN] MoveForDistance stalled at %u/%u deg avg\n",
                     (uint16_t)averageDegrees,
@@ -552,22 +612,20 @@ void MoveForDistance(directionType dir, uint16_t distance_mm, uint16_t speed_pct
             stallTimer.reset();
         }
 
-        prevLeftDegrees = leftDegrees;
-        prevRightDegrees = rightDegrees;
-        wait(20, msec);
+        previousAverageDegrees = averageDegrees;
+        wait(loopDelayMs, msec);
     }
 
-    mot_dtLeft.setMaxTorque(100.0, percent);
-    mot_dtRight.setMaxTorque(100.0, percent);
     mot_dtLeft.stop(brake);
     mot_dtRight.stop(brake);
 
-    // printf("final left/right deg %u %u\n", (uint16_t)fabs(mot_dtLeft.position(degrees)), (uint16_t)fabs(mot_dtRight.position(degrees)));
     printf("final distance %d\n", (uint16_t)dis_rear.objectDistance(mm));
     if(stuckDetected){
         printf("[WARN] MoveForDistance stopped before target\n");
     }
 }
+
+
 
 
 // Convert travel distance in mm to wheel degrees.
@@ -710,13 +768,14 @@ void Auto_Flip_Pin_Over() {
     }
     mg_pin.stop();
     ReleasePin;
+    wait(0.2, seconds);
     mg_pin.setTimeout(1.0, seconds);
     mg_pin.setStopping(coast);
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(100.0, percent);
     mg_pin.spin(forward);
-    wait(0.4, seconds);
+    wait(0.2, seconds);
 
 
     while(mg_pin.velocity(percent) > 30.0) {
@@ -793,7 +852,7 @@ void turnTo(double targetDeg) {
         if (error > 180) error -= 360;
         if (error < -180) error += 360;
 
-        if (fabs(error) < 0.5) break; // deadband
+        if (fabs(error) < 0.8) break; // deadband
 
         derivative = error - prevError;
         power = Kp * error + Kd * derivative;
