@@ -258,11 +258,11 @@ int TaskPin() {
                 mg_pin.setVelocity(100.0, percent);
                 mg_pin.setMaxTorque(100.0, percent);     
 #if robot_number == 1  
-                mg_pin.spinFor(spinPinUp, 115 , degrees, false);
-                wait(0.5, seconds);
+                mg_pin.spinFor(spinPinUp, 120 , degrees, false);
+                wait(0.8, seconds);
 #elif robot_number == 6
                 mg_pin.spinFor(spinPinUp, 130 , degrees, false);
-                wait(0.5, seconds);
+                wait(0.8, seconds);
 #endif 
                 mg_pin.stop();
                 // mg_pin.setVelocity(30, percent);
@@ -293,8 +293,10 @@ int TaskPin() {
         else if(fBtnFupPressed) {
             // check flip only if pin is at bottom
             if(pinPos == mid){
+                mg_pin.setStopping(coast);
+                mg_pin.stop();
                 // mg_pin.spin(spinPinDown);
-                // wait(0.2, seconds);
+                wait(0.1, seconds);
                 ReleasePin;
                 // mg_pin.spin(spinBeamUp);
                 // wait(0.3, seconds);
@@ -316,15 +318,17 @@ int TaskPin() {
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setVelocity(100.0, percent);
                 GrabPin;
-                fPinGuideOut = true;
+                
                 mg_pin.setStopping(hold);
                 wait(0.3, seconds);
                 mg_pin.setTimeout(0.5, seconds);
                 mg_pin.spinFor(reverse, 120.0 , degrees, false);
+                handDown;
                 wait(0.5,seconds);
                 mg_pin.stop();
                 pinPos = top;
-                handDown;
+                
+                fPinGuideOut = true;
                 
             }
             while (Controller.AxisC.position() > 20)
