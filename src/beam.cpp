@@ -106,52 +106,37 @@ void Place_Beam_2_Stack() {
 //         YGuidOutSafe();
 //     }
 }
-// Place beam on the standoff using rear alignment.
+
 void Place_Beam_Stand_Off() {
-    printf("place beam on stand off\n");
-    mg_beam.setMaxTorque(100.0, percent);
-    mg_beam.setVelocity(80, percent);
-    mg_beam.spin(spinBeamDown);
+    printf("beam down\n");
     OverRideDriveTrain = true;
-    mot_dtLeft.setVelocity(0, percent);
-    mot_dtRight.setVelocity(0, percent);
-    wait(0.15, seconds);
-    mg_beam.setStopping(hold); 
-    ReleaseBeam;
-    ReverseDir = true;
+    mot_dtLeft.setVelocity(0,percent);
+    mot_dtRight.setVelocity(0,percent);
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
+    wait(0.2,seconds);
     mg_beam.setMaxTorque(100.0, percent);
-    mg_beam.setVelocity(100, percent);
-    mg_beam.spin(spinBeamUp);
+    mg_beam.setVelocity(50, percent);
+    // mg_beam.setStopping(coast);
+    ReverseDir = true;
     mg_beam.stop();
-    wait(0.1, seconds);
-    OverRideDriveTrain = false;
-                wait(0.8, seconds);
-                Drop_Y_Arm();
+#if robot_number == 1
+    mg_beam.spinFor(spinBeamDown,50,degrees,true); 
+#elif robot_number == 6
+    mg_beam.spinFor(spinBeamDown,40,degrees,true); 
+#endif
+
+    mg_beam.setStopping(hold);
+    mg_beam.stop();
+    printf("stop and release beam\n");
+    wait(0.1,seconds);
+    ReleaseBeam ;
   
-    // OverRideDriveTrain = true;
-    // if((uint16_t)dis_rear.objectDistance(mm) < 45){
-    //     mot_dtRight.setVelocity(20, percent);
-    //     mot_dtLeft.setVelocity(20, percent);
-    //     mot_dtRight.setMaxTorque(100, percent);
-    //     mot_dtLeft.setMaxTorque(100, percent);
-    //     mot_dtLeft.spin(reverse);
-    //     mot_dtRight.spin(reverse);
-    //     timer rangeTimer;
-    //     rangeTimer.reset();
-    //     while(IS_IN_RANGE((uint16_t)dis_rear.objectDistance(mm), 40, 50) == false) {
-    //         if(rangeTimer.time(msec) > 3000) {
-    //             break;
-    //         }
-    //         wait(2, msec);
-    //     }
-    //     mot_dtLeft.stop(brake);
-    //     mot_dtRight.stop(brake);
-    // }
-    // mot_dtLeft.stop();
-    // mot_dtRight.stop();
-    // wait(0.1, seconds);
-    // move beam down
+    OverRideDriveTrain = false;
+    Drop_Y_Arm();
 }
+
+
 
 
 // Place pin on standoff using rear alignment.
@@ -296,17 +281,8 @@ int TaskBeam() {
             printf("L UP");
             printf("\n");
             Brain.Timer.reset();
-            if ((beamPos == bottom) || (beamPos == mid) || (beamPos == posFloat)) {     
-#if side == blueSide                      
-                ReverseDir = false;
-                Set_Drop_Pin();
-#endif
-                
-                printf("grab beam up\n");
-                Grab_Beam_up();
-                beamPos = top;   
-            } 
-            else if (beamPos == top) {
+
+            if (beamPos == top) {
                 printf("place beam stand off\n");
 #if side == redSide
                 Place_Beam_Stand_Off();
@@ -317,7 +293,9 @@ int TaskBeam() {
                 beamPos = bottom;
             } 
             else {
-                mg_beam.stop();
+#if side == buleSide
+                Grab_Beam_up_121();
+#endif
             }
         }
         else if (lDownEvent) {
