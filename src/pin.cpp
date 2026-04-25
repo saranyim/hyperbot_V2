@@ -181,7 +181,7 @@ void Flip_Pin_Over() {
     mg_pin.setVelocity(100.0, percent);
     mg_pin.spin(forward);
     wait(0.5, seconds);
-     Grab_Beam_up();
+     Grab_Beam_up_91();
 
     WaitPinStopOrNoSpeedChange(5.0);
     mg_pin.stop(brake);

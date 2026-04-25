@@ -10,7 +10,7 @@
 #include "pin.h"
 #include "beam.h"
 #include "drive.h"
-#include "autonomous.h"
+
 using namespace vex;
 
 // A global instance of vex::brain used for printing to the IQ2 brain screen
