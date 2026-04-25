@@ -1,6 +1,8 @@
 #pragma once
 #include "vex.h"
 
+#define robot_number 1
+
 #define redSide 1
 #define blueSide 2
 
@@ -92,7 +94,5 @@ extern bool fRetractGuide;
 
 
 void PrintDistance();
-void YGuidInSafe();
-void YGuidOutSafe();
 
 #define IS_IN_RANGE(value, min, max) ((value >= min) && (value <= max))

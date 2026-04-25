@@ -42,11 +42,19 @@ int TaskDriveTrain() {
         if (!OverRideDriveTrain) {
             if(abs(axisA) > 90) {
                 speedFactor = 1.0;
+#if robot_number == 1
                 turnFactor = 0.7;
+#elif robot_number == 6
+                turnFactor = 0.75;
+#endif
             }
             else {
                 speedFactor = 0.7;
+#if robot_number == 1
                 turnFactor = 0.5;
+#elif robot_number == 6
+                turnFactor = 0.55;
+#endif
             }
             if(abs(Controller.AxisB.position()) < 10){
                 stickB = 0;
@@ -57,7 +65,7 @@ int TaskDriveTrain() {
             // turnFactor = 0.7 * speedFactor;
             if (ReverseDir) {
 #if side == redSide
-                TouchLED12.setColor(blue);
+                TouchLED12.setColor(red);
 #else
                 TouchLED12.setColor(blue);
 #endif

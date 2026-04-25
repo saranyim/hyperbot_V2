@@ -40,18 +40,11 @@ void Set_Drop_Pin(){
     fSetDropPin = true;
 }
 
-void WaitRup() {
-    while(Controller.ButtonRUp.pressing() == false) {
-        wait(20, msec);
-    }
-    while(Controller.ButtonRUp.pressing() == true) {
-        wait(20, msec);
-    }
-}
+
 
 // Drop pin to stack height and back away.
 void DropDownMakeStack(){
-      printf("drop down pin");
+    printf("drop down pin");
     printf("\n");
     
     wait(0.1, seconds);
@@ -61,12 +54,24 @@ void DropDownMakeStack(){
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setStopping(coast);
     mg_pin.setVelocity(80.0, percent);
-   
-    mg_pin.spinFor(forward, 80 , degrees, true);
+    if(pinPos == getStartingPin){
+        //  OverRideDriveTrain = true;
+
+        // mot_dtLeft.setVelocity(50, percent);
+        // mot_dtRight.setVelocity(50, percent);
+        // mot_dtLeft.spinFor(forward,15 , degrees, false);
+        // mot_dtRight.spinFor(forward,15 , degrees, true);
+      
+        mg_pin.spinFor(forward, 120 , degrees, true);
+        // wait(0.1, seconds);
+        // OverRideDriveTrain = false;
+    }
+    else{
+        mg_pin.spinFor(forward, 80 , degrees, true);
+    }
     ReleasePin; 
     wait(0.1, seconds);
-    if(beamPos != top)
-        YGuidInSafe();
+    fPinGuideOut = false;
     printf("stop mov");
     printf("\n");
     OverRideDriveTrain = true;
@@ -92,21 +97,16 @@ void DropDownMakeStack(){
 void Drop_Pin_Arm() {
     printf("drop pin arm");
     printf("\n");
-    if(beamPos != top)
-        YGuidInSafe();
+    mg_pin.setStopping(coast);
+    fPinGuideOut = false;
     mg_pin.setMaxTorque(10.0, percent);
-    mg_pin.setStopping(brake);
+    mg_pin.setStopping(hold);
     mg_pin.setVelocity(80.0, percent);
-    mg_pin.spin(forward);
-
-    
-    wait(0.3, seconds);
+    mg_pin.spin(forward); 
+    wait(0.2, seconds);
     WaitPinStopOrNoSpeedChange(10.0);
-    wait(0.1, seconds);
     mg_pin.stop();
-    // wait(0.1, seconds);
     printf("done\n");
-   
 }
 
 
@@ -114,24 +114,17 @@ void Drop_Pin_Arm() {
 // Grab the pin and lift the arm.
 void Grab_then_up() {
     printf("Grab_then_up\n");
-
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setVelocity(100.0, percent);
     GrabPin;
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
-   
-    mg_pin.setTimeout(500, msec);
+    mg_pin.setTimeout(0.5, seconds);
     mg_pin.spinFor(reverse, pinArmDegree , degrees, false);
     wait(0.2, seconds);
-
     handDown;
     wait(0.2, seconds);
-    YGuidOutSafe();
-    // wait(0.3, seconds);
-   
-    // mg_pin.stop();
-   
+    fPinGuideOut = true;
     printf("end Grab_then_up\n");
 }
 
@@ -139,7 +132,7 @@ void Grab_then_up() {
 void Flip_Pin_Over() {
     printf("start flip\n");
     GrabPin;
-    YGuidInSafe();
+    fPinGuideOut = false;
 // set beam arm free to move a little bit
     mg_beam.setStopping(coast);
     mg_beam.stop();
@@ -154,7 +147,7 @@ void Flip_Pin_Over() {
     mg_pin.setVelocity(100.0, percent);
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.spin(reverse);
-    YGuidInSafe();
+    fPinGuideOut = false;
     wait(0.5, seconds);
     printf("mgpin speed %d\n",(int16_t)mg_pin.velocity(percent));
 
@@ -165,7 +158,7 @@ void Flip_Pin_Over() {
     while(abs(mg_pin.velocity(percent)) > 10) {
         double currSpeed = abs(mg_pin.velocity(percent));
 
-        YGuidInSafe();
+    
         printf("mgpin speed %d\n",(int16_t)mg_pin.velocity(percent));
 
         if(abs(currSpeed - prevFlipSpeed) < 0.5) {
@@ -189,18 +182,8 @@ void Flip_Pin_Over() {
     mg_pin.spin(forward);
     wait(0.5, seconds);
 #if side == redSide
-    // wait(1,seconds);
-    // Grab_Beam_up();
-#else
-    if(fBeamMovingUp == false){
-        mg_beam.setMaxTorque(100, percent);
-        mg_beam.setStopping(hold);
-        ReverseDir = true;
-        mg_beam.spin(spinBeamUp);
-        wait(0.3, seconds);
-        mg_beam.stop();
-    }   
-
+  
+    Grab_Beam_up_91();
 #endif
     WaitPinStopOrNoSpeedChange(5.0);
     mg_pin.stop(brake);
@@ -221,29 +204,16 @@ void Grab_Release_Pin() {
         }
         else {
             GrabPin;
-
         }
-    }
-    else if(mid == pinPos) {
-        mg_pin.setStopping(coast);
-        mg_pin.stop();
-        wait(0.1, seconds);
-        ReleasePin;
     }
     else {
         GrabPin;
-        
     }
 }
 
    
 // Pin subsystem task for button-driven actions.
 int TaskPin() {
-        bool btnRUpPressed = false;
-        bool btnRDownPressed = false;
-        bool btnEDownPressed = false;
-        bool btnFUpPressed = false;
-
   //  pin
     mg_pin.setVelocity(100.0, percent);
     mg_pin.setMaxTorque(100.0, percent);
@@ -257,59 +227,55 @@ int TaskPin() {
     pinPos = bottom;
 
     while (true) {
-        const bool rUpNow = Controller.ButtonRUp.pressing();
-        const bool rDownNow = Controller.ButtonRDown.pressing();
-        const bool eDownNow = Controller.ButtonEDown.pressing();
-        const bool fUpNow = Controller.ButtonFUp.pressing();
-
-        const bool rUpEvent = rUpNow && !btnRUpPressed;
-        const bool rDownEvent = rDownNow && !btnRDownPressed;
-        const bool eDownEvent = eDownNow && !btnEDownPressed;
-        const bool fUpEvent = fUpNow && !btnFUpPressed;
-
-        btnRUpPressed = rUpNow;
-        btnRDownPressed = rDownNow;
-        btnEDownPressed = eDownNow;
-        btnFUpPressed = fUpNow;
-
-        if (rUpEvent) {
+        if (fBtnRupPressed) {
+            fBtnRupPressed = false;
             printf("R UP\n");
             Brain.Timer.reset();
             if (bottom == pinPos) {
-                
                 Grab_then_up();
                 pinPos = top;
-                YGuidOutSafe();
+                fPinGuideOut = true;
             }
             else {
-             
                 DropDownMakeStack();
-                
                 pinPos = bottom;
             }
-            
         }
-        else if (rDownEvent) {
+            
+        else if (fBtnRdownPressed) {
+            fBtnRdownPressed = false;
+            printf("R Down\n");
             Brain.Timer.reset();
             if(beamPos != top)
-                YGuidInSafe();
+                fPinGuideOut = false;
             if (bottom == pinPos) {
                 GrabPin;
                 mg_pin.setStopping(hold);
-                mg_pin.spin(spinPinDown);
+                mg_pin.spin(spinBeamDown);
                 wait(0.2, seconds);
                 mg_pin.stop();
 
                 mg_pin.setPosition(0, degrees);
-                printf("start pin Pos %d\n",(int16_t)mg_pin.position(degrees));
+                printf("pin Pos %d\n",(int16_t)mg_pin.position(degrees));
                 mg_pin.setVelocity(100.0, percent);
-                mg_pin.setMaxTorque(100.0, percent);
-                mg_pin.spinFor(spinPinUp, 123 , degrees, false);
-                wait(0.5, seconds);
+                mg_pin.setMaxTorque(100.0, percent);     
+#if robot_number == 1  
+                mg_pin.spinFor(spinPinUp, 120 , degrees, false);
+                wait(0.8, seconds);
+#elif robot_number == 6
+                mg_pin.spinFor(spinPinUp, 130 , degrees, false);
+                wait(0.8, seconds);
+#endif 
                 mg_pin.stop();
-                printf("stop pin Pos %d\n",(int16_t)mg_pin.position(degrees));
-                pinPos = mid; 
-
+                // mg_pin.setVelocity(30, percent);
+                // mg_pin.spin(spinPinDown);
+                // while(mg_pin.position(degrees) < -130) {
+                //     printf("pin Pos %d\n",(int16_t)mg_pin.position(degrees));
+                //     wait(20, msec);
+                // }
+                // printf("pin Pos %d\n",(int16_t)mg_pin.position(degrees));
+                // mg_pin.stop();
+                pinPos = mid;
             }
             else{
                 handUp;
@@ -317,16 +283,31 @@ int TaskPin() {
                 ReleasePin;
                 pinPos = bottom;
             }
+            
         }   
-        else if (eDownEvent) {
+        else if (fBtnEdownPressed) {
             Brain.Timer.reset();
-            if (pinPos == bottom){
+            // if (pinPos == bottom){
                 Flip_Pin_Over();
-            }
+            // }
+            fBtnEdownPressed = false;
         }
-        else if(fUpEvent) {
+        else if(fBtnFupPressed) {
             // check flip only if pin is at bottom
-            Grab_Release_Pin();     
+            if(pinPos == mid){
+                mg_pin.setStopping(coast);
+                mg_pin.stop();
+                // mg_pin.spin(spinPinDown);
+                wait(0.1, seconds);
+                ReleasePin;
+                // mg_pin.spin(spinBeamUp);
+                // wait(0.3, seconds);
+                // mg_pin.stop();
+            }
+            else{
+                Grab_Release_Pin();     
+            }
+            fBtnFupPressed = false;
         }
         else if(fSetDropPin == true) {
             Drop_Pin_Arm();
@@ -339,21 +320,25 @@ int TaskPin() {
                 mg_pin.setMaxTorque(100.0, percent);
                 mg_pin.setVelocity(100.0, percent);
                 GrabPin;
-                YGuidOutSafe();
+                
                 mg_pin.setStopping(hold);
                 wait(0.3, seconds);
-                mg_pin.setTimeout(500, msec);
-                mg_pin.spinFor(reverse, 120.0 , degrees, true);
-                pinPos = top;
+                mg_pin.setTimeout(0.5, seconds);
+                mg_pin.spinFor(reverse, 120.0 , degrees, false);
                 handDown;
-                YGuidOutSafe();
+                wait(0.5,seconds);
+                mg_pin.stop();
+                pinPos = top;
+                
+                fPinGuideOut = true;
+                
             }
-            while (Controller.AxisC.position() > 10)
+            while (Controller.AxisC.position() > 20)
             {
                 /* code */
                 wait(20, msec);
             }
-            YGuidOutSafe();
+    
         }
         else if(Controller.AxisC.position() < -60){ // up
             if(pinPos == bottom){
@@ -363,7 +348,7 @@ int TaskPin() {
                 mg_pin.spinFor(reverse, 120 , degrees, false);
                 pinPos = mid;
             }
-            while (Controller.AxisC.position() < -10)
+            while (Controller.AxisC.position() < -20)
             {
                 /* code */
                 wait(20, msec);
@@ -422,6 +407,7 @@ int TaskPin() {
         }
 
 
+
         wait(5, msec);
     }
     return 0;
@@ -430,16 +416,13 @@ int TaskPin() {
 
 // Initial grab sequence at the start position.
 void Grab_From_Starting() {
-
     mg_pin.setMaxTorque(100.0, percent);
     mg_pin.setVelocity(100.0, percent);
     mg_pin.setStopping(hold);
     wait(0.3, seconds);
     GrabPin;
-    mg_pin.setTimeout(500, msec);
+    mg_pin.setTimeout(0.5, seconds);
     mg_pin.spinFor(reverse, 100 , degrees, false);
     wait(0.3, seconds);
-
-
 }
 

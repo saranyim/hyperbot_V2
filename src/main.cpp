@@ -10,7 +10,7 @@
 #include "pin.h"
 #include "beam.h"
 #include "drive.h"
-#include "autonomous.h"
+
 using namespace vex;
 
 // A global instance of vex::brain used for printing to the IQ2 brain screen
@@ -86,7 +86,7 @@ static bool DebounceControllerButton(ButtonT &button, bool &flag) {
 // Handle controller L3 press (debug placeholder).
 void onevent_ControllerButtonL3_pressed_0() {
     printf("L3 Pressed\n");
-    
+
 }
 
 
@@ -178,37 +178,20 @@ int main() {
     Controller.ButtonEUp.pressed(onevent_ControllerButtonEUp_pressed_0);
   
     wait(15, msec);
-    // vex::task ws1(TaskPin);
-    // vex::task ws2(TaskBeam);
+    vex::task ws1(TaskPin);  
+    vex::task ws2(TaskBeam);
     vex::task ws3(TaskGuide);
     vex::task ws4(TaskPinGrabber);
     vex::task ws5(TaskController);
-     vex::task wsDebug(TaskDebug);
-    // TaskDriveTrain();
-    TaskAutonomous();
+    vex::task wsDebug(TaskDebug);
+    TaskDriveTrain();
+    // TaskAutonomous();
 }
 
 // Print rear distance sensor reading.
 void PrintDistance(){
     printf("Distance : %u\n", (uint16_t)dis_rear.objectDistance(mm));
-}
-
-// Retract the Y-guide safely: clear both out-flags and fire the pneumatic directly.
-// Using the mutex prevents multiple tasks from racing on the same channel.
-void YGuidInSafe() {
-    gYGuidCmdMutex.lock();
-    fBeamGuideOut = false;
-    fPinGuideOut  = false;
-    yGuidIn;
-    gYGuidCmdMutex.unlock();
-}
-
-// Extend the Y-guide safely: set the beam-out flag and fire the pneumatic directly.
-void YGuidOutSafe() {
-    gYGuidCmdMutex.lock();
-    fBeamGuideOut = true;
-    yGuidOut;
-    gYGuidCmdMutex.unlock();
+    
 }
 
 // Periodic debug output task.
@@ -216,10 +199,11 @@ int TaskDebug() {
     while(1){
         // printf("Dis Left: %u ", (uint16_t)dis_rear.objectDistance(mm));
         // printf(" Dis Right: %u", (uint16_t)dis_right.objectDistance(mm));
-        printf(" heading: %u\n", (uint16_t)Inertial.angle());
+        // printf(" heading: %u\n", (uint16_t)Inertial.angle());
         // printf(" mot_left Pos: %d ", (uint16_t)mot_dtLeft.position(degrees));
-        // printf(" mot_    right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
-        PrintDistance();
+        // printf(" mot_right Pos: %d \n", (uint16_t)mot_dtRight.position(degrees));
+        // PrintDistance();
+        printf("mg pin Pos: %d \n", (uint16_t)mg_pin.position(degrees));
         wait(500, msec);
     }
 }
