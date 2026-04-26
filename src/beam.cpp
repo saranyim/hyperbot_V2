@@ -149,20 +149,30 @@ void Place_Beam_2_Stack() {
 }
 // Place beam on the standoff using rear alignment.
 void Place_Beam_Stand_Off() {
-  
-    
     printf("beam down\n");
+    OverRideDriveTrain = true;
+    mot_dtLeft.setVelocity(0,percent);
+    mot_dtRight.setVelocity(0,percent);
+    mot_dtLeft.stop(brake);
+    mot_dtRight.stop(brake);
+    wait(0.2,seconds);
     mg_beam.setMaxTorque(100.0, percent);
     mg_beam.setVelocity(50, percent);
-    mg_beam.setStopping(coast);
+    // mg_beam.setStopping(coast);
     ReverseDir = true;
     mg_beam.stop();
+#if robot_number == 1
+    mg_beam.spinFor(spinBeamDown,50,degrees,true); 
+#elif robot_number == 6
+    mg_beam.spinFor(spinBeamDown,40,degrees,true); 
+#endif
 
-    mg_beam.spinFor(spinBeamDown,100,degrees,true); 
     mg_beam.setStopping(hold);
     mg_beam.stop();
     printf("stop and release beam\n");
+    wait(0.1,seconds);
     ReleaseBeam ;
+
     wait(0.1,seconds);
     OverRideDriveTrain = false;
 #if side == redSide
@@ -174,7 +184,7 @@ void Place_Beam_Stand_Off() {
     wait(0.3, seconds);
     printf("Spinupfinished\n");
     mg_beam.stop();
-    wait(2, seconds);
+    wait(0.8, seconds);
     mg_beam.spin(spinBeamDown);
     wait(0.5, seconds);
     fRetractGuide = false;
@@ -353,6 +363,7 @@ int TaskBeam() {
             } 
             else {
 #if side == blueSide
+                ReverseDir = false;
                 Grab_Beam_up_121();
 #endif
             }
