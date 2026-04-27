@@ -264,7 +264,7 @@ int TaskPin() {
                 wait(0.8, seconds);
 #elif robot_number == 6
                 mg_pin.spinFor(spinPinUp, 130 , degrees, false);
-                wait(0.8, seconds);
+                wait(0.9, seconds);
 #endif 
                 mg_pin.stop();
                 // mg_pin.setVelocity(30, percent);
@@ -297,12 +297,12 @@ int TaskPin() {
             if(pinPos == mid){
                 mg_pin.setStopping(coast);
                 mg_pin.stop();
-                // mg_pin.spin(spinPinDown);
+                mg_pin.spin(spinPinDown);
                 wait(0.1, seconds);
                 ReleasePin;
                 // mg_pin.spin(spinBeamUp);
                 // wait(0.3, seconds);
-                // mg_pin.stop();
+                mg_pin.stop();
             }
             else{
                 Grab_Release_Pin();     
