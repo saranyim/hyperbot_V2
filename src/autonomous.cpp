@@ -335,7 +335,7 @@ void FromStartToMakeU(){
      // go to get 1st blue
      printf("Go get 1st blue\n");
     mg_beam.spinFor (spinBeamUp,140,degrees,true);
-    GotoDistance(1555, 0.0);
+    GotoDistance(1555, 1.0);
     GrabPin;
     // WaitEUp();
     // turn to get red yellow to makesstaick
