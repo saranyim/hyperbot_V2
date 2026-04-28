@@ -162,7 +162,7 @@ void Place_Beam_Stand_Off() {
     ReverseDir = true;
     mg_beam.stop();
 #if robot_number == 1
-    mg_beam.spinFor(spinBeamDown,50,degrees,true); 
+    mg_beam.spinFor(spinBeamDown,40,degrees,true); 
 #elif robot_number == 6
     mg_beam.spinFor(spinBeamDown,40,degrees,true); 
 #endif
