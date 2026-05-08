@@ -283,7 +283,7 @@ void Drop_Y_Arm() {
     // mg_beam.setStopping(brake);
     // ReverseDir = true;
     // wait(2.0, seconds);
-    wait(0.8, seconds);
+    wait(1.5, seconds);
     mg_beam.spin(spinBeamDown);
     wait(0.5, seconds);
   
